@@ -19,7 +19,7 @@ func (h *CartHandler) AddItemsToCart(w http.ResponseWriter, r *http.Request) {
 
 	userIdRaw := r.PathValue("user_id")
 	userId, err := strconv.Atoi(userIdRaw)
-	if err != nil || userId == 0 {
+	if err != nil || userId < 1 {
 		log.Error(errors.ErrUserIdRequired, slog.String("userId", userIdRaw))
 		h.sendErrorResponse(w, model.ErrorResponse{Error: model.Error{Code: http.StatusBadRequest, Message: errors.ErrUserIdRequired}})
 		return
@@ -27,7 +27,7 @@ func (h *CartHandler) AddItemsToCart(w http.ResponseWriter, r *http.Request) {
 
 	skuIdRaw := r.PathValue("sku_id")
 	skuId, err := strconv.Atoi(skuIdRaw)
-	if err != nil || skuId == 0 {
+	if err != nil || skuId < 1 {
 		log.Error(errors.ErrSkuIdRequired, slog.String("skuId", skuIdRaw))
 		h.sendErrorResponse(w, model.ErrorResponse{Error: model.Error{Code: http.StatusBadRequest, Message: errors.ErrSkuIdRequired}})
 		return
