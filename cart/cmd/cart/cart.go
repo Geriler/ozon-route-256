@@ -32,7 +32,7 @@ func main() {
 	mux.HandleFunc("POST /user/{user_id}/cart/{sku_id}", cartHandler.AddItemsToCart)
 	mux.HandleFunc("DELETE /user/{user_id}/cart/{sku_id}", cartHandler.DeleteItemsFromCart)
 	mux.HandleFunc("DELETE /user/{user_id}/cart", cartHandler.DeleteCartByUserID)
-	mux.HandleFunc("GET /user/{user_id}/cart", cartHandler.GetCartByUserID)
+	mux.HandleFunc("GET /user/{user_id}/cart/list", cartHandler.GetCartByUserID)
 
 	logWrapperHandler := middleware.NewLogWrapperHandler(mux, log)
 
