@@ -17,7 +17,7 @@ func (h *CartHandler) GetCartByUserID(w http.ResponseWriter, r *http.Request) {
 	req, err := model.GetValidateUserRequest(r)
 	if err != nil {
 		log.Error(err.Error())
-		h.sendErrorResponse(w, http.StatusBadRequest, err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -35,14 +35,14 @@ func (h *CartHandler) GetCartByUserID(w http.ResponseWriter, r *http.Request) {
 	bytes, err := json.Marshal(response)
 	if err != nil {
 		log.Error(err.Error())
-		h.sendErrorResponse(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	_, err = w.Write(bytes)
 	if err != nil {
 		log.Error(err.Error())
-		h.sendErrorResponse(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }

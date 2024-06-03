@@ -16,7 +16,7 @@ func (h *CartHandler) DeleteCartByUserID(w http.ResponseWriter, r *http.Request)
 	req, err := model.GetValidateUserRequest(r)
 	if err != nil {
 		log.Error(err.Error())
-		h.sendErrorResponse(w, http.StatusBadRequest, err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 

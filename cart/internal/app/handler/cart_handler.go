@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"encoding/json"
 	"log/slog"
-	"net/http"
 
 	"route256/cart/internal/cart/model"
 	productModel "route256/cart/internal/product/model"
@@ -32,17 +30,5 @@ func NewCartHandler(cartService CartService, productService ProductService, logg
 		cartService:    cartService,
 		productService: productService,
 		logger:         logger,
-	}
-}
-
-func (h *CartHandler) sendErrorResponse(w http.ResponseWriter, code int, message string) {
-	errResp := model.ErrorResponse{
-		Error: message,
-	}
-	jsonError, _ := json.Marshal(errResp)
-	w.WriteHeader(code)
-	_, err := w.Write(jsonError)
-	if err != nil {
-		h.logger.With("op", "handler.CartHandler.sendErrorResponse").Error(err.Error())
 	}
 }

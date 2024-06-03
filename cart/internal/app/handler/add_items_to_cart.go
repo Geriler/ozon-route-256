@@ -16,14 +16,14 @@ func (h *CartHandler) AddItemsToCart(w http.ResponseWriter, r *http.Request) {
 	req, err := model.GetValidateUserSKUCountRequest(r)
 	if err != nil {
 		log.Error(err.Error())
-		h.sendErrorResponse(w, http.StatusBadRequest, err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	product, err := h.productService.GetProduct(req.SKU)
 	if err != nil {
 		log.Error(err.Error())
-		h.sendErrorResponse(w, http.StatusBadRequest, err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 

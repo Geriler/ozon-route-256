@@ -18,13 +18,14 @@ type UserRequest struct {
 }
 
 type UserSKURequest struct {
-	UserRequest
-	SKU SkuID `validate:"nonzero"`
+	UserID UserID `validate:"nonzero"`
+	SKU    SkuID  `validate:"nonzero"`
 }
 
 type UserSKUCountRequest struct {
-	UserSKURequest
-	Count uint16 `validate:"nonzero"`
+	UserID UserID `validate:"nonzero"`
+	SKU    SkuID  `validate:"nonzero"`
+	Count  uint16 `validate:"nonzero"`
 }
 
 func GetValidateUserRequest(r *http.Request) (*UserRequest, error) {
