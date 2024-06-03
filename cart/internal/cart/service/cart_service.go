@@ -8,7 +8,7 @@ type CartRepository interface {
 	AddItems(userID model.UserID, item model.Item)
 	DeleteItems(userID model.UserID, itemID model.SkuID)
 	DeleteCart(userID model.UserID)
-	GetCart(userID model.UserID) *model.Cart
+	GetCart(userID model.UserID) (*model.Cart, error)
 }
 
 type CartService struct {
@@ -21,7 +21,7 @@ func NewCartService(cartRepository CartRepository) *CartService {
 	}
 }
 
-func (cs *CartService) GetCartByUserID(userID model.UserID) *model.Cart {
+func (cs *CartService) GetCartByUserID(userID model.UserID) (*model.Cart, error) {
 	return cs.cartRepository.GetCart(userID)
 }
 

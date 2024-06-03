@@ -1,8 +1,12 @@
 package repository
 
 import (
+	"errors"
+
 	"route256/cart/internal/cart/model"
 )
+
+const ErrCartNotFoundOrEmpty = "cart not found or empty"
 
 type InMemoryCartRepository struct {
 	carts map[model.UserID]*model.Cart
@@ -16,55 +20,6 @@ func NewInMemoryCartRepository() *InMemoryCartRepository {
 }
 
 func (r *InMemoryCartRepository) AddItems(userID model.UserID, item model.Item) {
-	cart := r.getCart(userID)
-
-	_, itemExists := cart.Items[item.SKU]
-	if !itemExists {
-		items := &model.Item{
-			SKU:   item.SKU,
-			Name:  item.Name,
-			Count: item.Count,
-			Price: item.Price,
-		}
-		cart.Items[item.SKU] = items
-
-		return
-	}
-
-	cart.Items[item.SKU].Count += item.Count
-
-	return
-}
-
-func (r *InMemoryCartRepository) DeleteItems(userID model.UserID, itemID model.SkuID) {
-	cart := r.getCart(userID)
-
-	_, itemExists := cart.Items[itemID]
-	if !itemExists {
-		return
-	} else {
-		delete(cart.Items, itemID)
-	}
-
-	return
-}
-
-func (r *InMemoryCartRepository) DeleteCart(userID model.UserID) {
-	cart := &model.Cart{
-		Items: make(map[model.SkuID]*model.Item),
-	}
-
-	r.carts[userID] = cart
-
-	return
-}
-
-func (r *InMemoryCartRepository) GetCart(userID model.UserID) *model.Cart {
-	cart := r.getCart(userID)
-	return cart
-}
-
-func (r *InMemoryCartRepository) getCart(userID model.UserID) *model.Cart {
 	cart, cartExists := r.carts[userID]
 	if !cartExists {
 		cart = &model.Cart{
@@ -73,5 +28,44 @@ func (r *InMemoryCartRepository) getCart(userID model.UserID) *model.Cart {
 
 		r.carts[userID] = cart
 	}
-	return cart
+
+	_, itemExists := cart.Items[item.SKU]
+	if itemExists {
+		cart.Items[item.SKU].Count += item.Count
+	} else {
+		items := &model.Item{
+			SKU:   item.SKU,
+			Name:  item.Name,
+			Count: item.Count,
+			Price: item.Price,
+		}
+		cart.Items[item.SKU] = items
+	}
+}
+
+func (r *InMemoryCartRepository) DeleteItems(userID model.UserID, itemID model.SkuID) {
+	cart, cartExists := r.carts[userID]
+	if !cartExists {
+		return
+	}
+
+	_, itemExists := cart.Items[itemID]
+	if itemExists {
+		delete(cart.Items, itemID)
+	}
+}
+
+func (r *InMemoryCartRepository) DeleteCart(userID model.UserID) {
+	delete(r.carts, userID)
+}
+
+func (r *InMemoryCartRepository) GetCart(userID model.UserID) (*model.Cart, error) {
+	cart, cartExists := r.carts[userID]
+	if !cartExists {
+		return nil, errors.New(ErrCartNotFoundOrEmpty)
+	}
+	if len(cart.Items) == 0 {
+		return nil, errors.New(ErrCartNotFoundOrEmpty)
+	}
+	return cart, nil
 }

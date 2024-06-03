@@ -11,7 +11,7 @@ type CartService interface {
 	AddItemsToCart(userID model.UserID, item model.Item)
 	DeleteItemsFromCart(userID model.UserID, itemID model.SkuID)
 	DeleteCartByUserID(userID model.UserID)
-	GetCartByUserID(userID model.UserID) *model.Cart
+	GetCartByUserID(userID model.UserID) (*model.Cart, error)
 	GetTotalPrice(cart *model.Cart) uint32
 }
 

@@ -21,7 +21,12 @@ func (h *CartHandler) GetCartByUserID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cart := h.cartService.GetCartByUserID(req.UserID)
+	cart, err := h.cartService.GetCartByUserID(req.UserID)
+	if err != nil {
+		log.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
 	totalPrice := h.cartService.GetTotalPrice(cart)
 	items := make([]model.Item, 0, len(cart.Items))
 	for _, item := range cart.Items {
