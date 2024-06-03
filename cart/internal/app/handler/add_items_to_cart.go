@@ -20,6 +20,9 @@ func (h *CartHandler) AddItemsToCart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log = log.With(slog.Int64("UserID", int64(req.UserID))).
+		With(slog.Int64("SKU", int64(req.SKU)))
+
 	product, err := h.productService.GetProduct(req.SKU)
 	if err != nil {
 		log.Error(err.Error())

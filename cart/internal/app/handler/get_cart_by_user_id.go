@@ -22,6 +22,8 @@ func (h *CartHandler) GetCartByUserID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log = log.With(slog.Int64("UserID", int64(req.UserID)))
+
 	cart, err := h.cartService.GetCartByUserID(req.UserID)
 	if err != nil {
 		log.Error(err.Error())
