@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"sort"
 
 	"route256/cart/internal/cart/model"
 )
@@ -32,6 +33,9 @@ func (h *CartHandler) GetCartByUserID(w http.ResponseWriter, r *http.Request) {
 	for _, item := range cart.Items {
 		items = append(items, *item)
 	}
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].SKU < items[j].SKU
+	})
 	response := model.CartResponse{
 		Items:      items,
 		TotalPrice: totalPrice,
