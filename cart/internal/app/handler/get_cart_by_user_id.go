@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"strconv"
 
-	"route256/cart/internal/app/errors"
 	"route256/cart/internal/cart/model"
 )
 
@@ -16,15 +14,14 @@ func (h *CartHandler) GetCartByUserID(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	userIdRaw := r.PathValue("user_id")
-	userId, err := strconv.Atoi(userIdRaw)
-	if err != nil || userId < 1 {
-		log.Error(errors.ErrUserIdRequired, slog.String("userId", userIdRaw))
-		h.sendErrorResponse(w, model.ErrorResponse{Error: model.Error{Code: http.StatusBadRequest, Message: errors.ErrUserIdRequired}})
+	req, err := model.GetValidateUserRequest(r)
+	if err != nil {
+		log.Error(err.Error())
+		h.sendErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	cart := h.cartService.GetCartByUserID(model.UserID(userId))
+	cart := h.cartService.GetCartByUserID(req.UserID)
 	totalPrice := h.cartService.GetTotalPrice(cart)
 	items := make([]model.Item, 0, len(cart.Items))
 	for _, item := range cart.Items {
@@ -38,14 +35,14 @@ func (h *CartHandler) GetCartByUserID(w http.ResponseWriter, r *http.Request) {
 	bytes, err := json.Marshal(response)
 	if err != nil {
 		log.Error(err.Error())
-		h.sendErrorResponse(w, model.ErrorResponse{Error: model.Error{Code: http.StatusInternalServerError, Message: http.StatusText(http.StatusInternalServerError)}})
+		h.sendErrorResponse(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
 	_, err = w.Write(bytes)
 	if err != nil {
 		log.Error(err.Error())
-		h.sendErrorResponse(w, model.ErrorResponse{Error: model.Error{Code: http.StatusInternalServerError, Message: http.StatusText(http.StatusInternalServerError)}})
+		h.sendErrorResponse(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 }

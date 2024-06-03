@@ -35,7 +35,13 @@ func NewCartHandler(cartService CartService, productService ProductService, logg
 	}
 }
 
-func (h *CartHandler) sendErrorResponse(w http.ResponseWriter, errResp model.ErrorResponse) {
+func (h *CartHandler) sendErrorResponse(w http.ResponseWriter, code int, message string) {
+	errResp := model.ErrorResponse{
+		Error: model.Error{
+			Code:    code,
+			Message: message,
+		},
+	}
 	jsonError, _ := json.Marshal(errResp)
 	w.WriteHeader(errResp.Error.Code)
 	_, err := w.Write(jsonError)
