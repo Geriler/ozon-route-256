@@ -22,5 +22,5 @@ func (h *CartHandler) DeleteCartByUserID(w http.ResponseWriter, r *http.Request)
 
 	h.cartService.DeleteCartByUserID(req.UserID)
 
-	h.sendSuccessResponse(w, model.SuccessResponse{Message: "success delete cart"})
+	w.WriteHeader(http.StatusNoContent)
 }

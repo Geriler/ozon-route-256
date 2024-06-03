@@ -22,5 +22,5 @@ func (h *CartHandler) DeleteItemsFromCart(w http.ResponseWriter, r *http.Request
 
 	h.cartService.DeleteItemsFromCart(req.UserID, req.SKU)
 
-	h.sendSuccessResponse(w, model.SuccessResponse{Message: "success delete items from cart"})
+	w.WriteHeader(http.StatusNoContent)
 }

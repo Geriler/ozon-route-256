@@ -37,24 +37,12 @@ func NewCartHandler(cartService CartService, productService ProductService, logg
 
 func (h *CartHandler) sendErrorResponse(w http.ResponseWriter, code int, message string) {
 	errResp := model.ErrorResponse{
-		Error: model.Error{
-			Code:    code,
-			Message: message,
-		},
+		Error: message,
 	}
 	jsonError, _ := json.Marshal(errResp)
-	w.WriteHeader(errResp.Error.Code)
+	w.WriteHeader(code)
 	_, err := w.Write(jsonError)
 	if err != nil {
 		h.logger.With("op", "handler.CartHandler.sendErrorResponse").Error(err.Error())
-	}
-}
-
-func (h *CartHandler) sendSuccessResponse(w http.ResponseWriter, resp model.SuccessResponse) {
-	jsonResp, _ := json.Marshal(resp)
-	w.WriteHeader(http.StatusOK)
-	_, err := w.Write(jsonResp)
-	if err != nil {
-		h.logger.With("op", "handler.CartHandler.sendSuccessResponse").Error(err.Error())
 	}
 }

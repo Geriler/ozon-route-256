@@ -36,5 +36,5 @@ func (h *CartHandler) AddItemsToCart(w http.ResponseWriter, r *http.Request) {
 
 	h.cartService.AddItemsToCart(req.UserID, item)
 
-	h.sendSuccessResponse(w, model.SuccessResponse{Message: "success add items to cart"})
+	w.WriteHeader(http.StatusNoContent)
 }
