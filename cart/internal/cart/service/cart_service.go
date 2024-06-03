@@ -38,7 +38,7 @@ func (cs *CartService) DeleteCartByUserID(userID model.UserID) {
 }
 
 func (cs *CartService) GetTotalPrice(cart *model.Cart) uint32 {
-	totalPrice := uint32(0)
+	var totalPrice uint32
 	for _, item := range cart.Items {
 		totalPrice += item.Price * uint32(item.Count)
 	}
