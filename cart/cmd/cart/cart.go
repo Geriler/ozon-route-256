@@ -8,9 +8,9 @@ import (
 	"route256/cart/internal/app/handler"
 	"route256/cart/internal/cart/repository"
 	"route256/cart/internal/cart/service"
-	"route256/cart/internal/lib/logger"
 	"route256/cart/internal/middleware"
 	product "route256/cart/internal/product/service"
+	"route256/cart/pkg/lib/logger"
 )
 
 func main() {
