@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"sync"
 
 	"route256/cart/internal/cart/model"
 )
@@ -10,6 +11,7 @@ const ErrCartNotFoundOrEmpty = "cart not found or empty"
 
 type InMemoryCartRepository struct {
 	carts map[model.UserID]*model.Cart
+	mutex *sync.RWMutex
 }
 
 func NewInMemoryCartRepository() *InMemoryCartRepository {
@@ -20,6 +22,8 @@ func NewInMemoryCartRepository() *InMemoryCartRepository {
 }
 
 func (r *InMemoryCartRepository) AddItems(userID model.UserID, item model.Item) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
 	cart, cartExists := r.carts[userID]
 	if !cartExists {
 		cart = &model.Cart{
@@ -44,6 +48,8 @@ func (r *InMemoryCartRepository) AddItems(userID model.UserID, item model.Item) 
 }
 
 func (r *InMemoryCartRepository) DeleteItems(userID model.UserID, itemID model.SkuID) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
 	cart, cartExists := r.carts[userID]
 	if !cartExists {
 		return
@@ -56,10 +62,14 @@ func (r *InMemoryCartRepository) DeleteItems(userID model.UserID, itemID model.S
 }
 
 func (r *InMemoryCartRepository) DeleteCart(userID model.UserID) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
 	delete(r.carts, userID)
 }
 
 func (r *InMemoryCartRepository) GetCart(userID model.UserID) (*model.Cart, error) {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
 	cart, cartExists := r.carts[userID]
 	if !cartExists {
 		return nil, errors.New(ErrCartNotFoundOrEmpty)
