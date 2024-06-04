@@ -7,12 +7,15 @@ import (
 	"route256/cart/internal/app/handler"
 	"route256/cart/internal/cart/repository"
 	"route256/cart/internal/cart/service"
+	"route256/cart/internal/config"
 	product "route256/cart/internal/product/service"
 	"route256/cart/pkg/lib/logger"
 )
 
 func main() {
-	log := logger.SetupLogger(logger.Local)
+	cfg := config.MustLoad()
+
+	log := logger.SetupLogger(cfg.Env)
 
 	cartRepository := repository.NewInMemoryCartRepository()
 	cartService := service.NewCartService(cartRepository)
@@ -21,7 +24,7 @@ func main() {
 
 	routes := app.InitRoutes(cartHandler)
 	server := app.NewApp(routes, log)
-	err := server.ListenAndServe()
+	err := server.ListenAndServe(cfg.Port)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)

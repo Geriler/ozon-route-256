@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"strconv"
 
 	"route256/cart/internal/middleware"
 )
@@ -20,8 +21,8 @@ func NewApp(mux *http.ServeMux, log *slog.Logger) *App {
 	}
 }
 
-func (a *App) ListenAndServe() error {
-	conn, err := net.Listen("tcp", ":8082")
+func (a *App) ListenAndServe(port int) error {
+	conn, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
 		return err
 	}

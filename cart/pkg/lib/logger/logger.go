@@ -5,15 +5,13 @@ import (
 	"os"
 )
 
-type Env string
-
 const (
-	Local Env = "local"
-	Dev   Env = "dev"
-	Prod  Env = "prod"
+	Local string = "local"
+	Dev   string = "dev"
+	Prod  string = "prod"
 )
 
-func SetupLogger(env Env) *slog.Logger {
+func SetupLogger(env string) *slog.Logger {
 	var logger *slog.Logger
 
 	switch env {
