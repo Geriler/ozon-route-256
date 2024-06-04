@@ -18,6 +18,7 @@ func NewInMemoryCartRepository() *InMemoryCartRepository {
 	carts := make(map[model.UserID]*model.Cart)
 	return &InMemoryCartRepository{
 		carts: carts,
+		mutex: &sync.RWMutex{},
 	}
 }
 
