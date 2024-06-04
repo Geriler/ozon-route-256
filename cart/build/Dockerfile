@@ -1,0 +1,19 @@
+FROM golang:1.22-alpine as builder
+
+WORKDIR /build
+
+COPY go.mod ./
+
+RUN go mod download
+
+COPY . .
+
+COPY ./config/config.yml /config.yml
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /cart ./cmd/cart
+
+FROM scratch
+COPY --from=builder cart /bin/cart
+COPY --from=builder config.yml /bin/config.yml
+
+ENTRYPOINT ["/bin/cart", "--config=/bin/config.yml"]
