@@ -3,6 +3,7 @@ module route256/cart
 go 1.22
 
 require (
+	github.com/gojuno/minimock/v3 v3.3.11
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/stretchr/testify v1.9.0
 	gopkg.in/validator.v2 v2.0.1
