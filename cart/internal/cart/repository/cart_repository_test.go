@@ -115,3 +115,19 @@ func TestInMemoryCartRepository_GetCart(t *testing.T) {
 	require.EqualError(t, err, ErrCartNotFoundOrEmpty)
 	require.Nil(t, cart)
 }
+
+func BenchmarkInMemoryCartRepository_AddItems(b *testing.B) {
+	cartRepository := NewInMemoryCartRepository()
+
+	var userId model.UserID = 1
+	item := &model.Item{
+		SKU:   1,
+		Name:  "test",
+		Count: 1,
+		Price: 1,
+	}
+
+	for i := 0; i < b.N; i++ {
+		cartRepository.AddItems(userId, *item)
+	}
+}
