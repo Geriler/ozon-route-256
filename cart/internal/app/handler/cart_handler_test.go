@@ -19,8 +19,8 @@ func TestCartHandler(t *testing.T) {
 
 	var (
 		err          error
-		userId       = model.UserID(1)
-		cartResponse = model.CartResponse{}
+		userId       model.UserID = 1
+		cartResponse              = model.CartResponse{}
 		cartItems    []model.Item
 		cart         = &model.Cart{}
 		products     = []*productModel.Product{
