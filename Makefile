@@ -7,3 +7,6 @@ run-all: build-all
 
 cover:
 	go test -cover ./cart/...
+
+lint:
+	cd cart && golangci-lint run --config=./config/linter-config.yml
