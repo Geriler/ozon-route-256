@@ -4,3 +4,6 @@ build-all:
 
 run-all: build-all
 	docker-compose up --force-recreate --build -d
+
+cover:
+	go test -cover ./cart/...
