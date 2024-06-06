@@ -8,8 +8,14 @@ import (
 )
 
 type Config struct {
-	Env  string `yaml:"env"`
-	Port int    `yaml:"port"`
+	Env     string        `yaml:"env"`
+	Port    int           `yaml:"port"`
+	Product ProductConfig `yaml:"product"`
+}
+
+type ProductConfig struct {
+	BaseUrl string `yaml:"base_url"`
+	Token   string `yaml:"token"`
 }
 
 func MustLoad() Config {
