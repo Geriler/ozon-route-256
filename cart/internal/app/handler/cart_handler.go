@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"log/slog"
-
 	"route256/cart/internal/cart/model"
 	productModel "route256/cart/internal/product/model"
 )
@@ -22,13 +20,11 @@ type ProductService interface {
 type CartHandler struct {
 	cartService    CartService
 	productService ProductService
-	logger         *slog.Logger
 }
 
-func NewCartHandler(cartService CartService, productService ProductService, logger *slog.Logger) *CartHandler {
+func NewCartHandler(cartService CartService, productService ProductService) *CartHandler {
 	return &CartHandler{
 		cartService:    cartService,
 		productService: productService,
-		logger:         logger,
 	}
 }

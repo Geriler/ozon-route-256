@@ -1,2 +1,5 @@
 env: "local"
 port: 8082
+product:
+  base_url: "http://route256.pavl.uk:8080"
+  token: "testtoken"

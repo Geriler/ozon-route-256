@@ -11,19 +11,23 @@ import (
 	"route256/cart/internal/product/model"
 )
 
-const baseUrl = "http://route256.pavl.uk:8080"
+type ProductService struct {
+	baseUrl string
+	token   string
+}
 
-type ProductService struct{}
-
-func NewProductService() *ProductService {
-	return &ProductService{}
+func NewProductService(baseUrl, token string) *ProductService {
+	return &ProductService{
+		baseUrl: baseUrl,
+		token:   token,
+	}
 }
 
 func (s *ProductService) GetProduct(skuId cartModel.SkuID) (*model.Product, error) {
-	url := baseUrl + "/get_product"
+	url := s.baseUrl + "/get_product"
 
 	request := model.GetProductRequest{
-		Token: "testtoken",
+		Token: s.token,
 		Sku:   skuId,
 	}
 
