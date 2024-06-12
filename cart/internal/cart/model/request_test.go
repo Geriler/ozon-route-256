@@ -133,7 +133,7 @@ func TestGetValidateUserSKUCountRequest(t *testing.T) {
 			userId:   "1",
 			skuId:    "1",
 			count:    "1",
-			expected: &UserSKUCountRequest{UserID: 1, SKU: 1, Count: uint16(1)},
+			expected: &UserSKUCountRequest{UserID: 1, SKU: 1, Count: 1},
 			hasErr:   false,
 		},
 		{

@@ -20,7 +20,7 @@ func (h *CartHttpHandlers) DeleteCartByUserID(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err = h.cartHandler.DeleteCart(req)
+	err = h.cartHandler.DeleteCart(r.Context(), req)
 	if err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

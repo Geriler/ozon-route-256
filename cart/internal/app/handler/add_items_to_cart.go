@@ -1,8 +1,12 @@
 package handler
 
-import "route256/cart/internal/cart/model"
+import (
+	"context"
 
-func (h *CartHandler) AddItemsToCart(req *model.UserSKUCountRequest) error {
+	"route256/cart/internal/cart/model"
+)
+
+func (h *CartHandler) AddItemsToCart(ctx context.Context, req *model.UserSKUCountRequest) error {
 	product, err := h.productService.GetProduct(req.SKU)
 	if err != nil {
 		return err
@@ -15,7 +19,7 @@ func (h *CartHandler) AddItemsToCart(req *model.UserSKUCountRequest) error {
 		Price: product.Price,
 	}
 
-	h.cartService.AddItemsToCart(req.UserID, item)
+	h.cartService.AddItemsToCart(ctx, req.UserID, item)
 
 	return nil
 }

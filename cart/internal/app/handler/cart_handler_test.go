@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -54,9 +55,9 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		cartHandler := NewCartHandler(cartService, productService)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
-		cartService.AddItemsToCartMock.Expect(userId, items[0])
+		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
-		err := cartHandler.AddItemsToCart(&model.UserSKUCountRequest{
+		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 			Count:  items[0].Count,
@@ -73,16 +74,16 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		cartHandler := NewCartHandler(cartService, productService)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
-		cartService.AddItemsToCartMock.Expect(userId, items[0])
+		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
-		err := cartHandler.AddItemsToCart(&model.UserSKUCountRequest{
+		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 			Count:  items[0].Count,
 		})
 		require.Nil(t, err)
 
-		err = cartHandler.AddItemsToCart(&model.UserSKUCountRequest{
+		err = cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 			Count:  items[0].Count,
@@ -99,9 +100,9 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		cartHandler := NewCartHandler(cartService, productService)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
-		cartService.AddItemsToCartMock.Expect(userId, items[0])
+		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
-		err := cartHandler.AddItemsToCart(&model.UserSKUCountRequest{
+		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 			Count:  items[0].Count,
@@ -109,9 +110,9 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		require.Nil(t, err)
 
 		productService.GetProductMock.Expect(items[1].SKU).Return(products[1], nil)
-		cartService.AddItemsToCartMock.Expect(userId, items[1])
+		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[1])
 
-		err = cartHandler.AddItemsToCart(&model.UserSKUCountRequest{
+		err = cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
 			UserID: userId,
 			SKU:    items[1].SKU,
 			Count:  items[1].Count,
@@ -129,7 +130,7 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 
 		productService.GetProductMock.Expect(items[2].SKU).Return(nil, errors.New("sku not found"))
 
-		err := cartHandler.AddItemsToCart(&model.UserSKUCountRequest{
+		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
 			UserID: userId,
 			SKU:    items[2].SKU,
 			Count:  items[2].Count,
@@ -169,9 +170,9 @@ func TestCartHandler_DeleteItemsFromCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		cartHandler := NewCartHandler(cartService, productService)
 
-		cartService.DeleteItemsFromCartMock.Expect(userId, items[0].SKU)
+		cartService.DeleteItemsFromCartMock.Expect(context.Background(), userId, items[0].SKU)
 
-		err := cartHandler.DeleteItemsFromCart(&model.UserSKURequest{
+		err := cartHandler.DeleteItemsFromCart(context.Background(), &model.UserSKURequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 		})
@@ -187,18 +188,18 @@ func TestCartHandler_DeleteItemsFromCart(t *testing.T) {
 		cartHandler := NewCartHandler(cartService, productService)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
-		cartService.AddItemsToCartMock.Expect(userId, items[0])
+		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
-		err := cartHandler.AddItemsToCart(&model.UserSKUCountRequest{
+		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 			Count:  items[0].Count,
 		})
 		require.Nil(t, err)
 
-		cartService.DeleteItemsFromCartMock.Expect(userId, items[0].SKU)
+		cartService.DeleteItemsFromCartMock.Expect(context.Background(), userId, items[0].SKU)
 
-		err = cartHandler.DeleteItemsFromCart(&model.UserSKURequest{
+		err = cartHandler.DeleteItemsFromCart(context.Background(), &model.UserSKURequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 		})
@@ -237,9 +238,9 @@ func TestCartHandler_DeleteCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		cartHandler := NewCartHandler(cartService, productService)
 
-		cartService.DeleteCartByUserIDMock.Expect(userId)
+		cartService.DeleteCartByUserIDMock.Expect(context.Background(), userId)
 
-		err := cartHandler.DeleteCart(&model.UserRequest{
+		err := cartHandler.DeleteCart(context.Background(), &model.UserRequest{
 			UserID: userId,
 		})
 		require.Nil(t, err)
@@ -254,26 +255,26 @@ func TestCartHandler_DeleteCart(t *testing.T) {
 		cartHandler := NewCartHandler(cartService, productService)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
-		cartService.AddItemsToCartMock.Expect(userId, items[0])
+		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
-		err := cartHandler.AddItemsToCart(&model.UserSKUCountRequest{
+		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 			Count:  items[0].Count,
 		})
 		require.Nil(t, err)
 
-		cartService.DeleteItemsFromCartMock.Expect(userId, items[0].SKU)
+		cartService.DeleteItemsFromCartMock.Expect(context.Background(), userId, items[0].SKU)
 
-		err = cartHandler.DeleteItemsFromCart(&model.UserSKURequest{
+		err = cartHandler.DeleteItemsFromCart(context.Background(), &model.UserSKURequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 		})
 		require.Nil(t, err)
 
-		cartService.DeleteCartByUserIDMock.Expect(userId)
+		cartService.DeleteCartByUserIDMock.Expect(context.Background(), userId)
 
-		err = cartHandler.DeleteCart(&model.UserRequest{
+		err = cartHandler.DeleteCart(context.Background(), &model.UserRequest{
 			UserID: userId,
 		})
 		require.Nil(t, err)
@@ -288,18 +289,18 @@ func TestCartHandler_DeleteCart(t *testing.T) {
 		cartHandler := NewCartHandler(cartService, productService)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
-		cartService.AddItemsToCartMock.Expect(userId, items[0])
+		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
-		err := cartHandler.AddItemsToCart(&model.UserSKUCountRequest{
+		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 			Count:  items[0].Count,
 		})
 		require.Nil(t, err)
 
-		cartService.DeleteCartByUserIDMock.Expect(userId)
+		cartService.DeleteCartByUserIDMock.Expect(context.Background(), userId)
 
-		err = cartHandler.DeleteCart(&model.UserRequest{
+		err = cartHandler.DeleteCart(context.Background(), &model.UserRequest{
 			UserID: userId,
 		})
 		require.Nil(t, err)
@@ -343,9 +344,9 @@ func TestCartHandler_GetCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		cartHandler := NewCartHandler(cartService, productService)
 
-		cartService.GetCartByUserIDMock.Expect(userId).Return(&model.Cart{}, errors.New(repository.ErrCartNotFoundOrEmpty))
+		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(&model.Cart{}, errors.New(repository.ErrCartNotFoundOrEmpty))
 
-		cartResponse, err := cartHandler.GetCart(&model.UserRequest{
+		cartResponse, err := cartHandler.GetCart(context.Background(), &model.UserRequest{
 			UserID: userId,
 		})
 		require.EqualError(t, err, repository.ErrCartNotFoundOrEmpty)
@@ -361,26 +362,26 @@ func TestCartHandler_GetCart(t *testing.T) {
 		cartHandler := NewCartHandler(cartService, productService)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
-		cartService.AddItemsToCartMock.Expect(userId, items[0])
+		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
-		err := cartHandler.AddItemsToCart(&model.UserSKUCountRequest{
+		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 			Count:  items[0].Count,
 		})
 		require.Nil(t, err)
 
-		cartService.DeleteItemsFromCartMock.Expect(userId, items[0].SKU)
+		cartService.DeleteItemsFromCartMock.Expect(context.Background(), userId, items[0].SKU)
 
-		err = cartHandler.DeleteItemsFromCart(&model.UserSKURequest{
+		err = cartHandler.DeleteItemsFromCart(context.Background(), &model.UserSKURequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 		})
 		require.Nil(t, err)
 
-		cartService.GetCartByUserIDMock.Expect(userId).Return(&model.Cart{}, errors.New(repository.ErrCartNotFoundOrEmpty))
+		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(&model.Cart{}, errors.New(repository.ErrCartNotFoundOrEmpty))
 
-		cartResponse, err := cartHandler.GetCart(&model.UserRequest{
+		cartResponse, err := cartHandler.GetCart(context.Background(), &model.UserRequest{
 			UserID: userId,
 		})
 		require.EqualError(t, err, repository.ErrCartNotFoundOrEmpty)
@@ -396,9 +397,9 @@ func TestCartHandler_GetCart(t *testing.T) {
 		cartHandler := NewCartHandler(cartService, productService)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
-		cartService.AddItemsToCartMock.Expect(userId, items[0])
+		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
-		err := cartHandler.AddItemsToCart(&model.UserSKUCountRequest{
+		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 			Count:  items[0].Count,
@@ -411,10 +412,10 @@ func TestCartHandler_GetCart(t *testing.T) {
 			Items: cartItems,
 		}
 
-		cartService.GetCartByUserIDMock.Expect(userId).Return(cart, nil)
-		cartService.GetTotalPriceMock.Expect(cart).Return(10)
+		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(cart, nil)
+		cartService.GetTotalPriceMock.Expect(context.Background(), cart).Return(10)
 
-		cartResponse, err := cartHandler.GetCart(&model.UserRequest{
+		cartResponse, err := cartHandler.GetCart(context.Background(), &model.UserRequest{
 			UserID: userId,
 		})
 		require.Nil(t, err)
@@ -431,9 +432,9 @@ func TestCartHandler_GetCart(t *testing.T) {
 		cartHandler := NewCartHandler(cartService, productService)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
-		cartService.AddItemsToCartMock.Expect(userId, items[0])
+		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
-		err := cartHandler.AddItemsToCart(&model.UserSKUCountRequest{
+		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
 			UserID: userId,
 			SKU:    items[0].SKU,
 			Count:  items[0].Count,
@@ -441,9 +442,9 @@ func TestCartHandler_GetCart(t *testing.T) {
 		require.Nil(t, err)
 
 		productService.GetProductMock.Expect(items[1].SKU).Return(products[1], nil)
-		cartService.AddItemsToCartMock.Expect(userId, items[1])
+		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[1])
 
-		err = cartHandler.AddItemsToCart(&model.UserSKUCountRequest{
+		err = cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
 			UserID: userId,
 			SKU:    items[1].SKU,
 			Count:  items[1].Count,
@@ -457,10 +458,10 @@ func TestCartHandler_GetCart(t *testing.T) {
 			Items: cartItems,
 		}
 
-		cartService.GetCartByUserIDMock.Expect(userId).Return(cart, nil)
-		cartService.GetTotalPriceMock.Expect(cart).Return(30)
+		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(cart, nil)
+		cartService.GetTotalPriceMock.Expect(context.Background(), cart).Return(30)
 
-		cartResponse, err := cartHandler.GetCart(&model.UserRequest{
+		cartResponse, err := cartHandler.GetCart(context.Background(), &model.UserRequest{
 			UserID: userId,
 		})
 		require.Nil(t, err)

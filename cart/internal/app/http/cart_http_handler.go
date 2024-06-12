@@ -1,16 +1,17 @@
 package http
 
 import (
+	"context"
 	"log/slog"
 
 	"route256/cart/internal/cart/model"
 )
 
 type CartHandler interface {
-	AddItemsToCart(req *model.UserSKUCountRequest) error
-	DeleteItemsFromCart(req *model.UserSKURequest) error
-	DeleteCart(req *model.UserRequest) error
-	GetCart(req *model.UserRequest) (model.CartResponse, error)
+	AddItemsToCart(ctx context.Context, req *model.UserSKUCountRequest) error
+	DeleteItemsFromCart(ctx context.Context, req *model.UserSKURequest) error
+	DeleteCart(ctx context.Context, req *model.UserRequest) error
+	GetCart(ctx context.Context, req *model.UserRequest) (model.CartResponse, error)
 }
 
 type CartHttpHandlers struct {

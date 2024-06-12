@@ -23,7 +23,7 @@ func (h *CartHttpHandlers) AddItemsToCart(w http.ResponseWriter, r *http.Request
 	log = log.With(slog.Int64("UserID", int64(req.UserID))).
 		With(slog.Int64("SKU", int64(req.SKU)))
 
-	err = h.cartHandler.AddItemsToCart(req)
+	err = h.cartHandler.AddItemsToCart(r.Context(), req)
 	if err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

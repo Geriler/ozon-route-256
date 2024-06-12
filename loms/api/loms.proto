@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package loms.api;
+
+option go_package = "gitlab.ozon.dev/alexanderkoltygin/homework/loms/gen/api;loms";
+
+import "buf/validate/validate.proto";
+
+service Order {
+    rpc OrderCreate(OrderCreateRequest) returns (OrderCreateResponse);
+    rpc OrderInfo(OrderInfoRequest) returns (OrderInfoResponse);
+    rpc OrderPay(OrderPayRequest) returns (OrderPayResponse);
+    rpc OrderCancel(OrderCancelRequest) returns (OrderCancelResponse);
+}
+
+service Stocks {
+    rpc StocksInfo(StocksInfoRequest) returns (StocksInfoResponse);
+}
+
+message OrderCreateRequest {
+    int64 user_id = 1 [
+        (buf.validate.field).int64.gt = 0,
+        (buf.validate.field).required = true
+    ];
+    repeated Item items = 2;
+}
+
+message OrderCreateResponse {
+    int64 order_id = 1;
+}
+
+message OrderInfoRequest {
+    int64 order_id = 1 [
+        (buf.validate.field).int64.gt = 0,
+        (buf.validate.field).required = true
+    ];
+}
+
+message OrderInfoResponse {
+    string status = 1;
+    int64 user_id = 2;
+    repeated Item items = 3;
+}
+
+message OrderPayRequest {
+    int64 order_id = 1 [
+        (buf.validate.field).int64.gt = 0,
+        (buf.validate.field).required = true
+    ];
+}
+
+message OrderPayResponse {}
+
+message OrderCancelRequest {
+    int64 order_id = 1 [
+        (buf.validate.field).int64.gt = 0,
+        (buf.validate.field).required = true
+    ];
+}
+
+message OrderCancelResponse {}
+
+message StocksInfoRequest {
+    int64 sku_id = 1 [
+        (buf.validate.field).int64.gt = 0,
+        (buf.validate.field).required = true
+    ];
+}
+
+message StocksInfoResponse {
+    int64 count = 1;
+}
+
+message Item {
+    int64 sku_id = 1 [
+        (buf.validate.field).int64.gt = 0,
+        (buf.validate.field).required = true
+    ];
+    int64 count = 2 [
+        (buf.validate.field).int64.gt = 0,
+        (buf.validate.field).required = true
+    ];
+}
