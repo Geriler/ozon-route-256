@@ -12,6 +12,7 @@ type CartHandler interface {
 	DeleteItemsFromCart(ctx context.Context, req *model.UserSKURequest) error
 	DeleteCart(ctx context.Context, req *model.UserRequest) error
 	GetCart(ctx context.Context, req *model.UserRequest) (model.CartResponse, error)
+	Checkout(ctx context.Context, req *model.UserRequest) (model.CartCheckoutResponse, error)
 }
 
 type CartHttpHandlers struct {

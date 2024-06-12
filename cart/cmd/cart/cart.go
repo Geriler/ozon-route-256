@@ -14,7 +14,13 @@ func main() {
 	log := logger.SetupLogger(cfg.Env)
 
 	application := app.NewApp(cfg, log)
-	err := application.ListenAndServe()
+	err := application.ListenGRPC()
+	if err != nil {
+		log.Error(err.Error())
+		os.Exit(1)
+	}
+
+	err = application.ListenAndServe()
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)

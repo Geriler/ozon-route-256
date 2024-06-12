@@ -11,11 +11,16 @@ type Config struct {
 	Env     string        `yaml:"env"`
 	Port    int           `yaml:"port"`
 	Product ProductConfig `yaml:"product"`
+	GRPC    GRPCConfig    `yaml:"grpc"`
 }
 
 type ProductConfig struct {
 	BaseUrl string `yaml:"base_url"`
 	Token   string `yaml:"token"`
+}
+
+type GRPCConfig struct {
+	Port int `yaml:"port"`
 }
 
 func MustLoad() Config {

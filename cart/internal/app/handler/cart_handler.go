@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"route256/cart/internal/cart/model"
+	"route256/cart/internal/loms/service"
 	productModel "route256/cart/internal/product/model"
-	loms "route256/loms/pb/api"
 )
 
 type CartService interface {
@@ -23,13 +23,13 @@ type ProductService interface {
 type CartHandler struct {
 	cartService    CartService
 	productService ProductService
-	orderClient    loms.OrderClient
-	stocksClient   loms.StocksClient
+	loms           service.LomsService
 }
 
-func NewCartHandler(cartService CartService, productService ProductService) *CartHandler {
+func NewCartHandler(cartService CartService, productService ProductService, loms service.LomsService) *CartHandler {
 	return &CartHandler{
 		cartService:    cartService,
 		productService: productService,
+		loms:           loms,
 	}
 }
