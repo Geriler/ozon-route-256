@@ -1,4 +1,4 @@
-package service
+package client
 
 import (
 	"context"
@@ -6,13 +6,13 @@ import (
 	loms "route256/loms/pb/api"
 )
 
-type LomsService struct {
+type GRPCClient struct {
 	Order  OrderService
 	Stocks StocksService
 }
 
-func NewLomsService(order OrderService, stocks StocksService) *LomsService {
-	return &LomsService{
+func NewGRPCClient(order OrderService, stocks StocksService) *GRPCClient {
+	return &GRPCClient{
 		Order:  order,
 		Stocks: stocks,
 	}
