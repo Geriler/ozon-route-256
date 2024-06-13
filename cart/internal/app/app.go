@@ -5,18 +5,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"route256/cart/internal/app/handler"
 	cartHttp "route256/cart/internal/app/http"
 	"route256/cart/internal/cart/repository"
 	"route256/cart/internal/cart/service"
 	"route256/cart/internal/config"
-	"route256/cart/internal/loms/client"
 	lomsService "route256/cart/internal/loms/service"
 	"route256/cart/internal/middleware"
 	product "route256/cart/internal/product/service"
-	loms "route256/loms/pb/api"
 )
 
 type App struct {
@@ -28,7 +24,7 @@ type App struct {
 	loms    *lomsService.LomsService
 }
 
-func NewApp(cfg config.Config, log *slog.Logger) *App {
+func NewApp(cfg config.Config, log *slog.Logger, loms *lomsService.LomsService) *App {
 	mux := http.NewServeMux()
 
 	return &App{
@@ -37,23 +33,8 @@ func NewApp(cfg config.Config, log *slog.Logger) *App {
 		server:  &http.Server{Addr: "localhost:" + strconv.Itoa(cfg.Port), Handler: middleware.NewLogWrapperHandler(mux, log)},
 		config:  cfg,
 		storage: repository.NewInMemoryCartRepository(),
+		loms:    loms,
 	}
-}
-
-func (a *App) ListenGRPC() error {
-	conn, err := grpc.NewClient(":"+strconv.Itoa(a.config.GRPC.Port), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		return err
-	}
-
-	oc := loms.NewOrderClient(conn)
-	orderClient := client.NewOrderClient(oc)
-
-	sc := loms.NewStocksClient(conn)
-	stocksClient := client.NewStocksClient(sc)
-
-	a.loms = lomsService.NewLomsService(orderClient, stocksClient)
-	return nil
 }
 
 func (a *App) ListenAndServe() error {
