@@ -21,7 +21,7 @@ func (h *CartHandler) Checkout(ctx context.Context, req *model.UserRequest) (mod
 		})
 	}
 
-	orderCreateResponse, err := h.loms.Order.OrderCreate(ctx, &loms.OrderCreateRequest{
+	orderCreateResponse, err := h.grpcClient.Order.OrderCreate(ctx, &loms.OrderCreateRequest{
 		UserId: int64(req.UserID),
 		Items:  items,
 	})

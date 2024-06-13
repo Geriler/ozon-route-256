@@ -16,7 +16,7 @@ func (h *CartHandler) AddItemsToCart(ctx context.Context, req *model.UserSKUCoun
 		return err
 	}
 
-	stocksInfo, err := h.loms.Stocks.StocksInfo(ctx, &loms.StocksInfoRequest{SkuId: int64(req.SKU)})
+	stocksInfo, err := h.grpcClient.Stocks.StocksInfo(ctx, &loms.StocksInfoRequest{SkuId: int64(req.SKU)})
 	if err != nil {
 		return err
 	}

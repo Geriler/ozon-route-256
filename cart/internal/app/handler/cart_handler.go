@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"route256/cart/internal/cart/model"
-	"route256/cart/internal/loms/service"
+	"route256/cart/internal/loms/client"
 	productModel "route256/cart/internal/product/model"
 )
 
@@ -23,13 +23,13 @@ type ProductService interface {
 type CartHandler struct {
 	cartService    CartService
 	productService ProductService
-	loms           service.LomsService
+	grpcClient     client.GRPCClient
 }
 
-func NewCartHandler(cartService CartService, productService ProductService, loms service.LomsService) *CartHandler {
+func NewCartHandler(cartService CartService, productService ProductService, grpcClient client.GRPCClient) *CartHandler {
 	return &CartHandler{
 		cartService:    cartService,
 		productService: productService,
-		loms:           loms,
+		grpcClient:     grpcClient,
 	}
 }
