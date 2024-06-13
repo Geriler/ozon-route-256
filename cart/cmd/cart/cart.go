@@ -13,13 +13,13 @@ func main() {
 
 	log := logger.SetupLogger(cfg.Env)
 
-	lomsService, err := app.NewGRPCClient(cfg)
+	grpcClient, err := app.NewGRPCClient(cfg)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
 	}
 
-	application := app.NewApp(cfg, log, lomsService)
+	application := app.NewApp(cfg, log, grpcClient)
 
 	err = application.ListenAndServe()
 	if err != nil {
