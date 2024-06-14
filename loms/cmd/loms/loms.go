@@ -1,14 +1,24 @@
 package main
 
-import (
-	"route256/loms/internal/config"
-	"route256/loms/pkg/lib/logger"
-)
-
 func main() {
-	cfg := config.MustLoad()
+	//cfg := config.MustLoad()
+	//
+	//log := logger.SetupLogger(cfg.Env)
 
-	log := logger.SetupLogger(cfg.Env)
+	//gwmux, err := app.NewGRPCServeMux(cfg)
+	//if err != nil {
+	//	log.Error(err.Error())
+	//	os.Exit(1)
+	//}
 
-	_ = log
+	//gwServer := &http.Server{
+	//	Addr: fmt.Sprintf(":%d", cfg.HTTP.Port),
+	//	//Handler: mw.WithHTTPLoggingMiddleware(gwmux),
+	//}
+	//
+	//err = gwServer.ListenAndServe()
+	//if err != nil {
+	//	log.Error(err.Error())
+	//	os.Exit(1)
+	//}
 }

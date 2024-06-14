@@ -10,9 +10,14 @@ import (
 type Config struct {
 	Env  string     `yaml:"env"`
 	GRPC GRPCConfig `yaml:"grpc"`
+	HTTP HTTPConfig `yaml:"http"`
 }
 
 type GRPCConfig struct {
+	Port int `yaml:"port"`
+}
+
+type HTTPConfig struct {
 	Port int `yaml:"port"`
 }
 

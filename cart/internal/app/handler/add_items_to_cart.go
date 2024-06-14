@@ -8,7 +8,7 @@ import (
 	loms "route256/loms/pb/api"
 )
 
-var ErrNotEnoughStock = "not enough stock"
+const ErrNotEnoughStock = "not enough stock"
 
 func (h *CartHandler) AddItemsToCart(ctx context.Context, req *model.UserSKUCountRequest) error {
 	product, err := h.productService.GetProduct(req.SKU)
