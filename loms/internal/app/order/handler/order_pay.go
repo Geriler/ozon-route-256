@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 
 	"route256/loms/internal/order/model"
 	loms "route256/loms/pb/api"
@@ -13,11 +14,15 @@ func (h *OrderHandler) OrderPay(ctx context.Context, req *loms.OrderPayRequest) 
 		return nil, err
 	}
 
+	if order.Status == model.StatusFailed || order.Status == model.StatusCanceled || order.Status == model.StatusPaid {
+		return nil, errors.New("order can't be paid")
+	}
+
 	for _, item := range order.Items {
 		_ = h.stocksService.StocksServiceReserveRemove(ctx, item.SKU, item.Count)
 	}
 
-	_ = h.orderService.OrderServiceSetStatus(ctx, model.OrderID(req.OrderId), model.StatusPayed)
+	_ = h.orderService.OrderServiceSetStatus(ctx, model.OrderID(req.OrderId), model.StatusPaid)
 
 	return &loms.OrderPayResponse{}, nil
 }

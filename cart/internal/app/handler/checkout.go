@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"route256/cart/internal/cart/model"
-	loms "route256/loms/pb/api"
+	loms "route256/cart/pb/api"
 )
 
 func (h *CartHandler) Checkout(ctx context.Context, req *model.UserRequest) (model.CartCheckoutResponse, error) {

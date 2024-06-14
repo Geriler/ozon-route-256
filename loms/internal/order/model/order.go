@@ -5,7 +5,7 @@ type Status string
 const (
 	StatusNew             Status = "new"
 	StatusAwaitingPayment Status = "awaiting_payment"
-	StatusPayed           Status = "payed"
+	StatusPaid            Status = "payed"
 	StatusFailed          Status = "failed"
 	StatusCanceled        Status = "canceled"
 )

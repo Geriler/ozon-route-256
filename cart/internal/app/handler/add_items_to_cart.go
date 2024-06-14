@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"route256/cart/internal/cart/model"
-	loms "route256/loms/pb/api"
+	loms "route256/cart/pb/api"
 )
 
 const ErrNotEnoughStock = "not enough stock"

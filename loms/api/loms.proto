@@ -5,16 +5,38 @@ package loms.api;
 option go_package = "gitlab.ozon.dev/alexanderkoltygin/homework/loms/gen/api;loms";
 
 import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
 
 service Order {
-    rpc OrderCreate(OrderCreateRequest) returns (OrderCreateResponse);
-    rpc OrderInfo(OrderInfoRequest) returns (OrderInfoResponse);
-    rpc OrderPay(OrderPayRequest) returns (OrderPayResponse);
-    rpc OrderCancel(OrderCancelRequest) returns (OrderCancelResponse);
+    rpc OrderCreate(OrderCreateRequest) returns (OrderCreateResponse) {
+        option (google.api.http) = {
+            post: "/order/create",
+            body: "user_id"
+        };
+    };
+    rpc OrderInfo(OrderInfoRequest) returns (OrderInfoResponse) {
+        option (google.api.http) = {
+            get: "/order/info/{order_id}"
+        };
+    };
+    rpc OrderPay(OrderPayRequest) returns (OrderPayResponse) {
+        option (google.api.http) = {
+            post: "/order/pay/{order_id}"
+        };
+    };
+    rpc OrderCancel(OrderCancelRequest) returns (OrderCancelResponse) {
+        option (google.api.http) = {
+            post: "/order/cancel/{order_id}"
+        };
+    };
 }
 
 service Stocks {
-    rpc StocksInfo(StocksInfoRequest) returns (StocksInfoResponse);
+    rpc StocksInfo(StocksInfoRequest) returns (StocksInfoResponse) {
+        option (google.api.http) = {
+            get: "/stocks/info/{sku_id}"
+        };
+    };
 }
 
 message OrderCreateRequest {

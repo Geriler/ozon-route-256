@@ -16,9 +16,18 @@ func main() {
 	log := logger.SetupLogger(cfg.Env)
 
 	grpcApp := app.NewGRPCApp(cfg, log)
+	httpgw := app.NewHTTPGW(cfg, log)
 
 	go func() {
 		err := grpcApp.ListenAndServe()
+		if err != nil {
+			log.Error(err.Error())
+			os.Exit(1)
+		}
+	}()
+
+	go func() {
+		err := httpgw.ListenAndServe()
 		if err != nil {
 			log.Error(err.Error())
 			os.Exit(1)

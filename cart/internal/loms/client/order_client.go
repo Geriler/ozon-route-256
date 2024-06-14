@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	loms "route256/loms/pb/api"
+	loms "route256/cart/pb/api"
 )
 
 type OrderClient struct {

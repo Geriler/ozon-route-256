@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 
 	"route256/loms/internal/order/model"
 	loms "route256/loms/pb/api"
@@ -11,6 +12,10 @@ func (h *OrderHandler) OrderCancel(ctx context.Context, req *loms.OrderCancelReq
 	order, err := h.orderService.OrderServiceGetOrder(ctx, model.OrderID(req.OrderId))
 	if err != nil {
 		return nil, err
+	}
+
+	if order.Status == model.StatusFailed || order.Status == model.StatusCanceled || order.Status == model.StatusPaid {
+		return nil, errors.New("order can't be canceled")
 	}
 
 	for _, item := range order.Items {

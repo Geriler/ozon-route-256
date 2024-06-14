@@ -9,6 +9,7 @@ import (
 	handlerOrder "route256/loms/internal/app/order/handler"
 	handlerStocks "route256/loms/internal/app/stocks/handler"
 	"route256/loms/internal/config"
+	"route256/loms/internal/middleware"
 	orderRepository "route256/loms/internal/order/repository"
 	serviceOrder "route256/loms/internal/order/service"
 	repositoryStocks "route256/loms/internal/stocks/repository"
@@ -57,5 +58,7 @@ func (a *GRPCApp) ListenAndServe() error {
 }
 
 func getServerOption() grpc.ServerOption {
-	return grpc.ChainUnaryInterceptor()
+	return grpc.ChainUnaryInterceptor(
+		middleware.Logger,
+	)
 }
