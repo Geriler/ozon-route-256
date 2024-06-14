@@ -6,7 +6,6 @@ import (
 	"net"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	handlerOrder "route256/loms/internal/app/order/handler"
 	handlerStocks "route256/loms/internal/app/stocks/handler"
 	"route256/loms/internal/config"
@@ -44,8 +43,6 @@ func (a *GRPCApp) ListenAndServe() error {
 
 	loms.RegisterOrderServer(a.server, orderHandler)
 	loms.RegisterStocksServer(a.server, stocksHandler)
-
-	reflection.Register(a.server)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", a.cfg.GRPC.Port))
 	if err != nil {
