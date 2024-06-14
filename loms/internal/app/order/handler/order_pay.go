@@ -8,6 +8,8 @@ import (
 	loms "route256/loms/pb/api"
 )
 
+const ErrOrderCannotPaid = "order can't be paid"
+
 func (h *OrderHandler) OrderPay(ctx context.Context, req *loms.OrderPayRequest) (*loms.OrderPayResponse, error) {
 	order, err := h.orderService.OrderServiceGetOrder(ctx, model.OrderID(req.OrderId))
 	if err != nil {
@@ -15,7 +17,7 @@ func (h *OrderHandler) OrderPay(ctx context.Context, req *loms.OrderPayRequest) 
 	}
 
 	if order.Status == model.StatusFailed || order.Status == model.StatusCanceled || order.Status == model.StatusPaid {
-		return nil, errors.New("order can't be paid")
+		return nil, errors.New(ErrOrderCannotPaid)
 	}
 
 	for _, item := range order.Items {

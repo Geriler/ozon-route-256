@@ -8,7 +8,7 @@ import (
 )
 
 func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateRequest) (*loms.OrderCreateResponse, error) {
-	reserved := make([]*model.Item, len(req.Items))
+	reserved := make([]*model.Item, 0)
 	items := model.LomsItemsToItems(req.Items)
 
 	orderID := h.orderService.OrderServiceCreate(ctx, &model.Order{

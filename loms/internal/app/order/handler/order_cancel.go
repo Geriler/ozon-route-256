@@ -8,6 +8,8 @@ import (
 	loms "route256/loms/pb/api"
 )
 
+const ErrOrderCannotCanceled = "order can't be canceled"
+
 func (h *OrderHandler) OrderCancel(ctx context.Context, req *loms.OrderCancelRequest) (*loms.OrderCancelResponse, error) {
 	order, err := h.orderService.OrderServiceGetOrder(ctx, model.OrderID(req.OrderId))
 	if err != nil {
@@ -15,7 +17,7 @@ func (h *OrderHandler) OrderCancel(ctx context.Context, req *loms.OrderCancelReq
 	}
 
 	if order.Status == model.StatusFailed || order.Status == model.StatusCanceled || order.Status == model.StatusPaid {
-		return nil, errors.New("order can't be canceled")
+		return nil, errors.New(ErrOrderCannotCanceled)
 	}
 
 	for _, item := range order.Items {
