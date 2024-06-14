@@ -17,3 +17,4 @@ services:
       dockerfile: ./build/Dockerfile
     ports:
       - "8081:8081" # GRPC
+      - "8080:8080" # HTTP
