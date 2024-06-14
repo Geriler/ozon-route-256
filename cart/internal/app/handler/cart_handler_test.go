@@ -10,7 +10,9 @@ import (
 	"route256/cart/internal/app/handler/mock"
 	"route256/cart/internal/cart/model"
 	"route256/cart/internal/cart/repository"
+	"route256/cart/internal/loms/client"
 	productModel "route256/cart/internal/product/model"
+	loms "route256/cart/pb/api"
 )
 
 func TestCartHandler_AddItemsToCart(t *testing.T) {
@@ -52,9 +54,17 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		productService := mock.NewProductServiceMock(ctrl)
 		cartService := mock.NewCartServiceMock(ctrl)
-		cartHandler := NewCartHandler(cartService, productService)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
+		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
+			SkuId: int64(items[0].SKU),
+		}).Return(&loms.StocksInfoResponse{
+			Count: items[0].Count,
+		}, nil)
 		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
 		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
@@ -71,9 +81,17 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		productService := mock.NewProductServiceMock(ctrl)
 		cartService := mock.NewCartServiceMock(ctrl)
-		cartHandler := NewCartHandler(cartService, productService)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
+		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
+			SkuId: int64(items[0].SKU),
+		}).Return(&loms.StocksInfoResponse{
+			Count: items[0].Count,
+		}, nil)
 		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
 		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
@@ -97,9 +115,17 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		productService := mock.NewProductServiceMock(ctrl)
 		cartService := mock.NewCartServiceMock(ctrl)
-		cartHandler := NewCartHandler(cartService, productService)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
+		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
+			SkuId: int64(items[0].SKU),
+		}).Return(&loms.StocksInfoResponse{
+			Count: items[0].Count,
+		}, nil)
 		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
 		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
@@ -110,6 +136,11 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		require.Nil(t, err)
 
 		productService.GetProductMock.Expect(items[1].SKU).Return(products[1], nil)
+		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
+			SkuId: int64(items[1].SKU),
+		}).Return(&loms.StocksInfoResponse{
+			Count: items[1].Count,
+		}, nil)
 		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[1])
 
 		err = cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
@@ -126,7 +157,10 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		productService := mock.NewProductServiceMock(ctrl)
 		cartService := mock.NewCartServiceMock(ctrl)
-		cartHandler := NewCartHandler(cartService, productService)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[2].SKU).Return(nil, errors.New("sku not found"))
 
@@ -136,6 +170,32 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 			Count:  items[2].Count,
 		})
 		require.EqualError(t, err, "sku not found")
+	})
+
+	t.Run("add item with not enough stocks", func(t *testing.T) {
+		t.Parallel()
+
+		ctrl := minimock.NewController(t)
+		productService := mock.NewProductServiceMock(ctrl)
+		cartService := mock.NewCartServiceMock(ctrl)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
+
+		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
+		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
+			SkuId: int64(items[0].SKU),
+		}).Return(&loms.StocksInfoResponse{
+			Count: 0,
+		}, nil)
+
+		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
+			UserID: userId,
+			SKU:    items[0].SKU,
+			Count:  items[0].Count,
+		})
+		require.EqualError(t, err, ErrNotEnoughStock)
 	})
 }
 
@@ -168,7 +228,10 @@ func TestCartHandler_DeleteItemsFromCart(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		productService := mock.NewProductServiceMock(ctrl)
 		cartService := mock.NewCartServiceMock(ctrl)
-		cartHandler := NewCartHandler(cartService, productService)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		cartService.DeleteItemsFromCartMock.Expect(context.Background(), userId, items[0].SKU)
 
@@ -185,9 +248,17 @@ func TestCartHandler_DeleteItemsFromCart(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		productService := mock.NewProductServiceMock(ctrl)
 		cartService := mock.NewCartServiceMock(ctrl)
-		cartHandler := NewCartHandler(cartService, productService)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
+		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
+			SkuId: int64(items[0].SKU),
+		}).Return(&loms.StocksInfoResponse{
+			Count: items[0].Count,
+		}, nil)
 		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
 		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
@@ -236,7 +307,10 @@ func TestCartHandler_DeleteCart(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		productService := mock.NewProductServiceMock(ctrl)
 		cartService := mock.NewCartServiceMock(ctrl)
-		cartHandler := NewCartHandler(cartService, productService)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		cartService.DeleteCartByUserIDMock.Expect(context.Background(), userId)
 
@@ -252,9 +326,17 @@ func TestCartHandler_DeleteCart(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		productService := mock.NewProductServiceMock(ctrl)
 		cartService := mock.NewCartServiceMock(ctrl)
-		cartHandler := NewCartHandler(cartService, productService)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
+		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
+			SkuId: int64(items[0].SKU),
+		}).Return(&loms.StocksInfoResponse{
+			Count: items[0].Count,
+		}, nil)
 		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
 		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
@@ -286,9 +368,17 @@ func TestCartHandler_DeleteCart(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		productService := mock.NewProductServiceMock(ctrl)
 		cartService := mock.NewCartServiceMock(ctrl)
-		cartHandler := NewCartHandler(cartService, productService)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
+		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
+			SkuId: int64(items[0].SKU),
+		}).Return(&loms.StocksInfoResponse{
+			Count: items[0].Count,
+		}, nil)
 		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
 		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
@@ -342,7 +432,10 @@ func TestCartHandler_GetCart(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		productService := mock.NewProductServiceMock(ctrl)
 		cartService := mock.NewCartServiceMock(ctrl)
-		cartHandler := NewCartHandler(cartService, productService)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(&model.Cart{}, errors.New(repository.ErrCartNotFoundOrEmpty))
 
@@ -359,9 +452,17 @@ func TestCartHandler_GetCart(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		productService := mock.NewProductServiceMock(ctrl)
 		cartService := mock.NewCartServiceMock(ctrl)
-		cartHandler := NewCartHandler(cartService, productService)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
+		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
+			SkuId: int64(items[0].SKU),
+		}).Return(&loms.StocksInfoResponse{
+			Count: items[0].Count,
+		}, nil)
 		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
 		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
@@ -394,9 +495,17 @@ func TestCartHandler_GetCart(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		productService := mock.NewProductServiceMock(ctrl)
 		cartService := mock.NewCartServiceMock(ctrl)
-		cartHandler := NewCartHandler(cartService, productService)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
+		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
+			SkuId: int64(items[0].SKU),
+		}).Return(&loms.StocksInfoResponse{
+			Count: items[0].Count,
+		}, nil)
 		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
 		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
@@ -429,9 +538,17 @@ func TestCartHandler_GetCart(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		productService := mock.NewProductServiceMock(ctrl)
 		cartService := mock.NewCartServiceMock(ctrl)
-		cartHandler := NewCartHandler(cartService, productService)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
+		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
+			SkuId: int64(items[0].SKU),
+		}).Return(&loms.StocksInfoResponse{
+			Count: items[0].Count,
+		}, nil)
 		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
 
 		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
@@ -442,6 +559,11 @@ func TestCartHandler_GetCart(t *testing.T) {
 		require.Nil(t, err)
 
 		productService.GetProductMock.Expect(items[1].SKU).Return(products[1], nil)
+		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
+			SkuId: int64(items[1].SKU),
+		}).Return(&loms.StocksInfoResponse{
+			Count: items[1].Count,
+		}, nil)
 		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[1])
 
 		err = cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
@@ -467,5 +589,94 @@ func TestCartHandler_GetCart(t *testing.T) {
 		require.Nil(t, err)
 		require.EqualValues(t, uint32(30), cartResponse.TotalPrice)
 		require.Len(t, cartResponse.Items, 2)
+	})
+}
+
+func TestCartHandler_Checkout(t *testing.T) {
+	t.Parallel()
+
+	var userId model.UserID = 1
+	products := []*productModel.Product{
+		{
+			Name:  "Item 1",
+			Price: 10,
+		},
+	}
+	items := []model.Item{
+		{
+			SKU:   1,
+			Name:  products[0].Name,
+			Count: 1,
+			Price: products[0].Price,
+		},
+	}
+
+	t.Run("checkout empty cart", func(t *testing.T) {
+		t.Parallel()
+
+		ctrl := minimock.NewController(t)
+		productService := mock.NewProductServiceMock(ctrl)
+		cartService := mock.NewCartServiceMock(ctrl)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
+
+		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(&model.Cart{}, errors.New(repository.ErrCartNotFoundOrEmpty))
+
+		_, err := cartHandler.Checkout(context.Background(), &model.UserRequest{
+			UserID: userId,
+		})
+		require.EqualError(t, err, repository.ErrCartNotFoundOrEmpty)
+	})
+
+	t.Run("checkout not empty cart", func(t *testing.T) {
+		t.Parallel()
+
+		ctrl := minimock.NewController(t)
+		productService := mock.NewProductServiceMock(ctrl)
+		cartService := mock.NewCartServiceMock(ctrl)
+		orderService := mock.NewOrderServiceMock(ctrl)
+		stocksService := mock.NewStocksServiceMock(ctrl)
+		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
+
+		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
+		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
+			SkuId: int64(items[0].SKU),
+		}).Return(&loms.StocksInfoResponse{
+			Count: items[0].Count,
+		}, nil)
+		cartService.AddItemsToCartMock.Expect(context.Background(), userId, items[0])
+
+		err := cartHandler.AddItemsToCart(context.Background(), &model.UserSKUCountRequest{
+			UserID: userId,
+			SKU:    items[0].SKU,
+			Count:  items[0].Count,
+		})
+		require.Nil(t, err)
+
+		cartItems := make(map[model.SkuID]*model.Item)
+		cartItems[items[0].SKU] = &items[0]
+
+		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(&model.Cart{
+			Items: cartItems,
+		}, nil)
+		orderService.OrderCreateMock.Expect(context.Background(), &loms.OrderCreateRequest{
+			UserId: int64(userId),
+			Items: []*loms.Item{
+				{
+					SkuId: int64(items[0].SKU),
+					Count: items[0].Count,
+				},
+			},
+		}).Return(&loms.OrderCreateResponse{
+			OrderId: 1,
+		}, nil)
+
+		_, err = cartHandler.Checkout(context.Background(), &model.UserRequest{
+			UserID: userId,
+		})
+		require.Nil(t, err)
 	})
 }
