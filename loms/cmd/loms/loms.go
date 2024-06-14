@@ -1,24 +1,31 @@
 package main
 
+import (
+	"os"
+	"os/signal"
+	"syscall"
+
+	"route256/loms/internal/app"
+	"route256/loms/internal/config"
+	"route256/loms/pkg/lib/logger"
+)
+
 func main() {
-	//cfg := config.MustLoad()
-	//
-	//log := logger.SetupLogger(cfg.Env)
+	cfg := config.MustLoad()
 
-	//gwmux, err := app.NewGRPCServeMux(cfg)
-	//if err != nil {
-	//	log.Error(err.Error())
-	//	os.Exit(1)
-	//}
+	log := logger.SetupLogger(cfg.Env)
 
-	//gwServer := &http.Server{
-	//	Addr: fmt.Sprintf(":%d", cfg.HTTP.Port),
-	//	//Handler: mw.WithHTTPLoggingMiddleware(gwmux),
-	//}
-	//
-	//err = gwServer.ListenAndServe()
-	//if err != nil {
-	//	log.Error(err.Error())
-	//	os.Exit(1)
-	//}
+	grpcApp := app.NewGRPCApp(cfg, log)
+
+	go func() {
+		err := grpcApp.ListenAndServe()
+		if err != nil {
+			log.Error(err.Error())
+			os.Exit(1)
+		}
+	}()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	<-stop
 }
