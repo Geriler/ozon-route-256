@@ -21,9 +21,9 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 	for _, item := range items {
 		err = h.stocksService.StocksServiceReserve(ctx, item.SKU, item.Count)
 		if err != nil {
-			err = h.orderService.OrderServiceSetStatus(ctx, orderID, model.StatusFailed)
-			if err != nil {
-				return nil, err
+			errSetStatus := h.orderService.OrderServiceSetStatus(ctx, orderID, model.StatusFailed)
+			if errSetStatus != nil {
+				return nil, errSetStatus
 			}
 
 			for _, item := range reserved {

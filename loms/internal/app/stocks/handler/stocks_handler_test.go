@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"github.com/gojuno/minimock/v3"
@@ -54,11 +53,11 @@ func TestStocksHandler_StocksInfo(t *testing.T) {
 		stocksService := mock.NewStocksServiceMock(ctrl)
 		stocksHandler := NewStocksHandler(stocksService)
 
-		stocksService.StocksServiceGetBySKUMock.Expect(context.Background(), items[0].SKU).Return(nil, errors.New(repository.ErrSkuNotFound))
+		stocksService.StocksServiceGetBySKUMock.Expect(context.Background(), items[0].SKU).Return(nil, repository.ErrSkuNotFound)
 
 		_, err := stocksHandler.StocksInfo(context.Background(), &loms.StocksInfoRequest{
 			SkuId: int64(items[0].SKU),
 		})
-		require.EqualError(t, err, repository.ErrSkuNotFound)
+		require.ErrorIs(t, err, repository.ErrSkuNotFound)
 	})
 }

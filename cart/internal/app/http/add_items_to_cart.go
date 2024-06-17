@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -28,7 +29,7 @@ func (h *CartHttpHandlers) AddItemsToCart(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		log.Error(err.Error())
 
-		if err.Error() == handler.ErrNotEnoughStock {
+		if errors.Is(err, handler.ErrNotEnoughStock) {
 			http.Error(w, err.Error(), http.StatusPreconditionFailed)
 			return
 		}

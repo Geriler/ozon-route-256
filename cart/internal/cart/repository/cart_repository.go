@@ -2,13 +2,13 @@ package repository
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"sync"
 
 	"route256/cart/internal/cart/model"
 )
 
-const ErrCartNotFoundOrEmpty = "cart not found or empty"
+var ErrCartNotFoundOrEmpty = fmt.Errorf("%s", "cart not found or empty")
 
 type InMemoryCartRepository struct {
 	carts map[model.UserID]*model.Cart
@@ -74,10 +74,10 @@ func (r *InMemoryCartRepository) GetCart(_ context.Context, userID model.UserID)
 	defer r.mutex.RUnlock()
 	cart, cartExists := r.carts[userID]
 	if !cartExists {
-		return nil, errors.New(ErrCartNotFoundOrEmpty)
+		return nil, ErrCartNotFoundOrEmpty
 	}
 	if len(cart.Items) == 0 {
-		return nil, errors.New(ErrCartNotFoundOrEmpty)
+		return nil, ErrCartNotFoundOrEmpty
 	}
 	return cart, nil
 }

@@ -180,7 +180,7 @@ func TestInMemoryCartRepository_GetCart(t *testing.T) {
 		)
 
 		cart, err = cartRepository.GetCart(context.Background(), userId)
-		require.EqualError(t, err, ErrCartNotFoundOrEmpty)
+		require.ErrorIs(t, err, ErrCartNotFoundOrEmpty)
 		require.Nil(t, cart)
 	})
 
@@ -219,7 +219,7 @@ func TestInMemoryCartRepository_GetCart(t *testing.T) {
 		cartRepository.DeleteItems(context.Background(), userId, item.SKU)
 
 		cart, err = cartRepository.GetCart(context.Background(), userId)
-		require.EqualError(t, err, ErrCartNotFoundOrEmpty)
+		require.ErrorIs(t, err, ErrCartNotFoundOrEmpty)
 		require.Nil(t, cart)
 	})
 }

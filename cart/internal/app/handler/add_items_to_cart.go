@@ -2,13 +2,13 @@ package handler
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
 	"route256/cart/internal/cart/model"
 	loms "route256/cart/pb/api"
 )
 
-const ErrNotEnoughStock = "not enough stock"
+var ErrNotEnoughStock = fmt.Errorf("%s", "not enough stock")
 
 func (h *CartHandler) AddItemsToCart(ctx context.Context, req *model.UserSKUCountRequest) error {
 	product, err := h.productService.GetProduct(req.SKU)
@@ -22,7 +22,7 @@ func (h *CartHandler) AddItemsToCart(ctx context.Context, req *model.UserSKUCoun
 	}
 
 	if stocksInfo.GetCount() < req.Count {
-		return errors.New(ErrNotEnoughStock)
+		return ErrNotEnoughStock
 	}
 
 	item := model.Item{

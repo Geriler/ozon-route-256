@@ -4,7 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"sync"
 
 	"route256/loms/internal/stocks/model"
@@ -37,9 +37,9 @@ func NewInMemoryStocksRepository() *InMemoryStocksRepository {
 	}
 }
 
-const (
-	ErrSkuNotFound    = "sku not found"
-	ErrNotEnoughStock = "not enough stock"
+var (
+	ErrSkuNotFound    = fmt.Errorf("%s", "sku not found")
+	ErrNotEnoughStock = fmt.Errorf("%s", "not enough stock")
 )
 
 func (r *InMemoryStocksRepository) Reserve(_ context.Context, sku model.SKU, count int64) error {
@@ -47,7 +47,7 @@ func (r *InMemoryStocksRepository) Reserve(_ context.Context, sku model.SKU, cou
 	defer r.mutex.Unlock()
 	if stock, ok := r.stocks[sku]; ok {
 		if stock.ReservedCount+count > stock.TotalCount {
-			return errors.New(ErrNotEnoughStock)
+			return ErrNotEnoughStock
 		}
 
 		stock.ReservedCount += count
@@ -55,7 +55,7 @@ func (r *InMemoryStocksRepository) Reserve(_ context.Context, sku model.SKU, cou
 		return nil
 	}
 
-	return errors.New(ErrSkuNotFound)
+	return ErrSkuNotFound
 }
 
 func (r *InMemoryStocksRepository) ReserveRemove(_ context.Context, sku model.SKU, count int64) error {
@@ -68,7 +68,7 @@ func (r *InMemoryStocksRepository) ReserveRemove(_ context.Context, sku model.SK
 		return nil
 	}
 
-	return errors.New(ErrSkuNotFound)
+	return ErrSkuNotFound
 }
 
 func (r *InMemoryStocksRepository) ReserveCancel(_ context.Context, sku model.SKU, count int64) error {
@@ -80,7 +80,7 @@ func (r *InMemoryStocksRepository) ReserveCancel(_ context.Context, sku model.SK
 		return nil
 	}
 
-	return errors.New(ErrSkuNotFound)
+	return ErrSkuNotFound
 }
 
 func (r *InMemoryStocksRepository) GetBySKU(_ context.Context, sku model.SKU) (*model.Stocks, error) {
@@ -90,5 +90,5 @@ func (r *InMemoryStocksRepository) GetBySKU(_ context.Context, sku model.SKU) (*
 		return stock, nil
 	}
 
-	return nil, errors.New(ErrSkuNotFound)
+	return nil, ErrSkuNotFound
 }

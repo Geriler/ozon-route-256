@@ -195,7 +195,7 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 			SKU:    items[0].SKU,
 			Count:  items[0].Count,
 		})
-		require.EqualError(t, err, ErrNotEnoughStock)
+		require.ErrorIs(t, err, ErrNotEnoughStock)
 	})
 }
 
@@ -437,12 +437,12 @@ func TestCartHandler_GetCart(t *testing.T) {
 		grpcClient := client.NewGRPCClient(orderService, stocksService)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
-		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(&model.Cart{}, errors.New(repository.ErrCartNotFoundOrEmpty))
+		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(&model.Cart{}, repository.ErrCartNotFoundOrEmpty)
 
 		cartResponse, err := cartHandler.GetCart(context.Background(), &model.UserRequest{
 			UserID: userId,
 		})
-		require.EqualError(t, err, repository.ErrCartNotFoundOrEmpty)
+		require.ErrorIs(t, err, repository.ErrCartNotFoundOrEmpty)
 		require.Equal(t, cartResponse, model.CartResponse{})
 	})
 
@@ -480,12 +480,12 @@ func TestCartHandler_GetCart(t *testing.T) {
 		})
 		require.Nil(t, err)
 
-		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(&model.Cart{}, errors.New(repository.ErrCartNotFoundOrEmpty))
+		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(&model.Cart{}, repository.ErrCartNotFoundOrEmpty)
 
 		cartResponse, err := cartHandler.GetCart(context.Background(), &model.UserRequest{
 			UserID: userId,
 		})
-		require.EqualError(t, err, repository.ErrCartNotFoundOrEmpty)
+		require.ErrorIs(t, err, repository.ErrCartNotFoundOrEmpty)
 		require.Equal(t, cartResponse, model.CartResponse{})
 	})
 
@@ -622,12 +622,12 @@ func TestCartHandler_Checkout(t *testing.T) {
 		grpcClient := client.NewGRPCClient(orderService, stocksService)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
-		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(&model.Cart{}, errors.New(repository.ErrCartNotFoundOrEmpty))
+		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(&model.Cart{}, repository.ErrCartNotFoundOrEmpty)
 
 		_, err := cartHandler.Checkout(context.Background(), &model.UserRequest{
 			UserID: userId,
 		})
-		require.EqualError(t, err, repository.ErrCartNotFoundOrEmpty)
+		require.ErrorIs(t, err, repository.ErrCartNotFoundOrEmpty)
 	})
 
 	t.Run("checkout not empty cart", func(t *testing.T) {

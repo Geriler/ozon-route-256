@@ -18,3 +18,14 @@ services:
     ports:
       - "8081:8081" # GRPC
       - "8080:8080" # HTTP
+  postgres:
+    image: postgres:latest
+    restart: always
+    deploy:
+      replicas: 5
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
