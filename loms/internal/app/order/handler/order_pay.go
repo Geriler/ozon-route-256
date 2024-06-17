@@ -21,10 +21,16 @@ func (h *OrderHandler) OrderPay(ctx context.Context, req *loms.OrderPayRequest) 
 	}
 
 	for _, item := range order.Items {
-		_ = h.stocksService.StocksServiceReserveRemove(ctx, item.SKU, item.Count)
+		err = h.stocksService.StocksServiceReserveRemove(ctx, item.SKU, item.Count)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	_ = h.orderService.OrderServiceSetStatus(ctx, model.OrderID(req.OrderId), model.StatusPaid)
+	err = h.orderService.OrderServiceSetStatus(ctx, model.OrderID(req.OrderId), model.StatusPaid)
+	if err != nil {
+		return nil, err
+	}
 
 	return &loms.OrderPayResponse{}, nil
 }

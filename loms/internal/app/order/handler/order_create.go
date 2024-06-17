@@ -8,6 +8,7 @@ import (
 )
 
 func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateRequest) (*loms.OrderCreateResponse, error) {
+	var err error
 	reserved := make([]*model.Item, 0)
 	items := model.LomsItemsToItems(req.Items)
 
@@ -18,12 +19,18 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 	})
 
 	for _, item := range items {
-		err := h.stocksService.StocksServiceReserve(ctx, item.SKU, item.Count)
+		err = h.stocksService.StocksServiceReserve(ctx, item.SKU, item.Count)
 		if err != nil {
-			_ = h.orderService.OrderServiceSetStatus(ctx, orderID, model.StatusFailed)
+			err = h.orderService.OrderServiceSetStatus(ctx, orderID, model.StatusFailed)
+			if err != nil {
+				return nil, err
+			}
 
 			for _, item := range reserved {
-				_ = h.stocksService.StocksServiceReserveCancel(ctx, item.SKU, item.Count)
+				err = h.stocksService.StocksServiceReserveCancel(ctx, item.SKU, item.Count)
+				if err != nil {
+					return nil, err
+				}
 			}
 
 			return nil, err
@@ -34,7 +41,10 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 		})
 	}
 
-	_ = h.orderService.OrderServiceSetStatus(ctx, orderID, model.StatusAwaitingPayment)
+	err = h.orderService.OrderServiceSetStatus(ctx, orderID, model.StatusAwaitingPayment)
+	if err != nil {
+		return nil, err
+	}
 
 	return &loms.OrderCreateResponse{
 		OrderId: int64(orderID),
