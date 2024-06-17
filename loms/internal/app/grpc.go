@@ -36,7 +36,10 @@ func (a *GRPCApp) ListenAndServe() error {
 	orderRepo := orderRepository.NewInMemoryOrderRepository()
 	orderService := serviceOrder.NewOrderService(orderRepo)
 
-	stocksRepo := repositoryStocks.NewInMemoryStocksRepository()
+	stocksRepo, err := repositoryStocks.NewInMemoryStocksRepository()
+	if err != nil {
+		return err
+	}
 	stocksService := srviceStocks.NewStocksService(stocksRepo)
 
 	orderHandler := handlerOrder.NewOrderHandler(orderService, stocksService)

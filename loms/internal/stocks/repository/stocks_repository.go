@@ -18,11 +18,11 @@ type InMemoryStocksRepository struct {
 	mutex  *sync.RWMutex
 }
 
-func NewInMemoryStocksRepository() *InMemoryStocksRepository {
+func NewInMemoryStocksRepository() (*InMemoryStocksRepository, error) {
 	var stocksJson []*model.Stocks
 	err := json.Unmarshal(stocksBytes, &stocksJson)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	stocks := make(map[model.SKU]*model.Stocks)
@@ -34,7 +34,7 @@ func NewInMemoryStocksRepository() *InMemoryStocksRepository {
 	return &InMemoryStocksRepository{
 		stocks: stocks,
 		mutex:  &sync.RWMutex{},
-	}
+	}, nil
 }
 
 var (
