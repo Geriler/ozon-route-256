@@ -2,13 +2,13 @@ package handler
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"route256/loms/internal/order/model"
 	loms "route256/loms/pb/api"
 )
 
-var ErrOrderCannotCanceled = fmt.Errorf("%s", "order can't be canceled")
+var ErrOrderCannotCanceled = errors.New("order can't be canceled")
 
 func (h *OrderHandler) OrderCancel(ctx context.Context, req *loms.OrderCancelRequest) (*loms.OrderCancelResponse, error) {
 	order, err := h.orderService.OrderServiceGetOrder(ctx, model.OrderID(req.OrderId))

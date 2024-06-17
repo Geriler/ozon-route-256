@@ -2,13 +2,13 @@ package handler
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"route256/loms/internal/order/model"
 	loms "route256/loms/pb/api"
 )
 
-var ErrOrderCannotPaid = fmt.Errorf("%s", "order can't be paid")
+var ErrOrderCannotPaid = errors.New("order can't be paid")
 
 func (h *OrderHandler) OrderPay(ctx context.Context, req *loms.OrderPayRequest) (*loms.OrderPayResponse, error) {
 	order, err := h.orderService.OrderServiceGetOrder(ctx, model.OrderID(req.OrderId))

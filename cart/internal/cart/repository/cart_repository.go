@@ -2,13 +2,13 @@ package repository
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"sync"
 
 	"route256/cart/internal/cart/model"
 )
 
-var ErrCartNotFoundOrEmpty = fmt.Errorf("%s", "cart not found or empty")
+var ErrCartNotFoundOrEmpty = errors.New("cart not found or empty")
 
 type InMemoryCartRepository struct {
 	carts map[model.UserID]*model.Cart

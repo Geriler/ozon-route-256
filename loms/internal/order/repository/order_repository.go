@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"sync"
 
 	"route256/loms/internal/order/model"
@@ -13,7 +13,7 @@ type InMemoryOrderRepository struct {
 	mutex  *sync.RWMutex
 }
 
-var ErrOrderNotFound = fmt.Errorf("%s", "order not found")
+var ErrOrderNotFound = errors.New("order not found")
 
 func NewInMemoryOrderRepository() *InMemoryOrderRepository {
 	return &InMemoryOrderRepository{

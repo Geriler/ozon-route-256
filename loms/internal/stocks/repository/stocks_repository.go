@@ -4,7 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"sync"
 
 	"route256/loms/internal/stocks/model"
@@ -38,8 +38,8 @@ func NewInMemoryStocksRepository() (*InMemoryStocksRepository, error) {
 }
 
 var (
-	ErrSkuNotFound    = fmt.Errorf("%s", "sku not found")
-	ErrNotEnoughStock = fmt.Errorf("%s", "not enough stock")
+	ErrSkuNotFound    = errors.New("sku not found")
+	ErrNotEnoughStock = errors.New("not enough stock")
 )
 
 func (r *InMemoryStocksRepository) Reserve(_ context.Context, sku model.SKU, count int64) error {
