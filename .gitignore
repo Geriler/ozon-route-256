@@ -10,5 +10,6 @@
 /cover.out
 /cover.svg
 /cart/vendor.protogen/
+/loms/vendor.protogen/
 /loms/pgdata
 bin/

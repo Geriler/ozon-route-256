@@ -1,9 +1,11 @@
 package http
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
+	"route256/cart/internal/app/handler"
 	"route256/cart/internal/cart/model"
 )
 
@@ -23,9 +25,15 @@ func (h *CartHttpHandlers) AddItemsToCart(w http.ResponseWriter, r *http.Request
 	log = log.With(slog.Int64("UserID", int64(req.UserID))).
 		With(slog.Int64("SKU", int64(req.SKU)))
 
-	err = h.cartHandler.AddItemsToCart(req)
+	err = h.cartHandler.AddItemsToCart(r.Context(), req)
 	if err != nil {
 		log.Error(err.Error())
+
+		if errors.Is(err, handler.ErrNotEnoughStock) {
+			http.Error(w, err.Error(), http.StatusPreconditionFailed)
+			return
+		}
+
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

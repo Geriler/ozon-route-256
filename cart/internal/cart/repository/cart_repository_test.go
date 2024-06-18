@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -33,9 +34,9 @@ func TestInMemoryCartRepository_AddItems(t *testing.T) {
 
 		var cart *model.Cart
 
-		cartRepository.AddItems(userId, *items[0])
+		cartRepository.AddItems(context.Background(), userId, *items[0])
 		cart = cartRepository.carts[userId]
-		require.EqualValues(t, uint16(1), cart.Items[items[0].SKU].Count)
+		require.EqualValues(t, 1, cart.Items[items[0].SKU].Count)
 	})
 
 	t.Run("add existing item", func(t *testing.T) {
@@ -45,10 +46,10 @@ func TestInMemoryCartRepository_AddItems(t *testing.T) {
 
 		var cart *model.Cart
 
-		cartRepository.AddItems(userId, *items[0])
-		cartRepository.AddItems(userId, *items[0])
+		cartRepository.AddItems(context.Background(), userId, *items[0])
+		cartRepository.AddItems(context.Background(), userId, *items[0])
 		cart = cartRepository.carts[userId]
-		require.EqualValues(t, uint16(2), cart.Items[items[0].SKU].Count)
+		require.EqualValues(t, 2, cart.Items[items[0].SKU].Count)
 	})
 
 	t.Run("add another item", func(t *testing.T) {
@@ -58,11 +59,11 @@ func TestInMemoryCartRepository_AddItems(t *testing.T) {
 
 		var cart *model.Cart
 
-		cartRepository.AddItems(userId, *items[0])
-		cartRepository.AddItems(userId, *items[1])
+		cartRepository.AddItems(context.Background(), userId, *items[0])
+		cartRepository.AddItems(context.Background(), userId, *items[1])
 		cart = cartRepository.carts[userId]
-		require.EqualValues(t, uint16(1), cart.Items[items[0].SKU].Count)
-		require.EqualValues(t, uint16(1), cart.Items[items[1].SKU].Count)
+		require.EqualValues(t, 1, cart.Items[items[0].SKU].Count)
+		require.EqualValues(t, 1, cart.Items[items[1].SKU].Count)
 	})
 }
 
@@ -84,7 +85,7 @@ func TestInMemoryCartRepository_DeleteItems(t *testing.T) {
 
 		var cart *model.Cart
 
-		cartRepository.DeleteItems(userId, item.SKU)
+		cartRepository.DeleteItems(context.Background(), userId, item.SKU)
 		cart = cartRepository.carts[userId]
 		require.Nil(t, cart)
 	})
@@ -96,9 +97,9 @@ func TestInMemoryCartRepository_DeleteItems(t *testing.T) {
 
 		var cart *model.Cart
 
-		cartRepository.AddItems(userId, *item)
+		cartRepository.AddItems(context.Background(), userId, *item)
 
-		cartRepository.DeleteItems(userId, item.SKU)
+		cartRepository.DeleteItems(context.Background(), userId, item.SKU)
 		cart = cartRepository.carts[userId]
 		require.EqualValues(t, 0, len(cart.Items))
 	})
@@ -122,7 +123,7 @@ func TestInMemoryCartRepository_DeleteCart(t *testing.T) {
 
 		var cart *model.Cart
 
-		cartRepository.DeleteCart(userId)
+		cartRepository.DeleteCart(context.Background(), userId)
 		cart = cartRepository.carts[userId]
 		require.Nil(t, cart)
 	})
@@ -134,10 +135,10 @@ func TestInMemoryCartRepository_DeleteCart(t *testing.T) {
 
 		var cart *model.Cart
 
-		cartRepository.AddItems(userId, *item)
-		cartRepository.DeleteItems(userId, item.SKU)
+		cartRepository.AddItems(context.Background(), userId, *item)
+		cartRepository.DeleteItems(context.Background(), userId, item.SKU)
 
-		cartRepository.DeleteCart(userId)
+		cartRepository.DeleteCart(context.Background(), userId)
 		cart = cartRepository.carts[userId]
 		require.Nil(t, cart)
 	})
@@ -149,9 +150,9 @@ func TestInMemoryCartRepository_DeleteCart(t *testing.T) {
 
 		var cart *model.Cart
 
-		cartRepository.AddItems(userId, *item)
+		cartRepository.AddItems(context.Background(), userId, *item)
 
-		cartRepository.DeleteCart(userId)
+		cartRepository.DeleteCart(context.Background(), userId)
 		cart = cartRepository.carts[userId]
 		require.Nil(t, cart)
 	})
@@ -178,8 +179,8 @@ func TestInMemoryCartRepository_GetCart(t *testing.T) {
 			err  error
 		)
 
-		cart, err = cartRepository.GetCart(userId)
-		require.EqualError(t, err, ErrCartNotFoundOrEmpty)
+		cart, err = cartRepository.GetCart(context.Background(), userId)
+		require.ErrorIs(t, err, ErrCartNotFoundOrEmpty)
 		require.Nil(t, cart)
 	})
 
@@ -193,9 +194,9 @@ func TestInMemoryCartRepository_GetCart(t *testing.T) {
 			err  error
 		)
 
-		cartRepository.AddItems(userId, *item)
+		cartRepository.AddItems(context.Background(), userId, *item)
 
-		cart, err = cartRepository.GetCart(userId)
+		cart, err = cartRepository.GetCart(context.Background(), userId)
 		require.Nil(t, err)
 		require.EqualValues(t, 1, len(cart.Items))
 		require.EqualValues(t, 1, cart.Items[item.SKU].Count)
@@ -213,12 +214,12 @@ func TestInMemoryCartRepository_GetCart(t *testing.T) {
 			err  error
 		)
 
-		cartRepository.AddItems(userId, *item)
+		cartRepository.AddItems(context.Background(), userId, *item)
 
-		cartRepository.DeleteItems(userId, item.SKU)
+		cartRepository.DeleteItems(context.Background(), userId, item.SKU)
 
-		cart, err = cartRepository.GetCart(userId)
-		require.EqualError(t, err, ErrCartNotFoundOrEmpty)
+		cart, err = cartRepository.GetCart(context.Background(), userId)
+		require.ErrorIs(t, err, ErrCartNotFoundOrEmpty)
 		require.Nil(t, cart)
 	})
 }
@@ -235,6 +236,6 @@ func BenchmarkInMemoryCartRepository_AddItems(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		cartRepository.AddItems(userId, *item)
+		cartRepository.AddItems(context.Background(), userId, *item)
 	}
 }

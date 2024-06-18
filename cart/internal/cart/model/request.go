@@ -25,7 +25,7 @@ type UserSKURequest struct {
 type UserSKUCountRequest struct {
 	UserID UserID `validate:"nonzero"`
 	SKU    SkuID  `validate:"nonzero"`
-	Count  uint16 `validate:"nonzero"`
+	Count  int64  `validate:"nonzero"`
 }
 
 func GetValidateUserRequest(r *http.Request) (*UserRequest, error) {

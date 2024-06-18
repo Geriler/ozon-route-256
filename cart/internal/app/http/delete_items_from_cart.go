@@ -20,7 +20,7 @@ func (h *CartHttpHandlers) DeleteItemsFromCart(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	err = h.cartHandler.DeleteItemsFromCart(req)
+	err = h.cartHandler.DeleteItemsFromCart(r.Context(), req)
 	if err != nil {
 		log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
