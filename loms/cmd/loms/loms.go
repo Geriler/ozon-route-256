@@ -16,8 +16,6 @@ func main() {
 
 	log := logger.SetupLogger(cfg.Env)
 
-	log.Info(fmt.Sprintf("%+v", cfg))
-
 	grpcApp := app.NewGRPCApp(cfg, log)
 	httpgw := app.NewHTTPGW(cfg, log)
 
