@@ -8,8 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"route256/loms/internal/app/order/handler/mock"
 	"route256/loms/internal/order/model"
-	"route256/loms/internal/order/repository"
-	repositoryStocks "route256/loms/internal/stocks/repository"
+	modelStocks "route256/loms/internal/stocks/model"
 	loms "route256/loms/pb/api"
 )
 
@@ -67,12 +66,12 @@ func TestOrderHandler_OrderCancel(t *testing.T) {
 		orderItems := make([]*model.Item, 1)
 		orderItems[0] = items[0]
 
-		orderService.OrderServiceGetOrderMock.Expect(context.Background(), model.OrderID(orderID)).Return(nil, repository.ErrOrderNotFound)
+		orderService.OrderServiceGetOrderMock.Expect(context.Background(), model.OrderID(orderID)).Return(nil, model.ErrOrderNotFound)
 
 		_, err := orderHandler.OrderCancel(context.Background(), &loms.OrderCancelRequest{
 			OrderId: orderID,
 		})
-		require.ErrorIs(t, err, repository.ErrOrderNotFound)
+		require.ErrorIs(t, err, model.ErrOrderNotFound)
 	})
 
 	t.Run("cancel paid order", func(t *testing.T) {
@@ -131,7 +130,7 @@ func TestOrderHandler_OrderCreate(t *testing.T) {
 			UserID: userID,
 			Status: model.StatusNew,
 			Items:  items,
-		}).Return(1)
+		}).Return(1, nil)
 		stocksService.StocksServiceReserveMock.Expect(context.Background(), items).Return(nil)
 		orderService.OrderServiceSetStatusMock.Expect(context.Background(), model.OrderID(1), model.StatusAwaitingPayment).Return(nil)
 
@@ -154,15 +153,15 @@ func TestOrderHandler_OrderCreate(t *testing.T) {
 			UserID: userID,
 			Status: model.StatusNew,
 			Items:  items,
-		}).Return(1)
-		stocksService.StocksServiceReserveMock.Expect(context.Background(), items).Return(repositoryStocks.ErrNotEnoughStock)
+		}).Return(1, nil)
+		stocksService.StocksServiceReserveMock.Expect(context.Background(), items).Return(modelStocks.ErrNotEnoughStock)
 		orderService.OrderServiceSetStatusMock.Expect(context.Background(), model.OrderID(orderID), model.StatusFailed).Return(nil)
 
 		_, err := orderHandler.OrderCreate(context.Background(), &loms.OrderCreateRequest{
 			UserId: userID,
 			Items:  lomsItems,
 		})
-		require.ErrorIs(t, err, repositoryStocks.ErrNotEnoughStock)
+		require.ErrorIs(t, err, modelStocks.ErrNotEnoughStock)
 	})
 }
 
@@ -207,12 +206,12 @@ func TestOrderHandler_OrderInfo(t *testing.T) {
 		stocksService := mock.NewStocksServiceMock(ctrl)
 		orderHandler := NewOrderHandler(orderService, stocksService)
 
-		orderService.OrderServiceGetOrderMock.Expect(context.Background(), model.OrderID(orderID)).Return(nil, repository.ErrOrderNotFound)
+		orderService.OrderServiceGetOrderMock.Expect(context.Background(), model.OrderID(orderID)).Return(nil, model.ErrOrderNotFound)
 
 		_, err := orderHandler.OrderInfo(context.Background(), &loms.OrderInfoRequest{
 			OrderId: orderID,
 		})
-		require.ErrorIs(t, err, repository.ErrOrderNotFound)
+		require.ErrorIs(t, err, model.ErrOrderNotFound)
 	})
 }
 
@@ -260,12 +259,12 @@ func TestOrderHandler_OrderPay(t *testing.T) {
 		stocksService := mock.NewStocksServiceMock(ctrl)
 		orderHandler := NewOrderHandler(orderService, stocksService)
 
-		orderService.OrderServiceGetOrderMock.Expect(context.Background(), model.OrderID(orderID)).Return(nil, repository.ErrOrderNotFound)
+		orderService.OrderServiceGetOrderMock.Expect(context.Background(), model.OrderID(orderID)).Return(nil, model.ErrOrderNotFound)
 
 		_, err := orderHandler.OrderPay(context.Background(), &loms.OrderPayRequest{
 			OrderId: orderID,
 		})
-		require.ErrorIs(t, err, repository.ErrOrderNotFound)
+		require.ErrorIs(t, err, model.ErrOrderNotFound)
 	})
 
 	t.Run("pay failed order", func(t *testing.T) {

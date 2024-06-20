@@ -3,18 +3,30 @@ version: "3.8"
 services:
   cart:
     container_name: cart
-    image: cart
     build:
       context: ./cart
-      dockerfile: ./build/Dockerfile
+      dockerfile: ./Dockerfile
     ports:
       - "8082:8082" # HTTP
+    depends_on:
+      - postgres
   loms:
     container_name: loms
-    image: loms
     build:
       context: ./loms
-      dockerfile: ./build/Dockerfile
+      dockerfile: ./Dockerfile
     ports:
       - "8081:8081" # GRPC
       - "8080:8080" # HTTP
+    depends_on:
+      - postgres
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres

@@ -20,7 +20,7 @@ type OrderServiceMock struct {
 	t          minimock.Tester
 	finishOnce sync.Once
 
-	funcOrderServiceCreate          func(ctx context.Context, order *model.Order) (o1 model.OrderID)
+	funcOrderServiceCreate          func(ctx context.Context, order *model.Order) (o1 model.OrderID, err error)
 	inspectFuncOrderServiceCreate   func(ctx context.Context, order *model.Order)
 	afterOrderServiceCreateCounter  uint64
 	beforeOrderServiceCreateCounter uint64
@@ -96,7 +96,8 @@ type OrderServiceMockOrderServiceCreateParamPtrs struct {
 
 // OrderServiceMockOrderServiceCreateResults contains results of the OrderService.OrderServiceCreate
 type OrderServiceMockOrderServiceCreateResults struct {
-	o1 model.OrderID
+	o1  model.OrderID
+	err error
 }
 
 // Marks this method to be optional. The default behavior of any method with Return() is '1 or more', meaning
@@ -189,7 +190,7 @@ func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) Inspect(f func(
 }
 
 // Return sets up results that will be returned by OrderService.OrderServiceCreate
-func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) Return(o1 model.OrderID) *OrderServiceMock {
+func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) Return(o1 model.OrderID, err error) *OrderServiceMock {
 	if mmOrderServiceCreate.mock.funcOrderServiceCreate != nil {
 		mmOrderServiceCreate.mock.t.Fatalf("OrderServiceMock.OrderServiceCreate mock is already set by Set")
 	}
@@ -197,12 +198,12 @@ func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) Return(o1 model
 	if mmOrderServiceCreate.defaultExpectation == nil {
 		mmOrderServiceCreate.defaultExpectation = &OrderServiceMockOrderServiceCreateExpectation{mock: mmOrderServiceCreate.mock}
 	}
-	mmOrderServiceCreate.defaultExpectation.results = &OrderServiceMockOrderServiceCreateResults{o1}
+	mmOrderServiceCreate.defaultExpectation.results = &OrderServiceMockOrderServiceCreateResults{o1, err}
 	return mmOrderServiceCreate.mock
 }
 
 // Set uses given function f to mock the OrderService.OrderServiceCreate method
-func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) Set(f func(ctx context.Context, order *model.Order) (o1 model.OrderID)) *OrderServiceMock {
+func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) Set(f func(ctx context.Context, order *model.Order) (o1 model.OrderID, err error)) *OrderServiceMock {
 	if mmOrderServiceCreate.defaultExpectation != nil {
 		mmOrderServiceCreate.mock.t.Fatalf("Default expectation is already set for the OrderService.OrderServiceCreate method")
 	}
@@ -231,8 +232,8 @@ func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) When(ctx contex
 }
 
 // Then sets up OrderService.OrderServiceCreate return parameters for the expectation previously defined by the When method
-func (e *OrderServiceMockOrderServiceCreateExpectation) Then(o1 model.OrderID) *OrderServiceMock {
-	e.results = &OrderServiceMockOrderServiceCreateResults{o1}
+func (e *OrderServiceMockOrderServiceCreateExpectation) Then(o1 model.OrderID, err error) *OrderServiceMock {
+	e.results = &OrderServiceMockOrderServiceCreateResults{o1, err}
 	return e.mock
 }
 
@@ -257,7 +258,7 @@ func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) invocationsDone
 }
 
 // OrderServiceCreate implements handler.OrderService
-func (mmOrderServiceCreate *OrderServiceMock) OrderServiceCreate(ctx context.Context, order *model.Order) (o1 model.OrderID) {
+func (mmOrderServiceCreate *OrderServiceMock) OrderServiceCreate(ctx context.Context, order *model.Order) (o1 model.OrderID, err error) {
 	mm_atomic.AddUint64(&mmOrderServiceCreate.beforeOrderServiceCreateCounter, 1)
 	defer mm_atomic.AddUint64(&mmOrderServiceCreate.afterOrderServiceCreateCounter, 1)
 
@@ -275,7 +276,7 @@ func (mmOrderServiceCreate *OrderServiceMock) OrderServiceCreate(ctx context.Con
 	for _, e := range mmOrderServiceCreate.OrderServiceCreateMock.expectations {
 		if minimock.Equal(*e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.o1
+			return e.results.o1, e.results.err
 		}
 	}
 
@@ -304,7 +305,7 @@ func (mmOrderServiceCreate *OrderServiceMock) OrderServiceCreate(ctx context.Con
 		if mm_results == nil {
 			mmOrderServiceCreate.t.Fatal("No results are set for the OrderServiceMock.OrderServiceCreate")
 		}
-		return (*mm_results).o1
+		return (*mm_results).o1, (*mm_results).err
 	}
 	if mmOrderServiceCreate.funcOrderServiceCreate != nil {
 		return mmOrderServiceCreate.funcOrderServiceCreate(ctx, order)

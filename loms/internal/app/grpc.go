@@ -1,10 +1,12 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net"
 
+	"github.com/jackc/pgx/v5"
 	"google.golang.org/grpc"
 	handlerOrder "route256/loms/internal/app/order/handler"
 	handlerStocks "route256/loms/internal/app/stocks/handler"
@@ -33,13 +35,15 @@ func NewGRPCApp(config config.Config, logger *slog.Logger) *GRPCApp {
 }
 
 func (a *GRPCApp) ListenAndServe() error {
-	orderRepo := orderRepository.NewInMemoryOrderRepository()
-	orderService := serviceOrder.NewOrderService(orderRepo)
-
-	stocksRepo, err := repositoryStocks.NewInMemoryStocksRepository()
+	conn, err := a.dbConnect(context.Background())
 	if err != nil {
 		return err
 	}
+
+	orderRepo := orderRepository.NewPostgresOrderRepository(conn)
+	orderService := serviceOrder.NewOrderService(orderRepo)
+
+	stocksRepo := repositoryStocks.NewPostgresStocksRepository(conn)
 	stocksService := srviceStocks.NewStocksService(stocksRepo)
 
 	orderHandler := handlerOrder.NewOrderHandler(orderService, stocksService)
@@ -48,7 +52,7 @@ func (a *GRPCApp) ListenAndServe() error {
 	loms.RegisterOrderServer(a.server, orderHandler)
 	loms.RegisterStocksServer(a.server, stocksHandler)
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", a.cfg.GRPC.Port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.GRPC.Host, a.cfg.GRPC.Port))
 	if err != nil {
 		return err
 	}
@@ -64,4 +68,18 @@ func getServerOption() grpc.ServerOption {
 	return grpc.ChainUnaryInterceptor(
 		middleware.Logger,
 	)
+}
+
+func (a *GRPCApp) dbConnect(ctx context.Context) (*pgx.Conn, error) {
+	conn, err := pgx.Connect(ctx, a.cfg.Database.DSN)
+	if err != nil {
+		return nil, err
+	}
+
+	err = conn.Ping(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, nil
 }

@@ -30,7 +30,7 @@ func NewApp(cfg config.Config, log *slog.Logger, loms *lomsService.GRPCClient) *
 	return &App{
 		mux:     mux,
 		log:     log,
-		server:  &http.Server{Addr: fmt.Sprintf(":%d", cfg.Port), Handler: middleware.NewLogWrapperHandler(mux, log)},
+		server:  &http.Server{Addr: fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port), Handler: middleware.NewLogWrapperHandler(mux, log)},
 		config:  cfg,
 		storage: repository.NewInMemoryCartRepository(),
 		loms:    loms,

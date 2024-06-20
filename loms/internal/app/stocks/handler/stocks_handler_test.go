@@ -9,7 +9,6 @@ import (
 	"route256/loms/internal/app/stocks/handler/mock"
 	"route256/loms/internal/order/model"
 	stocksModel "route256/loms/internal/stocks/model"
-	"route256/loms/internal/stocks/repository"
 	loms "route256/loms/pb/api"
 )
 
@@ -53,11 +52,11 @@ func TestStocksHandler_StocksInfo(t *testing.T) {
 		stocksService := mock.NewStocksServiceMock(ctrl)
 		stocksHandler := NewStocksHandler(stocksService)
 
-		stocksService.StocksServiceGetBySKUMock.Expect(context.Background(), items[0].SKU).Return(nil, repository.ErrSkuNotFound)
+		stocksService.StocksServiceGetBySKUMock.Expect(context.Background(), items[0].SKU).Return(nil, stocksModel.ErrSkuNotFound)
 
 		_, err := stocksHandler.StocksInfo(context.Background(), &loms.StocksInfoRequest{
 			SkuId: int64(items[0].SKU),
 		})
-		require.ErrorIs(t, err, repository.ErrSkuNotFound)
+		require.ErrorIs(t, err, stocksModel.ErrSkuNotFound)
 	})
 }

@@ -6,8 +6,9 @@ import (
 )
 
 type Item struct {
-	SKU   model.SKU
-	Count int64
+	OrderID int64
+	SKU     model.SKU
+	Count   int64
 }
 
 func LomsItemToItem(lomsItem *loms.Item) *Item {

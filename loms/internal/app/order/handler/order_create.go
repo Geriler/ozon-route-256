@@ -11,11 +11,18 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 	var err error
 	items := model.LomsItemsToItems(req.Items)
 
-	orderID := h.orderService.OrderServiceCreate(ctx, &model.Order{
+	orderID, err := h.orderService.OrderServiceCreate(ctx, &model.Order{
 		UserID: req.UserId,
 		Status: model.StatusNew,
 		Items:  items,
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range items {
+		item.OrderID = int64(orderID)
+	}
 
 	err = h.stocksService.StocksServiceReserve(ctx, items)
 	if err != nil {

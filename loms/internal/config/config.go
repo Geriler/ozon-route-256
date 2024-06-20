@@ -8,17 +8,19 @@ import (
 )
 
 type Config struct {
-	Env  string     `yaml:"env"`
-	GRPC GRPCConfig `yaml:"grpc"`
-	HTTP HTTPConfig `yaml:"http"`
+	Env      string         `yaml:"env"`
+	GRPC     AddressConfig  `yaml:"grpc"`
+	HTTP     AddressConfig  `yaml:"http"`
+	Database DatabaseConfig `yaml:"database"`
 }
 
-type GRPCConfig struct {
-	Port int `yaml:"port"`
+type AddressConfig struct {
+	Host string `yaml:"host"`
+	Port int    `yaml:"port"`
 }
 
-type HTTPConfig struct {
-	Port int `yaml:"port"`
+type DatabaseConfig struct {
+	DSN string `yaml:"dsn"`
 }
 
 func MustLoad() Config {

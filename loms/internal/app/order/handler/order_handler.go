@@ -11,7 +11,7 @@ import (
 type OrderService interface {
 	OrderServiceSetStatus(ctx context.Context, orderID model.OrderID, status model.Status) error
 	OrderServiceGetOrder(ctx context.Context, orderID model.OrderID) (*model.Order, error)
-	OrderServiceCreate(ctx context.Context, order *model.Order) model.OrderID
+	OrderServiceCreate(ctx context.Context, order *model.Order) (model.OrderID, error)
 }
 
 type OrderHandler struct {
