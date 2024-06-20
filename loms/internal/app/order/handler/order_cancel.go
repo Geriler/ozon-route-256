@@ -20,11 +20,9 @@ func (h *OrderHandler) OrderCancel(ctx context.Context, req *loms.OrderCancelReq
 		return nil, ErrOrderCannotCanceled
 	}
 
-	for _, item := range order.Items {
-		err = h.stocksService.StocksServiceReserveCancel(ctx, item.SKU, item.Count)
-		if err != nil {
-			return nil, err
-		}
+	err = h.stocksService.StocksServiceReserveCancel(ctx, order.Items)
+	if err != nil {
+		return nil, err
 	}
 
 	err = h.orderService.OrderServiceSetStatus(ctx, model.OrderID(req.OrderId), model.StatusCanceled)

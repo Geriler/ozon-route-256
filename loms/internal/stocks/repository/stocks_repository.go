@@ -7,6 +7,7 @@ import (
 	"errors"
 	"sync"
 
+	orderModel "route256/loms/internal/order/model"
 	"route256/loms/internal/stocks/model"
 )
 
@@ -42,45 +43,60 @@ var (
 	ErrNotEnoughStock = errors.New("not enough stock")
 )
 
-func (r *InMemoryStocksRepository) Reserve(_ context.Context, sku model.SKU, count int64) error {
+func (r *InMemoryStocksRepository) Reserve(_ context.Context, items []*orderModel.Item) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
-	if stock, ok := r.stocks[sku]; ok {
-		if stock.ReservedCount+count > stock.TotalCount {
-			return ErrNotEnoughStock
+
+	for _, item := range items {
+		if stock, ok := r.stocks[item.SKU]; ok {
+			if stock.ReservedCount+item.Count > stock.TotalCount {
+				return ErrNotEnoughStock
+			}
+		} else {
+			return ErrSkuNotFound
 		}
-
-		stock.ReservedCount += count
-		r.stocks[sku] = stock
-		return nil
 	}
 
-	return ErrSkuNotFound
+	for _, item := range items {
+		r.stocks[item.SKU].ReservedCount += item.Count
+	}
+
+	return nil
 }
 
-func (r *InMemoryStocksRepository) ReserveRemove(_ context.Context, sku model.SKU, count int64) error {
+func (r *InMemoryStocksRepository) ReserveRemove(_ context.Context, items []*orderModel.Item) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
-	if stock, ok := r.stocks[sku]; ok {
-		stock.ReservedCount -= count
-		stock.TotalCount -= count
-		r.stocks[sku] = stock
-		return nil
+
+	for _, item := range items {
+		if _, ok := r.stocks[item.SKU]; !ok {
+			return ErrSkuNotFound
+		}
 	}
 
-	return ErrSkuNotFound
+	for _, item := range items {
+		r.stocks[item.SKU].ReservedCount -= item.Count
+		r.stocks[item.SKU].TotalCount -= item.Count
+	}
+
+	return nil
 }
 
-func (r *InMemoryStocksRepository) ReserveCancel(_ context.Context, sku model.SKU, count int64) error {
+func (r *InMemoryStocksRepository) ReserveCancel(_ context.Context, items []*orderModel.Item) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
-	if stock, ok := r.stocks[sku]; ok {
-		stock.ReservedCount -= count
-		r.stocks[sku] = stock
-		return nil
+
+	for _, item := range items {
+		if _, ok := r.stocks[item.SKU]; !ok {
+			return ErrSkuNotFound
+		}
 	}
 
-	return ErrSkuNotFound
+	for _, item := range items {
+		r.stocks[item.SKU].ReservedCount -= item.Count
+	}
+
+	return nil
 }
 
 func (r *InMemoryStocksRepository) GetBySKU(_ context.Context, sku model.SKU) (*model.Stocks, error) {

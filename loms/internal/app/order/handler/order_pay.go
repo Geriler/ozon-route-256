@@ -20,11 +20,9 @@ func (h *OrderHandler) OrderPay(ctx context.Context, req *loms.OrderPayRequest) 
 		return nil, ErrOrderCannotPaid
 	}
 
-	for _, item := range order.Items {
-		err = h.stocksService.StocksServiceReserveRemove(ctx, item.SKU, item.Count)
-		if err != nil {
-			return nil, err
-		}
+	err = h.stocksService.StocksServiceReserveRemove(ctx, order.Items)
+	if err != nil {
+		return nil, err
 	}
 
 	err = h.orderService.OrderServiceSetStatus(ctx, model.OrderID(req.OrderId), model.StatusPaid)

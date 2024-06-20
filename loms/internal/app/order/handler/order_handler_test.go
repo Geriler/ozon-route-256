@@ -47,7 +47,7 @@ func TestOrderHandler_OrderCancel(t *testing.T) {
 			Status: model.StatusAwaitingPayment,
 			Items:  orderItems,
 		}, nil)
-		stocksService.StocksServiceReserveCancelMock.Expect(context.Background(), items[0].SKU, items[0].Count).Return(nil)
+		stocksService.StocksServiceReserveCancelMock.Expect(context.Background(), orderItems).Return(nil)
 		orderService.OrderServiceSetStatusMock.Expect(context.Background(), model.OrderID(orderID), model.StatusCanceled).Return(nil)
 
 		_, err := orderHandler.OrderCancel(context.Background(), &loms.OrderCancelRequest{
@@ -132,7 +132,7 @@ func TestOrderHandler_OrderCreate(t *testing.T) {
 			Status: model.StatusNew,
 			Items:  items,
 		}).Return(1)
-		stocksService.StocksServiceReserveMock.Expect(context.Background(), items[0].SKU, items[0].Count).Return(nil)
+		stocksService.StocksServiceReserveMock.Expect(context.Background(), items).Return(nil)
 		orderService.OrderServiceSetStatusMock.Expect(context.Background(), model.OrderID(1), model.StatusAwaitingPayment).Return(nil)
 
 		_, err := orderHandler.OrderCreate(context.Background(), &loms.OrderCreateRequest{
@@ -155,7 +155,7 @@ func TestOrderHandler_OrderCreate(t *testing.T) {
 			Status: model.StatusNew,
 			Items:  items,
 		}).Return(1)
-		stocksService.StocksServiceReserveMock.Expect(context.Background(), items[0].SKU, items[0].Count).Return(repositoryStocks.ErrNotEnoughStock)
+		stocksService.StocksServiceReserveMock.Expect(context.Background(), items).Return(repositoryStocks.ErrNotEnoughStock)
 		orderService.OrderServiceSetStatusMock.Expect(context.Background(), model.OrderID(orderID), model.StatusFailed).Return(nil)
 
 		_, err := orderHandler.OrderCreate(context.Background(), &loms.OrderCreateRequest{
@@ -243,7 +243,7 @@ func TestOrderHandler_OrderPay(t *testing.T) {
 			Status: model.StatusAwaitingPayment,
 			Items:  items,
 		}, nil)
-		stocksService.StocksServiceReserveRemoveMock.Expect(context.Background(), items[0].SKU, items[0].Count).Return(nil)
+		stocksService.StocksServiceReserveRemoveMock.Expect(context.Background(), items).Return(nil)
 		orderService.OrderServiceSetStatusMock.Expect(context.Background(), model.OrderID(orderID), model.StatusPaid).Return(nil)
 
 		_, err := orderHandler.OrderPay(context.Background(), &loms.OrderPayRequest{
