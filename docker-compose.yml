@@ -9,7 +9,11 @@ services:
     ports:
       - "8082:8082" # HTTP
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      goose:
+        condition: service_completed_successfully
+
   loms:
     container_name: loms
     build:
@@ -19,7 +23,11 @@ services:
       - "8081:8081" # GRPC
       - "8080:8080" # HTTP
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      goose:
+        condition: service_completed_successfully
+
   postgres:
     container_name: postgres
     image: postgres:latest
@@ -30,3 +38,21 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  goose:
+    container_name: goose
+    image: golang:1.22
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=postgres://postgres:postgres@postgres:5432/postgres
+    volumes:
+      - ./loms/migrations:/migrations
+    command: "sh -c 'go install github.com/pressly/goose/v3/cmd/goose@latest && goose -dir /migrations up'"

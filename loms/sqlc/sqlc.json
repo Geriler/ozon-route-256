@@ -3,7 +3,7 @@
   "sql": [
     {
       "engine": "postgresql",
-      "schema": "../../migrations",
+      "schema": "../migrations",
       "gen": {
         "go": {
           "package": "repository",
@@ -15,7 +15,7 @@
     },
     {
       "engine": "postgresql",
-      "schema": "../../migrations",
+      "schema": "../migrations",
       "gen": {
         "go": {
           "package": "repository",
