@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
@@ -44,4 +45,15 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
+
+	log.Info("Stopping loms service...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.TimeoutStop)
+	defer cancel()
+
+	grpcApp.GracefulStop()
+	err = httpgw.Shutdown(ctx)
+	if err != nil {
+		log.Error(err.Error())
+	}
 }

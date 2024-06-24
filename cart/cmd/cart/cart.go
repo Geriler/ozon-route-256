@@ -1,7 +1,10 @@
 package main
 
 import (
+	"context"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"route256/cart/internal/app"
 	"route256/cart/internal/config"
@@ -21,11 +24,31 @@ func main() {
 
 	application := app.NewApp(cfg, log, grpcClient)
 
-	log.Info("Starting HTTP application", "port", cfg.HTTP.Port)
+	go func() {
+		log.Info("Starting HTTP application", "port", cfg.HTTP.Port)
+		err = application.ListenAndServe()
+		if err != nil {
+			log.Error(err.Error())
+			os.Exit(1)
+		}
+	}()
 
-	err = application.ListenAndServe()
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	<-stop
+
+	log.Info("Stopping cart service...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.TimeoutStop)
+	defer cancel()
+
+	err = grpcClient.Close()
 	if err != nil {
 		log.Error(err.Error())
-		os.Exit(1)
+	}
+
+	err = application.Shutdown(ctx)
+	if err != nil {
+		log.Error(err.Error())
 	}
 }

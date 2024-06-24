@@ -22,5 +22,5 @@ func NewGRPCClient(cfg config.Config) (*client.GRPCClient, error) {
 	sc := loms.NewStocksClient(conn)
 	stocksClient := client.NewStocksClient(sc)
 
-	return client.NewGRPCClient(orderClient, stocksClient), nil
+	return client.NewGRPCClient(orderClient, stocksClient, conn), nil
 }

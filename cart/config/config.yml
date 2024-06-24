@@ -8,3 +8,4 @@ product:
 grpc:
   host: "loms"
   port: 8081
+timeout_stop: 10s

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -54,4 +55,8 @@ func (a *App) ListenAndServe() error {
 	}
 
 	return nil
+}
+
+func (a *App) Shutdown(ctx context.Context) error {
+	return a.server.Shutdown(ctx)
 }
