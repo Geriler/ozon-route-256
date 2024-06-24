@@ -1,3 +1,5 @@
+@GOBIN=$(GOPATH)/bin
+
 run-all:
 	docker-compose up --force-recreate --build -d
 

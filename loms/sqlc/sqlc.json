@@ -1,0 +1,29 @@
+{
+  "version": "2",
+  "sql": [
+    {
+      "engine": "postgresql",
+      "schema": "../migrations",
+      "gen": {
+        "go": {
+          "package": "repository",
+          "out": "../internal/stocks/repository/sqlc",
+          "sql_package": "pgx/v5"
+        }
+      },
+      "queries": "../internal/stocks/repository/sqlc"
+    },
+    {
+      "engine": "postgresql",
+      "schema": "../migrations",
+      "gen": {
+        "go": {
+          "package": "repository",
+          "out": "../internal/order/repository/sqlc",
+          "sql_package": "pgx/v5"
+        }
+      },
+      "queries": "../internal/order/repository/sqlc"
+    }
+  ]
+}

@@ -1,5 +1,9 @@
 env: "local"
 grpc:
+  host: "loms"
   port: 8081
 http:
+  host: "loms"
   port: 8080
+database:
+  dsn: "postgres://postgres:postgres@postgres:5432/postgres"

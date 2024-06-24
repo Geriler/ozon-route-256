@@ -21,6 +21,8 @@ func main() {
 
 	application := app.NewApp(cfg, log, grpcClient)
 
+	log.Info("Starting HTTP application", "port", cfg.HTTP.Port)
+
 	err = application.ListenAndServe()
 	if err != nil {
 		log.Error(err.Error())

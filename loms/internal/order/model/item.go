@@ -6,8 +6,9 @@ import (
 )
 
 type Item struct {
-	SKU   model.SKU
-	Count int64
+	OrderID int64
+	SKU     model.SKU
+	Count   int64
 }
 
 func LomsItemToItem(lomsItem *loms.Item) *Item {
@@ -22,8 +23,8 @@ func LomsItemToItem(lomsItem *loms.Item) *Item {
 
 func LomsItemsToItems(lomsItems []*loms.Item) []*Item {
 	items := make([]*Item, len(lomsItems))
-	for _, item := range lomsItems {
-		items = append(items, LomsItemToItem(item))
+	for i, item := range lomsItems {
+		items[i] = LomsItemToItem(item)
 	}
 	return items
 }
@@ -40,8 +41,8 @@ func ItemToLomsItem(item *Item) *loms.Item {
 
 func ItemsToLomsItems(items []*Item) []*loms.Item {
 	lomsItems := make([]*loms.Item, len(items))
-	for _, item := range items {
-		lomsItems = append(lomsItems, ItemToLomsItem(item))
+	for i, item := range items {
+		lomsItems[i] = ItemToLomsItem(item)
 	}
 	return lomsItems
 }

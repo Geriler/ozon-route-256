@@ -11,7 +11,7 @@ import (
 )
 
 func NewGRPCClient(cfg config.Config) (*client.GRPCClient, error) {
-	conn, err := grpc.NewClient(fmt.Sprintf(":%d", cfg.GRPC.Port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(fmt.Sprintf("dns:%s:%d", cfg.GRPC.Host, cfg.GRPC.Port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return &client.GRPCClient{}, err
 	}

@@ -3,13 +3,14 @@ package service
 import (
 	"context"
 
+	orderModel "route256/loms/internal/order/model"
 	stocksModel "route256/loms/internal/stocks/model"
 )
 
 type StocksRepository interface {
-	Reserve(ctx context.Context, sku stocksModel.SKU, count int64) error
-	ReserveRemove(ctx context.Context, sku stocksModel.SKU, count int64) error
-	ReserveCancel(ctx context.Context, sku stocksModel.SKU, count int64) error
+	Reserve(ctx context.Context, items []*orderModel.Item) error
+	ReserveRemove(ctx context.Context, items []*orderModel.Item) error
+	ReserveCancel(ctx context.Context, items []*orderModel.Item) error
 	GetBySKU(ctx context.Context, sku stocksModel.SKU) (*stocksModel.Stocks, error)
 }
 
@@ -23,18 +24,18 @@ func NewStocksService(stocksRepository StocksRepository) *StocksService {
 	}
 }
 
-func (ss *StocksService) StocksServiceReserve(ctx context.Context, sku stocksModel.SKU, count int64) error {
-	return ss.stocksRepository.Reserve(ctx, sku, count)
+func (ss *StocksService) Reserve(ctx context.Context, items []*orderModel.Item) error {
+	return ss.stocksRepository.Reserve(ctx, items)
 }
 
-func (ss *StocksService) StocksServiceReserveRemove(ctx context.Context, sku stocksModel.SKU, count int64) error {
-	return ss.stocksRepository.ReserveRemove(ctx, sku, count)
+func (ss *StocksService) ReserveRemove(ctx context.Context, items []*orderModel.Item) error {
+	return ss.stocksRepository.ReserveRemove(ctx, items)
 }
 
-func (ss *StocksService) StocksServiceReserveCancel(ctx context.Context, sku stocksModel.SKU, count int64) error {
-	return ss.stocksRepository.ReserveCancel(ctx, sku, count)
+func (ss *StocksService) ReserveCancel(ctx context.Context, items []*orderModel.Item) error {
+	return ss.stocksRepository.ReserveCancel(ctx, items)
 }
 
-func (ss *StocksService) StocksServiceGetBySKU(ctx context.Context, sku stocksModel.SKU) (*stocksModel.Stocks, error) {
+func (ss *StocksService) GetBySKU(ctx context.Context, sku stocksModel.SKU) (*stocksModel.Stocks, error) {
 	return ss.stocksRepository.GetBySKU(ctx, sku)
 }

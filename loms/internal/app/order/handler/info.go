@@ -8,7 +8,7 @@ import (
 )
 
 func (h *OrderHandler) OrderInfo(ctx context.Context, req *loms.OrderInfoRequest) (*loms.OrderInfoResponse, error) {
-	order, err := h.orderService.OrderServiceGetOrder(ctx, model.OrderID(req.OrderId))
+	order, err := h.orderService.GetOrder(ctx, model.OrderID(req.OrderId))
 	if err != nil {
 		return nil, err
 	}

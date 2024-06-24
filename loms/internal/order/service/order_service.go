@@ -9,7 +9,7 @@ import (
 type OrderRepository interface {
 	SetStatus(ctx context.Context, orderID model.OrderID, status model.Status) error
 	GetOrder(ctx context.Context, orderID model.OrderID) (*model.Order, error)
-	Create(ctx context.Context, order *model.Order) model.OrderID
+	Create(ctx context.Context, order *model.Order) (model.OrderID, error)
 }
 
 type OrderService struct {
@@ -22,14 +22,14 @@ func NewOrderService(orderRepository OrderRepository) *OrderService {
 	}
 }
 
-func (os *OrderService) OrderServiceSetStatus(ctx context.Context, orderID model.OrderID, status model.Status) error {
+func (os *OrderService) SetStatus(ctx context.Context, orderID model.OrderID, status model.Status) error {
 	return os.orderRepository.SetStatus(ctx, orderID, status)
 }
 
-func (os *OrderService) OrderServiceGetOrder(ctx context.Context, orderID model.OrderID) (*model.Order, error) {
+func (os *OrderService) GetOrder(ctx context.Context, orderID model.OrderID) (*model.Order, error) {
 	return os.orderRepository.GetOrder(ctx, orderID)
 }
 
-func (os *OrderService) OrderServiceCreate(ctx context.Context, order *model.Order) model.OrderID {
+func (os *OrderService) Create(ctx context.Context, order *model.Order) (model.OrderID, error) {
 	return os.orderRepository.Create(ctx, order)
 }

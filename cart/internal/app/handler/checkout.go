@@ -29,6 +29,8 @@ func (h *CartHandler) Checkout(ctx context.Context, req *model.UserRequest) (mod
 		return model.CartCheckoutResponse{}, err
 	}
 
+	h.cartService.DeleteCartByUserID(ctx, req.UserID)
+
 	return model.CartCheckoutResponse{
 		OrderID: orderCreateResponse.OrderId,
 	}, nil

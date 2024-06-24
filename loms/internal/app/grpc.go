@@ -1,10 +1,12 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net"
 
+	"github.com/jackc/pgx/v5"
 	"google.golang.org/grpc"
 	handlerOrder "route256/loms/internal/app/order/handler"
 	handlerStocks "route256/loms/internal/app/stocks/handler"
@@ -23,32 +25,35 @@ type GRPCApp struct {
 	server *grpc.Server
 }
 
-func NewGRPCApp(config config.Config, logger *slog.Logger) *GRPCApp {
-	server := grpc.NewServer(getServerOption())
-	return &GRPCApp{
-		cfg:    config,
-		log:    logger,
-		server: server,
+func NewGRPCApp(config config.Config, logger *slog.Logger) (*GRPCApp, error) {
+	conn, err := dbConnect(context.Background(), config.Database.DSN)
+	if err != nil {
+		return nil, err
 	}
-}
 
-func (a *GRPCApp) ListenAndServe() error {
-	orderRepo := orderRepository.NewInMemoryOrderRepository()
+	orderRepo := orderRepository.NewPostgresOrderRepository(conn, logger)
 	orderService := serviceOrder.NewOrderService(orderRepo)
 
-	stocksRepo, err := repositoryStocks.NewInMemoryStocksRepository()
-	if err != nil {
-		return err
-	}
+	stocksRepo := repositoryStocks.NewPostgresStocksRepository(conn, logger)
 	stocksService := srviceStocks.NewStocksService(stocksRepo)
 
 	orderHandler := handlerOrder.NewOrderHandler(orderService, stocksService)
 	stocksHandler := handlerStocks.NewStocksHandler(stocksService)
 
-	loms.RegisterOrderServer(a.server, orderHandler)
-	loms.RegisterStocksServer(a.server, stocksHandler)
+	server := grpc.NewServer(getServerOption())
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", a.cfg.GRPC.Port))
+	loms.RegisterOrderServer(server, orderHandler)
+	loms.RegisterStocksServer(server, stocksHandler)
+
+	return &GRPCApp{
+		cfg:    config,
+		log:    logger,
+		server: server,
+	}, nil
+}
+
+func (a *GRPCApp) ListenAndServe() error {
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.GRPC.Host, a.cfg.GRPC.Port))
 	if err != nil {
 		return err
 	}
@@ -64,4 +69,18 @@ func getServerOption() grpc.ServerOption {
 	return grpc.ChainUnaryInterceptor(
 		middleware.Logger,
 	)
+}
+
+func dbConnect(ctx context.Context, dsn string) (*pgx.Conn, error) {
+	conn, err := pgx.Connect(ctx, dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	err = conn.Ping(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, nil
 }

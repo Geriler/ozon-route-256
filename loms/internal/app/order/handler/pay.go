@@ -11,7 +11,7 @@ import (
 var ErrOrderCannotPaid = errors.New("order can't be paid")
 
 func (h *OrderHandler) OrderPay(ctx context.Context, req *loms.OrderPayRequest) (*loms.OrderPayResponse, error) {
-	order, err := h.orderService.OrderServiceGetOrder(ctx, model.OrderID(req.OrderId))
+	order, err := h.orderService.GetOrder(ctx, model.OrderID(req.OrderId))
 	if err != nil {
 		return nil, err
 	}
@@ -20,14 +20,12 @@ func (h *OrderHandler) OrderPay(ctx context.Context, req *loms.OrderPayRequest) 
 		return nil, ErrOrderCannotPaid
 	}
 
-	for _, item := range order.Items {
-		err = h.stocksService.StocksServiceReserveRemove(ctx, item.SKU, item.Count)
-		if err != nil {
-			return nil, err
-		}
+	err = h.stocksService.ReserveRemove(ctx, order.Items)
+	if err != nil {
+		return nil, err
 	}
 
-	err = h.orderService.OrderServiceSetStatus(ctx, model.OrderID(req.OrderId), model.StatusPaid)
+	err = h.orderService.SetStatus(ctx, model.OrderID(req.OrderId), model.StatusPaid)
 	if err != nil {
 		return nil, err
 	}

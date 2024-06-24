@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"sync"
 
 	"route256/loms/internal/order/model"
@@ -12,8 +11,6 @@ type InMemoryOrderRepository struct {
 	orders map[model.OrderID]*model.Order
 	mutex  *sync.RWMutex
 }
-
-var ErrOrderNotFound = errors.New("order not found")
 
 func NewInMemoryOrderRepository() *InMemoryOrderRepository {
 	return &InMemoryOrderRepository{
@@ -30,7 +27,7 @@ func (r *InMemoryOrderRepository) SetStatus(_ context.Context, orderID model.Ord
 		return nil
 	}
 
-	return ErrOrderNotFound
+	return model.ErrOrderNotFound
 }
 
 func (r *InMemoryOrderRepository) GetOrder(_ context.Context, orderID model.OrderID) (*model.Order, error) {
@@ -40,13 +37,13 @@ func (r *InMemoryOrderRepository) GetOrder(_ context.Context, orderID model.Orde
 		return order, nil
 	}
 
-	return nil, ErrOrderNotFound
+	return nil, model.ErrOrderNotFound
 }
 
-func (r *InMemoryOrderRepository) Create(_ context.Context, order *model.Order) model.OrderID {
+func (r *InMemoryOrderRepository) Create(_ context.Context, order *model.Order) (model.OrderID, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	orderID := model.OrderID(len(r.orders) + 1)
 	r.orders[orderID] = order
-	return orderID
+	return orderID, nil
 }

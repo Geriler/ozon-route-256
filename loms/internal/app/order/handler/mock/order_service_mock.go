@@ -20,23 +20,23 @@ type OrderServiceMock struct {
 	t          minimock.Tester
 	finishOnce sync.Once
 
-	funcOrderServiceCreate          func(ctx context.Context, order *model.Order) (o1 model.OrderID)
-	inspectFuncOrderServiceCreate   func(ctx context.Context, order *model.Order)
-	afterOrderServiceCreateCounter  uint64
-	beforeOrderServiceCreateCounter uint64
-	OrderServiceCreateMock          mOrderServiceMockOrderServiceCreate
+	funcCreate          func(ctx context.Context, order *model.Order) (o1 model.OrderID, err error)
+	inspectFuncCreate   func(ctx context.Context, order *model.Order)
+	afterCreateCounter  uint64
+	beforeCreateCounter uint64
+	CreateMock          mOrderServiceMockCreate
 
-	funcOrderServiceGetOrder          func(ctx context.Context, orderID model.OrderID) (op1 *model.Order, err error)
-	inspectFuncOrderServiceGetOrder   func(ctx context.Context, orderID model.OrderID)
-	afterOrderServiceGetOrderCounter  uint64
-	beforeOrderServiceGetOrderCounter uint64
-	OrderServiceGetOrderMock          mOrderServiceMockOrderServiceGetOrder
+	funcGetOrder          func(ctx context.Context, orderID model.OrderID) (op1 *model.Order, err error)
+	inspectFuncGetOrder   func(ctx context.Context, orderID model.OrderID)
+	afterGetOrderCounter  uint64
+	beforeGetOrderCounter uint64
+	GetOrderMock          mOrderServiceMockGetOrder
 
-	funcOrderServiceSetStatus          func(ctx context.Context, orderID model.OrderID, status model.Status) (err error)
-	inspectFuncOrderServiceSetStatus   func(ctx context.Context, orderID model.OrderID, status model.Status)
-	afterOrderServiceSetStatusCounter  uint64
-	beforeOrderServiceSetStatusCounter uint64
-	OrderServiceSetStatusMock          mOrderServiceMockOrderServiceSetStatus
+	funcSetStatus          func(ctx context.Context, orderID model.OrderID, status model.Status) (err error)
+	inspectFuncSetStatus   func(ctx context.Context, orderID model.OrderID, status model.Status)
+	afterSetStatusCounter  uint64
+	beforeSetStatusCounter uint64
+	SetStatusMock          mOrderServiceMockSetStatus
 }
 
 // NewOrderServiceMock returns a mock for handler.OrderService
@@ -47,56 +47,57 @@ func NewOrderServiceMock(t minimock.Tester) *OrderServiceMock {
 		controller.RegisterMocker(m)
 	}
 
-	m.OrderServiceCreateMock = mOrderServiceMockOrderServiceCreate{mock: m}
-	m.OrderServiceCreateMock.callArgs = []*OrderServiceMockOrderServiceCreateParams{}
+	m.CreateMock = mOrderServiceMockCreate{mock: m}
+	m.CreateMock.callArgs = []*OrderServiceMockCreateParams{}
 
-	m.OrderServiceGetOrderMock = mOrderServiceMockOrderServiceGetOrder{mock: m}
-	m.OrderServiceGetOrderMock.callArgs = []*OrderServiceMockOrderServiceGetOrderParams{}
+	m.GetOrderMock = mOrderServiceMockGetOrder{mock: m}
+	m.GetOrderMock.callArgs = []*OrderServiceMockGetOrderParams{}
 
-	m.OrderServiceSetStatusMock = mOrderServiceMockOrderServiceSetStatus{mock: m}
-	m.OrderServiceSetStatusMock.callArgs = []*OrderServiceMockOrderServiceSetStatusParams{}
+	m.SetStatusMock = mOrderServiceMockSetStatus{mock: m}
+	m.SetStatusMock.callArgs = []*OrderServiceMockSetStatusParams{}
 
 	t.Cleanup(m.MinimockFinish)
 
 	return m
 }
 
-type mOrderServiceMockOrderServiceCreate struct {
+type mOrderServiceMockCreate struct {
 	optional           bool
 	mock               *OrderServiceMock
-	defaultExpectation *OrderServiceMockOrderServiceCreateExpectation
-	expectations       []*OrderServiceMockOrderServiceCreateExpectation
+	defaultExpectation *OrderServiceMockCreateExpectation
+	expectations       []*OrderServiceMockCreateExpectation
 
-	callArgs []*OrderServiceMockOrderServiceCreateParams
+	callArgs []*OrderServiceMockCreateParams
 	mutex    sync.RWMutex
 
 	expectedInvocations uint64
 }
 
-// OrderServiceMockOrderServiceCreateExpectation specifies expectation struct of the OrderService.OrderServiceCreate
-type OrderServiceMockOrderServiceCreateExpectation struct {
+// OrderServiceMockCreateExpectation specifies expectation struct of the OrderService.Create
+type OrderServiceMockCreateExpectation struct {
 	mock      *OrderServiceMock
-	params    *OrderServiceMockOrderServiceCreateParams
-	paramPtrs *OrderServiceMockOrderServiceCreateParamPtrs
-	results   *OrderServiceMockOrderServiceCreateResults
+	params    *OrderServiceMockCreateParams
+	paramPtrs *OrderServiceMockCreateParamPtrs
+	results   *OrderServiceMockCreateResults
 	Counter   uint64
 }
 
-// OrderServiceMockOrderServiceCreateParams contains parameters of the OrderService.OrderServiceCreate
-type OrderServiceMockOrderServiceCreateParams struct {
+// OrderServiceMockCreateParams contains parameters of the OrderService.Create
+type OrderServiceMockCreateParams struct {
 	ctx   context.Context
 	order *model.Order
 }
 
-// OrderServiceMockOrderServiceCreateParamPtrs contains pointers to parameters of the OrderService.OrderServiceCreate
-type OrderServiceMockOrderServiceCreateParamPtrs struct {
+// OrderServiceMockCreateParamPtrs contains pointers to parameters of the OrderService.Create
+type OrderServiceMockCreateParamPtrs struct {
 	ctx   *context.Context
 	order **model.Order
 }
 
-// OrderServiceMockOrderServiceCreateResults contains results of the OrderService.OrderServiceCreate
-type OrderServiceMockOrderServiceCreateResults struct {
-	o1 model.OrderID
+// OrderServiceMockCreateResults contains results of the OrderService.Create
+type OrderServiceMockCreateResults struct {
+	o1  model.OrderID
+	err error
 }
 
 // Marks this method to be optional. The default behavior of any method with Return() is '1 or more', meaning
@@ -104,318 +105,318 @@ type OrderServiceMockOrderServiceCreateResults struct {
 // Optional() makes method check to work in '0 or more' mode.
 // It is NOT RECOMMENDED to use this option by default unless you really need it, as it helps to
 // catch the problems when the expected method call is totally skipped during test run.
-func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) Optional() *mOrderServiceMockOrderServiceCreate {
-	mmOrderServiceCreate.optional = true
-	return mmOrderServiceCreate
+func (mmCreate *mOrderServiceMockCreate) Optional() *mOrderServiceMockCreate {
+	mmCreate.optional = true
+	return mmCreate
 }
 
-// Expect sets up expected params for OrderService.OrderServiceCreate
-func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) Expect(ctx context.Context, order *model.Order) *mOrderServiceMockOrderServiceCreate {
-	if mmOrderServiceCreate.mock.funcOrderServiceCreate != nil {
-		mmOrderServiceCreate.mock.t.Fatalf("OrderServiceMock.OrderServiceCreate mock is already set by Set")
+// Expect sets up expected params for OrderService.Create
+func (mmCreate *mOrderServiceMockCreate) Expect(ctx context.Context, order *model.Order) *mOrderServiceMockCreate {
+	if mmCreate.mock.funcCreate != nil {
+		mmCreate.mock.t.Fatalf("OrderServiceMock.Create mock is already set by Set")
 	}
 
-	if mmOrderServiceCreate.defaultExpectation == nil {
-		mmOrderServiceCreate.defaultExpectation = &OrderServiceMockOrderServiceCreateExpectation{}
+	if mmCreate.defaultExpectation == nil {
+		mmCreate.defaultExpectation = &OrderServiceMockCreateExpectation{}
 	}
 
-	if mmOrderServiceCreate.defaultExpectation.paramPtrs != nil {
-		mmOrderServiceCreate.mock.t.Fatalf("OrderServiceMock.OrderServiceCreate mock is already set by ExpectParams functions")
+	if mmCreate.defaultExpectation.paramPtrs != nil {
+		mmCreate.mock.t.Fatalf("OrderServiceMock.Create mock is already set by ExpectParams functions")
 	}
 
-	mmOrderServiceCreate.defaultExpectation.params = &OrderServiceMockOrderServiceCreateParams{ctx, order}
-	for _, e := range mmOrderServiceCreate.expectations {
-		if minimock.Equal(e.params, mmOrderServiceCreate.defaultExpectation.params) {
-			mmOrderServiceCreate.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmOrderServiceCreate.defaultExpectation.params)
+	mmCreate.defaultExpectation.params = &OrderServiceMockCreateParams{ctx, order}
+	for _, e := range mmCreate.expectations {
+		if minimock.Equal(e.params, mmCreate.defaultExpectation.params) {
+			mmCreate.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmCreate.defaultExpectation.params)
 		}
 	}
 
-	return mmOrderServiceCreate
+	return mmCreate
 }
 
-// ExpectCtxParam1 sets up expected param ctx for OrderService.OrderServiceCreate
-func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) ExpectCtxParam1(ctx context.Context) *mOrderServiceMockOrderServiceCreate {
-	if mmOrderServiceCreate.mock.funcOrderServiceCreate != nil {
-		mmOrderServiceCreate.mock.t.Fatalf("OrderServiceMock.OrderServiceCreate mock is already set by Set")
+// ExpectCtxParam1 sets up expected param ctx for OrderService.Create
+func (mmCreate *mOrderServiceMockCreate) ExpectCtxParam1(ctx context.Context) *mOrderServiceMockCreate {
+	if mmCreate.mock.funcCreate != nil {
+		mmCreate.mock.t.Fatalf("OrderServiceMock.Create mock is already set by Set")
 	}
 
-	if mmOrderServiceCreate.defaultExpectation == nil {
-		mmOrderServiceCreate.defaultExpectation = &OrderServiceMockOrderServiceCreateExpectation{}
+	if mmCreate.defaultExpectation == nil {
+		mmCreate.defaultExpectation = &OrderServiceMockCreateExpectation{}
 	}
 
-	if mmOrderServiceCreate.defaultExpectation.params != nil {
-		mmOrderServiceCreate.mock.t.Fatalf("OrderServiceMock.OrderServiceCreate mock is already set by Expect")
+	if mmCreate.defaultExpectation.params != nil {
+		mmCreate.mock.t.Fatalf("OrderServiceMock.Create mock is already set by Expect")
 	}
 
-	if mmOrderServiceCreate.defaultExpectation.paramPtrs == nil {
-		mmOrderServiceCreate.defaultExpectation.paramPtrs = &OrderServiceMockOrderServiceCreateParamPtrs{}
+	if mmCreate.defaultExpectation.paramPtrs == nil {
+		mmCreate.defaultExpectation.paramPtrs = &OrderServiceMockCreateParamPtrs{}
 	}
-	mmOrderServiceCreate.defaultExpectation.paramPtrs.ctx = &ctx
+	mmCreate.defaultExpectation.paramPtrs.ctx = &ctx
 
-	return mmOrderServiceCreate
+	return mmCreate
 }
 
-// ExpectOrderParam2 sets up expected param order for OrderService.OrderServiceCreate
-func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) ExpectOrderParam2(order *model.Order) *mOrderServiceMockOrderServiceCreate {
-	if mmOrderServiceCreate.mock.funcOrderServiceCreate != nil {
-		mmOrderServiceCreate.mock.t.Fatalf("OrderServiceMock.OrderServiceCreate mock is already set by Set")
+// ExpectOrderParam2 sets up expected param order for OrderService.Create
+func (mmCreate *mOrderServiceMockCreate) ExpectOrderParam2(order *model.Order) *mOrderServiceMockCreate {
+	if mmCreate.mock.funcCreate != nil {
+		mmCreate.mock.t.Fatalf("OrderServiceMock.Create mock is already set by Set")
 	}
 
-	if mmOrderServiceCreate.defaultExpectation == nil {
-		mmOrderServiceCreate.defaultExpectation = &OrderServiceMockOrderServiceCreateExpectation{}
+	if mmCreate.defaultExpectation == nil {
+		mmCreate.defaultExpectation = &OrderServiceMockCreateExpectation{}
 	}
 
-	if mmOrderServiceCreate.defaultExpectation.params != nil {
-		mmOrderServiceCreate.mock.t.Fatalf("OrderServiceMock.OrderServiceCreate mock is already set by Expect")
+	if mmCreate.defaultExpectation.params != nil {
+		mmCreate.mock.t.Fatalf("OrderServiceMock.Create mock is already set by Expect")
 	}
 
-	if mmOrderServiceCreate.defaultExpectation.paramPtrs == nil {
-		mmOrderServiceCreate.defaultExpectation.paramPtrs = &OrderServiceMockOrderServiceCreateParamPtrs{}
+	if mmCreate.defaultExpectation.paramPtrs == nil {
+		mmCreate.defaultExpectation.paramPtrs = &OrderServiceMockCreateParamPtrs{}
 	}
-	mmOrderServiceCreate.defaultExpectation.paramPtrs.order = &order
+	mmCreate.defaultExpectation.paramPtrs.order = &order
 
-	return mmOrderServiceCreate
+	return mmCreate
 }
 
-// Inspect accepts an inspector function that has same arguments as the OrderService.OrderServiceCreate
-func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) Inspect(f func(ctx context.Context, order *model.Order)) *mOrderServiceMockOrderServiceCreate {
-	if mmOrderServiceCreate.mock.inspectFuncOrderServiceCreate != nil {
-		mmOrderServiceCreate.mock.t.Fatalf("Inspect function is already set for OrderServiceMock.OrderServiceCreate")
+// Inspect accepts an inspector function that has same arguments as the OrderService.Create
+func (mmCreate *mOrderServiceMockCreate) Inspect(f func(ctx context.Context, order *model.Order)) *mOrderServiceMockCreate {
+	if mmCreate.mock.inspectFuncCreate != nil {
+		mmCreate.mock.t.Fatalf("Inspect function is already set for OrderServiceMock.Create")
 	}
 
-	mmOrderServiceCreate.mock.inspectFuncOrderServiceCreate = f
+	mmCreate.mock.inspectFuncCreate = f
 
-	return mmOrderServiceCreate
+	return mmCreate
 }
 
-// Return sets up results that will be returned by OrderService.OrderServiceCreate
-func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) Return(o1 model.OrderID) *OrderServiceMock {
-	if mmOrderServiceCreate.mock.funcOrderServiceCreate != nil {
-		mmOrderServiceCreate.mock.t.Fatalf("OrderServiceMock.OrderServiceCreate mock is already set by Set")
+// Return sets up results that will be returned by OrderService.Create
+func (mmCreate *mOrderServiceMockCreate) Return(o1 model.OrderID, err error) *OrderServiceMock {
+	if mmCreate.mock.funcCreate != nil {
+		mmCreate.mock.t.Fatalf("OrderServiceMock.Create mock is already set by Set")
 	}
 
-	if mmOrderServiceCreate.defaultExpectation == nil {
-		mmOrderServiceCreate.defaultExpectation = &OrderServiceMockOrderServiceCreateExpectation{mock: mmOrderServiceCreate.mock}
+	if mmCreate.defaultExpectation == nil {
+		mmCreate.defaultExpectation = &OrderServiceMockCreateExpectation{mock: mmCreate.mock}
 	}
-	mmOrderServiceCreate.defaultExpectation.results = &OrderServiceMockOrderServiceCreateResults{o1}
-	return mmOrderServiceCreate.mock
+	mmCreate.defaultExpectation.results = &OrderServiceMockCreateResults{o1, err}
+	return mmCreate.mock
 }
 
-// Set uses given function f to mock the OrderService.OrderServiceCreate method
-func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) Set(f func(ctx context.Context, order *model.Order) (o1 model.OrderID)) *OrderServiceMock {
-	if mmOrderServiceCreate.defaultExpectation != nil {
-		mmOrderServiceCreate.mock.t.Fatalf("Default expectation is already set for the OrderService.OrderServiceCreate method")
+// Set uses given function f to mock the OrderService.Create method
+func (mmCreate *mOrderServiceMockCreate) Set(f func(ctx context.Context, order *model.Order) (o1 model.OrderID, err error)) *OrderServiceMock {
+	if mmCreate.defaultExpectation != nil {
+		mmCreate.mock.t.Fatalf("Default expectation is already set for the OrderService.Create method")
 	}
 
-	if len(mmOrderServiceCreate.expectations) > 0 {
-		mmOrderServiceCreate.mock.t.Fatalf("Some expectations are already set for the OrderService.OrderServiceCreate method")
+	if len(mmCreate.expectations) > 0 {
+		mmCreate.mock.t.Fatalf("Some expectations are already set for the OrderService.Create method")
 	}
 
-	mmOrderServiceCreate.mock.funcOrderServiceCreate = f
-	return mmOrderServiceCreate.mock
+	mmCreate.mock.funcCreate = f
+	return mmCreate.mock
 }
 
-// When sets expectation for the OrderService.OrderServiceCreate which will trigger the result defined by the following
+// When sets expectation for the OrderService.Create which will trigger the result defined by the following
 // Then helper
-func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) When(ctx context.Context, order *model.Order) *OrderServiceMockOrderServiceCreateExpectation {
-	if mmOrderServiceCreate.mock.funcOrderServiceCreate != nil {
-		mmOrderServiceCreate.mock.t.Fatalf("OrderServiceMock.OrderServiceCreate mock is already set by Set")
+func (mmCreate *mOrderServiceMockCreate) When(ctx context.Context, order *model.Order) *OrderServiceMockCreateExpectation {
+	if mmCreate.mock.funcCreate != nil {
+		mmCreate.mock.t.Fatalf("OrderServiceMock.Create mock is already set by Set")
 	}
 
-	expectation := &OrderServiceMockOrderServiceCreateExpectation{
-		mock:   mmOrderServiceCreate.mock,
-		params: &OrderServiceMockOrderServiceCreateParams{ctx, order},
+	expectation := &OrderServiceMockCreateExpectation{
+		mock:   mmCreate.mock,
+		params: &OrderServiceMockCreateParams{ctx, order},
 	}
-	mmOrderServiceCreate.expectations = append(mmOrderServiceCreate.expectations, expectation)
+	mmCreate.expectations = append(mmCreate.expectations, expectation)
 	return expectation
 }
 
-// Then sets up OrderService.OrderServiceCreate return parameters for the expectation previously defined by the When method
-func (e *OrderServiceMockOrderServiceCreateExpectation) Then(o1 model.OrderID) *OrderServiceMock {
-	e.results = &OrderServiceMockOrderServiceCreateResults{o1}
+// Then sets up OrderService.Create return parameters for the expectation previously defined by the When method
+func (e *OrderServiceMockCreateExpectation) Then(o1 model.OrderID, err error) *OrderServiceMock {
+	e.results = &OrderServiceMockCreateResults{o1, err}
 	return e.mock
 }
 
-// Times sets number of times OrderService.OrderServiceCreate should be invoked
-func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) Times(n uint64) *mOrderServiceMockOrderServiceCreate {
+// Times sets number of times OrderService.Create should be invoked
+func (mmCreate *mOrderServiceMockCreate) Times(n uint64) *mOrderServiceMockCreate {
 	if n == 0 {
-		mmOrderServiceCreate.mock.t.Fatalf("Times of OrderServiceMock.OrderServiceCreate mock can not be zero")
+		mmCreate.mock.t.Fatalf("Times of OrderServiceMock.Create mock can not be zero")
 	}
-	mm_atomic.StoreUint64(&mmOrderServiceCreate.expectedInvocations, n)
-	return mmOrderServiceCreate
+	mm_atomic.StoreUint64(&mmCreate.expectedInvocations, n)
+	return mmCreate
 }
 
-func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) invocationsDone() bool {
-	if len(mmOrderServiceCreate.expectations) == 0 && mmOrderServiceCreate.defaultExpectation == nil && mmOrderServiceCreate.mock.funcOrderServiceCreate == nil {
+func (mmCreate *mOrderServiceMockCreate) invocationsDone() bool {
+	if len(mmCreate.expectations) == 0 && mmCreate.defaultExpectation == nil && mmCreate.mock.funcCreate == nil {
 		return true
 	}
 
-	totalInvocations := mm_atomic.LoadUint64(&mmOrderServiceCreate.mock.afterOrderServiceCreateCounter)
-	expectedInvocations := mm_atomic.LoadUint64(&mmOrderServiceCreate.expectedInvocations)
+	totalInvocations := mm_atomic.LoadUint64(&mmCreate.mock.afterCreateCounter)
+	expectedInvocations := mm_atomic.LoadUint64(&mmCreate.expectedInvocations)
 
 	return totalInvocations > 0 && (expectedInvocations == 0 || expectedInvocations == totalInvocations)
 }
 
-// OrderServiceCreate implements handler.OrderService
-func (mmOrderServiceCreate *OrderServiceMock) OrderServiceCreate(ctx context.Context, order *model.Order) (o1 model.OrderID) {
-	mm_atomic.AddUint64(&mmOrderServiceCreate.beforeOrderServiceCreateCounter, 1)
-	defer mm_atomic.AddUint64(&mmOrderServiceCreate.afterOrderServiceCreateCounter, 1)
+// Create implements handler.OrderService
+func (mmCreate *OrderServiceMock) Create(ctx context.Context, order *model.Order) (o1 model.OrderID, err error) {
+	mm_atomic.AddUint64(&mmCreate.beforeCreateCounter, 1)
+	defer mm_atomic.AddUint64(&mmCreate.afterCreateCounter, 1)
 
-	if mmOrderServiceCreate.inspectFuncOrderServiceCreate != nil {
-		mmOrderServiceCreate.inspectFuncOrderServiceCreate(ctx, order)
+	if mmCreate.inspectFuncCreate != nil {
+		mmCreate.inspectFuncCreate(ctx, order)
 	}
 
-	mm_params := OrderServiceMockOrderServiceCreateParams{ctx, order}
+	mm_params := OrderServiceMockCreateParams{ctx, order}
 
 	// Record call args
-	mmOrderServiceCreate.OrderServiceCreateMock.mutex.Lock()
-	mmOrderServiceCreate.OrderServiceCreateMock.callArgs = append(mmOrderServiceCreate.OrderServiceCreateMock.callArgs, &mm_params)
-	mmOrderServiceCreate.OrderServiceCreateMock.mutex.Unlock()
+	mmCreate.CreateMock.mutex.Lock()
+	mmCreate.CreateMock.callArgs = append(mmCreate.CreateMock.callArgs, &mm_params)
+	mmCreate.CreateMock.mutex.Unlock()
 
-	for _, e := range mmOrderServiceCreate.OrderServiceCreateMock.expectations {
+	for _, e := range mmCreate.CreateMock.expectations {
 		if minimock.Equal(*e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.o1
+			return e.results.o1, e.results.err
 		}
 	}
 
-	if mmOrderServiceCreate.OrderServiceCreateMock.defaultExpectation != nil {
-		mm_atomic.AddUint64(&mmOrderServiceCreate.OrderServiceCreateMock.defaultExpectation.Counter, 1)
-		mm_want := mmOrderServiceCreate.OrderServiceCreateMock.defaultExpectation.params
-		mm_want_ptrs := mmOrderServiceCreate.OrderServiceCreateMock.defaultExpectation.paramPtrs
+	if mmCreate.CreateMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmCreate.CreateMock.defaultExpectation.Counter, 1)
+		mm_want := mmCreate.CreateMock.defaultExpectation.params
+		mm_want_ptrs := mmCreate.CreateMock.defaultExpectation.paramPtrs
 
-		mm_got := OrderServiceMockOrderServiceCreateParams{ctx, order}
+		mm_got := OrderServiceMockCreateParams{ctx, order}
 
 		if mm_want_ptrs != nil {
 
 			if mm_want_ptrs.ctx != nil && !minimock.Equal(*mm_want_ptrs.ctx, mm_got.ctx) {
-				mmOrderServiceCreate.t.Errorf("OrderServiceMock.OrderServiceCreate got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
+				mmCreate.t.Errorf("OrderServiceMock.Create got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
 			}
 
 			if mm_want_ptrs.order != nil && !minimock.Equal(*mm_want_ptrs.order, mm_got.order) {
-				mmOrderServiceCreate.t.Errorf("OrderServiceMock.OrderServiceCreate got unexpected parameter order, want: %#v, got: %#v%s\n", *mm_want_ptrs.order, mm_got.order, minimock.Diff(*mm_want_ptrs.order, mm_got.order))
+				mmCreate.t.Errorf("OrderServiceMock.Create got unexpected parameter order, want: %#v, got: %#v%s\n", *mm_want_ptrs.order, mm_got.order, minimock.Diff(*mm_want_ptrs.order, mm_got.order))
 			}
 
 		} else if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmOrderServiceCreate.t.Errorf("OrderServiceMock.OrderServiceCreate got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+			mmCreate.t.Errorf("OrderServiceMock.Create got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
 
-		mm_results := mmOrderServiceCreate.OrderServiceCreateMock.defaultExpectation.results
+		mm_results := mmCreate.CreateMock.defaultExpectation.results
 		if mm_results == nil {
-			mmOrderServiceCreate.t.Fatal("No results are set for the OrderServiceMock.OrderServiceCreate")
+			mmCreate.t.Fatal("No results are set for the OrderServiceMock.Create")
 		}
-		return (*mm_results).o1
+		return (*mm_results).o1, (*mm_results).err
 	}
-	if mmOrderServiceCreate.funcOrderServiceCreate != nil {
-		return mmOrderServiceCreate.funcOrderServiceCreate(ctx, order)
+	if mmCreate.funcCreate != nil {
+		return mmCreate.funcCreate(ctx, order)
 	}
-	mmOrderServiceCreate.t.Fatalf("Unexpected call to OrderServiceMock.OrderServiceCreate. %v %v", ctx, order)
+	mmCreate.t.Fatalf("Unexpected call to OrderServiceMock.Create. %v %v", ctx, order)
 	return
 }
 
-// OrderServiceCreateAfterCounter returns a count of finished OrderServiceMock.OrderServiceCreate invocations
-func (mmOrderServiceCreate *OrderServiceMock) OrderServiceCreateAfterCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmOrderServiceCreate.afterOrderServiceCreateCounter)
+// CreateAfterCounter returns a count of finished OrderServiceMock.Create invocations
+func (mmCreate *OrderServiceMock) CreateAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmCreate.afterCreateCounter)
 }
 
-// OrderServiceCreateBeforeCounter returns a count of OrderServiceMock.OrderServiceCreate invocations
-func (mmOrderServiceCreate *OrderServiceMock) OrderServiceCreateBeforeCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmOrderServiceCreate.beforeOrderServiceCreateCounter)
+// CreateBeforeCounter returns a count of OrderServiceMock.Create invocations
+func (mmCreate *OrderServiceMock) CreateBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmCreate.beforeCreateCounter)
 }
 
-// Calls returns a list of arguments used in each call to OrderServiceMock.OrderServiceCreate.
+// Calls returns a list of arguments used in each call to OrderServiceMock.Create.
 // The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmOrderServiceCreate *mOrderServiceMockOrderServiceCreate) Calls() []*OrderServiceMockOrderServiceCreateParams {
-	mmOrderServiceCreate.mutex.RLock()
+func (mmCreate *mOrderServiceMockCreate) Calls() []*OrderServiceMockCreateParams {
+	mmCreate.mutex.RLock()
 
-	argCopy := make([]*OrderServiceMockOrderServiceCreateParams, len(mmOrderServiceCreate.callArgs))
-	copy(argCopy, mmOrderServiceCreate.callArgs)
+	argCopy := make([]*OrderServiceMockCreateParams, len(mmCreate.callArgs))
+	copy(argCopy, mmCreate.callArgs)
 
-	mmOrderServiceCreate.mutex.RUnlock()
+	mmCreate.mutex.RUnlock()
 
 	return argCopy
 }
 
-// MinimockOrderServiceCreateDone returns true if the count of the OrderServiceCreate invocations corresponds
+// MinimockCreateDone returns true if the count of the Create invocations corresponds
 // the number of defined expectations
-func (m *OrderServiceMock) MinimockOrderServiceCreateDone() bool {
-	if m.OrderServiceCreateMock.optional {
+func (m *OrderServiceMock) MinimockCreateDone() bool {
+	if m.CreateMock.optional {
 		// Optional methods provide '0 or more' call count restriction.
 		return true
 	}
 
-	for _, e := range m.OrderServiceCreateMock.expectations {
+	for _, e := range m.CreateMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
 			return false
 		}
 	}
 
-	return m.OrderServiceCreateMock.invocationsDone()
+	return m.CreateMock.invocationsDone()
 }
 
-// MinimockOrderServiceCreateInspect logs each unmet expectation
-func (m *OrderServiceMock) MinimockOrderServiceCreateInspect() {
-	for _, e := range m.OrderServiceCreateMock.expectations {
+// MinimockCreateInspect logs each unmet expectation
+func (m *OrderServiceMock) MinimockCreateInspect() {
+	for _, e := range m.CreateMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to OrderServiceMock.OrderServiceCreate with params: %#v", *e.params)
+			m.t.Errorf("Expected call to OrderServiceMock.Create with params: %#v", *e.params)
 		}
 	}
 
-	afterOrderServiceCreateCounter := mm_atomic.LoadUint64(&m.afterOrderServiceCreateCounter)
+	afterCreateCounter := mm_atomic.LoadUint64(&m.afterCreateCounter)
 	// if default expectation was set then invocations count should be greater than zero
-	if m.OrderServiceCreateMock.defaultExpectation != nil && afterOrderServiceCreateCounter < 1 {
-		if m.OrderServiceCreateMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to OrderServiceMock.OrderServiceCreate")
+	if m.CreateMock.defaultExpectation != nil && afterCreateCounter < 1 {
+		if m.CreateMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to OrderServiceMock.Create")
 		} else {
-			m.t.Errorf("Expected call to OrderServiceMock.OrderServiceCreate with params: %#v", *m.OrderServiceCreateMock.defaultExpectation.params)
+			m.t.Errorf("Expected call to OrderServiceMock.Create with params: %#v", *m.CreateMock.defaultExpectation.params)
 		}
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcOrderServiceCreate != nil && afterOrderServiceCreateCounter < 1 {
-		m.t.Error("Expected call to OrderServiceMock.OrderServiceCreate")
+	if m.funcCreate != nil && afterCreateCounter < 1 {
+		m.t.Error("Expected call to OrderServiceMock.Create")
 	}
 
-	if !m.OrderServiceCreateMock.invocationsDone() && afterOrderServiceCreateCounter > 0 {
-		m.t.Errorf("Expected %d calls to OrderServiceMock.OrderServiceCreate but found %d calls",
-			mm_atomic.LoadUint64(&m.OrderServiceCreateMock.expectedInvocations), afterOrderServiceCreateCounter)
+	if !m.CreateMock.invocationsDone() && afterCreateCounter > 0 {
+		m.t.Errorf("Expected %d calls to OrderServiceMock.Create but found %d calls",
+			mm_atomic.LoadUint64(&m.CreateMock.expectedInvocations), afterCreateCounter)
 	}
 }
 
-type mOrderServiceMockOrderServiceGetOrder struct {
+type mOrderServiceMockGetOrder struct {
 	optional           bool
 	mock               *OrderServiceMock
-	defaultExpectation *OrderServiceMockOrderServiceGetOrderExpectation
-	expectations       []*OrderServiceMockOrderServiceGetOrderExpectation
+	defaultExpectation *OrderServiceMockGetOrderExpectation
+	expectations       []*OrderServiceMockGetOrderExpectation
 
-	callArgs []*OrderServiceMockOrderServiceGetOrderParams
+	callArgs []*OrderServiceMockGetOrderParams
 	mutex    sync.RWMutex
 
 	expectedInvocations uint64
 }
 
-// OrderServiceMockOrderServiceGetOrderExpectation specifies expectation struct of the OrderService.OrderServiceGetOrder
-type OrderServiceMockOrderServiceGetOrderExpectation struct {
+// OrderServiceMockGetOrderExpectation specifies expectation struct of the OrderService.GetOrder
+type OrderServiceMockGetOrderExpectation struct {
 	mock      *OrderServiceMock
-	params    *OrderServiceMockOrderServiceGetOrderParams
-	paramPtrs *OrderServiceMockOrderServiceGetOrderParamPtrs
-	results   *OrderServiceMockOrderServiceGetOrderResults
+	params    *OrderServiceMockGetOrderParams
+	paramPtrs *OrderServiceMockGetOrderParamPtrs
+	results   *OrderServiceMockGetOrderResults
 	Counter   uint64
 }
 
-// OrderServiceMockOrderServiceGetOrderParams contains parameters of the OrderService.OrderServiceGetOrder
-type OrderServiceMockOrderServiceGetOrderParams struct {
+// OrderServiceMockGetOrderParams contains parameters of the OrderService.GetOrder
+type OrderServiceMockGetOrderParams struct {
 	ctx     context.Context
 	orderID model.OrderID
 }
 
-// OrderServiceMockOrderServiceGetOrderParamPtrs contains pointers to parameters of the OrderService.OrderServiceGetOrder
-type OrderServiceMockOrderServiceGetOrderParamPtrs struct {
+// OrderServiceMockGetOrderParamPtrs contains pointers to parameters of the OrderService.GetOrder
+type OrderServiceMockGetOrderParamPtrs struct {
 	ctx     *context.Context
 	orderID *model.OrderID
 }
 
-// OrderServiceMockOrderServiceGetOrderResults contains results of the OrderService.OrderServiceGetOrder
-type OrderServiceMockOrderServiceGetOrderResults struct {
+// OrderServiceMockGetOrderResults contains results of the OrderService.GetOrder
+type OrderServiceMockGetOrderResults struct {
 	op1 *model.Order
 	err error
 }
@@ -425,320 +426,320 @@ type OrderServiceMockOrderServiceGetOrderResults struct {
 // Optional() makes method check to work in '0 or more' mode.
 // It is NOT RECOMMENDED to use this option by default unless you really need it, as it helps to
 // catch the problems when the expected method call is totally skipped during test run.
-func (mmOrderServiceGetOrder *mOrderServiceMockOrderServiceGetOrder) Optional() *mOrderServiceMockOrderServiceGetOrder {
-	mmOrderServiceGetOrder.optional = true
-	return mmOrderServiceGetOrder
+func (mmGetOrder *mOrderServiceMockGetOrder) Optional() *mOrderServiceMockGetOrder {
+	mmGetOrder.optional = true
+	return mmGetOrder
 }
 
-// Expect sets up expected params for OrderService.OrderServiceGetOrder
-func (mmOrderServiceGetOrder *mOrderServiceMockOrderServiceGetOrder) Expect(ctx context.Context, orderID model.OrderID) *mOrderServiceMockOrderServiceGetOrder {
-	if mmOrderServiceGetOrder.mock.funcOrderServiceGetOrder != nil {
-		mmOrderServiceGetOrder.mock.t.Fatalf("OrderServiceMock.OrderServiceGetOrder mock is already set by Set")
+// Expect sets up expected params for OrderService.GetOrder
+func (mmGetOrder *mOrderServiceMockGetOrder) Expect(ctx context.Context, orderID model.OrderID) *mOrderServiceMockGetOrder {
+	if mmGetOrder.mock.funcGetOrder != nil {
+		mmGetOrder.mock.t.Fatalf("OrderServiceMock.GetOrder mock is already set by Set")
 	}
 
-	if mmOrderServiceGetOrder.defaultExpectation == nil {
-		mmOrderServiceGetOrder.defaultExpectation = &OrderServiceMockOrderServiceGetOrderExpectation{}
+	if mmGetOrder.defaultExpectation == nil {
+		mmGetOrder.defaultExpectation = &OrderServiceMockGetOrderExpectation{}
 	}
 
-	if mmOrderServiceGetOrder.defaultExpectation.paramPtrs != nil {
-		mmOrderServiceGetOrder.mock.t.Fatalf("OrderServiceMock.OrderServiceGetOrder mock is already set by ExpectParams functions")
+	if mmGetOrder.defaultExpectation.paramPtrs != nil {
+		mmGetOrder.mock.t.Fatalf("OrderServiceMock.GetOrder mock is already set by ExpectParams functions")
 	}
 
-	mmOrderServiceGetOrder.defaultExpectation.params = &OrderServiceMockOrderServiceGetOrderParams{ctx, orderID}
-	for _, e := range mmOrderServiceGetOrder.expectations {
-		if minimock.Equal(e.params, mmOrderServiceGetOrder.defaultExpectation.params) {
-			mmOrderServiceGetOrder.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmOrderServiceGetOrder.defaultExpectation.params)
+	mmGetOrder.defaultExpectation.params = &OrderServiceMockGetOrderParams{ctx, orderID}
+	for _, e := range mmGetOrder.expectations {
+		if minimock.Equal(e.params, mmGetOrder.defaultExpectation.params) {
+			mmGetOrder.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetOrder.defaultExpectation.params)
 		}
 	}
 
-	return mmOrderServiceGetOrder
+	return mmGetOrder
 }
 
-// ExpectCtxParam1 sets up expected param ctx for OrderService.OrderServiceGetOrder
-func (mmOrderServiceGetOrder *mOrderServiceMockOrderServiceGetOrder) ExpectCtxParam1(ctx context.Context) *mOrderServiceMockOrderServiceGetOrder {
-	if mmOrderServiceGetOrder.mock.funcOrderServiceGetOrder != nil {
-		mmOrderServiceGetOrder.mock.t.Fatalf("OrderServiceMock.OrderServiceGetOrder mock is already set by Set")
+// ExpectCtxParam1 sets up expected param ctx for OrderService.GetOrder
+func (mmGetOrder *mOrderServiceMockGetOrder) ExpectCtxParam1(ctx context.Context) *mOrderServiceMockGetOrder {
+	if mmGetOrder.mock.funcGetOrder != nil {
+		mmGetOrder.mock.t.Fatalf("OrderServiceMock.GetOrder mock is already set by Set")
 	}
 
-	if mmOrderServiceGetOrder.defaultExpectation == nil {
-		mmOrderServiceGetOrder.defaultExpectation = &OrderServiceMockOrderServiceGetOrderExpectation{}
+	if mmGetOrder.defaultExpectation == nil {
+		mmGetOrder.defaultExpectation = &OrderServiceMockGetOrderExpectation{}
 	}
 
-	if mmOrderServiceGetOrder.defaultExpectation.params != nil {
-		mmOrderServiceGetOrder.mock.t.Fatalf("OrderServiceMock.OrderServiceGetOrder mock is already set by Expect")
+	if mmGetOrder.defaultExpectation.params != nil {
+		mmGetOrder.mock.t.Fatalf("OrderServiceMock.GetOrder mock is already set by Expect")
 	}
 
-	if mmOrderServiceGetOrder.defaultExpectation.paramPtrs == nil {
-		mmOrderServiceGetOrder.defaultExpectation.paramPtrs = &OrderServiceMockOrderServiceGetOrderParamPtrs{}
+	if mmGetOrder.defaultExpectation.paramPtrs == nil {
+		mmGetOrder.defaultExpectation.paramPtrs = &OrderServiceMockGetOrderParamPtrs{}
 	}
-	mmOrderServiceGetOrder.defaultExpectation.paramPtrs.ctx = &ctx
+	mmGetOrder.defaultExpectation.paramPtrs.ctx = &ctx
 
-	return mmOrderServiceGetOrder
+	return mmGetOrder
 }
 
-// ExpectOrderIDParam2 sets up expected param orderID for OrderService.OrderServiceGetOrder
-func (mmOrderServiceGetOrder *mOrderServiceMockOrderServiceGetOrder) ExpectOrderIDParam2(orderID model.OrderID) *mOrderServiceMockOrderServiceGetOrder {
-	if mmOrderServiceGetOrder.mock.funcOrderServiceGetOrder != nil {
-		mmOrderServiceGetOrder.mock.t.Fatalf("OrderServiceMock.OrderServiceGetOrder mock is already set by Set")
+// ExpectOrderIDParam2 sets up expected param orderID for OrderService.GetOrder
+func (mmGetOrder *mOrderServiceMockGetOrder) ExpectOrderIDParam2(orderID model.OrderID) *mOrderServiceMockGetOrder {
+	if mmGetOrder.mock.funcGetOrder != nil {
+		mmGetOrder.mock.t.Fatalf("OrderServiceMock.GetOrder mock is already set by Set")
 	}
 
-	if mmOrderServiceGetOrder.defaultExpectation == nil {
-		mmOrderServiceGetOrder.defaultExpectation = &OrderServiceMockOrderServiceGetOrderExpectation{}
+	if mmGetOrder.defaultExpectation == nil {
+		mmGetOrder.defaultExpectation = &OrderServiceMockGetOrderExpectation{}
 	}
 
-	if mmOrderServiceGetOrder.defaultExpectation.params != nil {
-		mmOrderServiceGetOrder.mock.t.Fatalf("OrderServiceMock.OrderServiceGetOrder mock is already set by Expect")
+	if mmGetOrder.defaultExpectation.params != nil {
+		mmGetOrder.mock.t.Fatalf("OrderServiceMock.GetOrder mock is already set by Expect")
 	}
 
-	if mmOrderServiceGetOrder.defaultExpectation.paramPtrs == nil {
-		mmOrderServiceGetOrder.defaultExpectation.paramPtrs = &OrderServiceMockOrderServiceGetOrderParamPtrs{}
+	if mmGetOrder.defaultExpectation.paramPtrs == nil {
+		mmGetOrder.defaultExpectation.paramPtrs = &OrderServiceMockGetOrderParamPtrs{}
 	}
-	mmOrderServiceGetOrder.defaultExpectation.paramPtrs.orderID = &orderID
+	mmGetOrder.defaultExpectation.paramPtrs.orderID = &orderID
 
-	return mmOrderServiceGetOrder
+	return mmGetOrder
 }
 
-// Inspect accepts an inspector function that has same arguments as the OrderService.OrderServiceGetOrder
-func (mmOrderServiceGetOrder *mOrderServiceMockOrderServiceGetOrder) Inspect(f func(ctx context.Context, orderID model.OrderID)) *mOrderServiceMockOrderServiceGetOrder {
-	if mmOrderServiceGetOrder.mock.inspectFuncOrderServiceGetOrder != nil {
-		mmOrderServiceGetOrder.mock.t.Fatalf("Inspect function is already set for OrderServiceMock.OrderServiceGetOrder")
+// Inspect accepts an inspector function that has same arguments as the OrderService.GetOrder
+func (mmGetOrder *mOrderServiceMockGetOrder) Inspect(f func(ctx context.Context, orderID model.OrderID)) *mOrderServiceMockGetOrder {
+	if mmGetOrder.mock.inspectFuncGetOrder != nil {
+		mmGetOrder.mock.t.Fatalf("Inspect function is already set for OrderServiceMock.GetOrder")
 	}
 
-	mmOrderServiceGetOrder.mock.inspectFuncOrderServiceGetOrder = f
+	mmGetOrder.mock.inspectFuncGetOrder = f
 
-	return mmOrderServiceGetOrder
+	return mmGetOrder
 }
 
-// Return sets up results that will be returned by OrderService.OrderServiceGetOrder
-func (mmOrderServiceGetOrder *mOrderServiceMockOrderServiceGetOrder) Return(op1 *model.Order, err error) *OrderServiceMock {
-	if mmOrderServiceGetOrder.mock.funcOrderServiceGetOrder != nil {
-		mmOrderServiceGetOrder.mock.t.Fatalf("OrderServiceMock.OrderServiceGetOrder mock is already set by Set")
+// Return sets up results that will be returned by OrderService.GetOrder
+func (mmGetOrder *mOrderServiceMockGetOrder) Return(op1 *model.Order, err error) *OrderServiceMock {
+	if mmGetOrder.mock.funcGetOrder != nil {
+		mmGetOrder.mock.t.Fatalf("OrderServiceMock.GetOrder mock is already set by Set")
 	}
 
-	if mmOrderServiceGetOrder.defaultExpectation == nil {
-		mmOrderServiceGetOrder.defaultExpectation = &OrderServiceMockOrderServiceGetOrderExpectation{mock: mmOrderServiceGetOrder.mock}
+	if mmGetOrder.defaultExpectation == nil {
+		mmGetOrder.defaultExpectation = &OrderServiceMockGetOrderExpectation{mock: mmGetOrder.mock}
 	}
-	mmOrderServiceGetOrder.defaultExpectation.results = &OrderServiceMockOrderServiceGetOrderResults{op1, err}
-	return mmOrderServiceGetOrder.mock
+	mmGetOrder.defaultExpectation.results = &OrderServiceMockGetOrderResults{op1, err}
+	return mmGetOrder.mock
 }
 
-// Set uses given function f to mock the OrderService.OrderServiceGetOrder method
-func (mmOrderServiceGetOrder *mOrderServiceMockOrderServiceGetOrder) Set(f func(ctx context.Context, orderID model.OrderID) (op1 *model.Order, err error)) *OrderServiceMock {
-	if mmOrderServiceGetOrder.defaultExpectation != nil {
-		mmOrderServiceGetOrder.mock.t.Fatalf("Default expectation is already set for the OrderService.OrderServiceGetOrder method")
+// Set uses given function f to mock the OrderService.GetOrder method
+func (mmGetOrder *mOrderServiceMockGetOrder) Set(f func(ctx context.Context, orderID model.OrderID) (op1 *model.Order, err error)) *OrderServiceMock {
+	if mmGetOrder.defaultExpectation != nil {
+		mmGetOrder.mock.t.Fatalf("Default expectation is already set for the OrderService.GetOrder method")
 	}
 
-	if len(mmOrderServiceGetOrder.expectations) > 0 {
-		mmOrderServiceGetOrder.mock.t.Fatalf("Some expectations are already set for the OrderService.OrderServiceGetOrder method")
+	if len(mmGetOrder.expectations) > 0 {
+		mmGetOrder.mock.t.Fatalf("Some expectations are already set for the OrderService.GetOrder method")
 	}
 
-	mmOrderServiceGetOrder.mock.funcOrderServiceGetOrder = f
-	return mmOrderServiceGetOrder.mock
+	mmGetOrder.mock.funcGetOrder = f
+	return mmGetOrder.mock
 }
 
-// When sets expectation for the OrderService.OrderServiceGetOrder which will trigger the result defined by the following
+// When sets expectation for the OrderService.GetOrder which will trigger the result defined by the following
 // Then helper
-func (mmOrderServiceGetOrder *mOrderServiceMockOrderServiceGetOrder) When(ctx context.Context, orderID model.OrderID) *OrderServiceMockOrderServiceGetOrderExpectation {
-	if mmOrderServiceGetOrder.mock.funcOrderServiceGetOrder != nil {
-		mmOrderServiceGetOrder.mock.t.Fatalf("OrderServiceMock.OrderServiceGetOrder mock is already set by Set")
+func (mmGetOrder *mOrderServiceMockGetOrder) When(ctx context.Context, orderID model.OrderID) *OrderServiceMockGetOrderExpectation {
+	if mmGetOrder.mock.funcGetOrder != nil {
+		mmGetOrder.mock.t.Fatalf("OrderServiceMock.GetOrder mock is already set by Set")
 	}
 
-	expectation := &OrderServiceMockOrderServiceGetOrderExpectation{
-		mock:   mmOrderServiceGetOrder.mock,
-		params: &OrderServiceMockOrderServiceGetOrderParams{ctx, orderID},
+	expectation := &OrderServiceMockGetOrderExpectation{
+		mock:   mmGetOrder.mock,
+		params: &OrderServiceMockGetOrderParams{ctx, orderID},
 	}
-	mmOrderServiceGetOrder.expectations = append(mmOrderServiceGetOrder.expectations, expectation)
+	mmGetOrder.expectations = append(mmGetOrder.expectations, expectation)
 	return expectation
 }
 
-// Then sets up OrderService.OrderServiceGetOrder return parameters for the expectation previously defined by the When method
-func (e *OrderServiceMockOrderServiceGetOrderExpectation) Then(op1 *model.Order, err error) *OrderServiceMock {
-	e.results = &OrderServiceMockOrderServiceGetOrderResults{op1, err}
+// Then sets up OrderService.GetOrder return parameters for the expectation previously defined by the When method
+func (e *OrderServiceMockGetOrderExpectation) Then(op1 *model.Order, err error) *OrderServiceMock {
+	e.results = &OrderServiceMockGetOrderResults{op1, err}
 	return e.mock
 }
 
-// Times sets number of times OrderService.OrderServiceGetOrder should be invoked
-func (mmOrderServiceGetOrder *mOrderServiceMockOrderServiceGetOrder) Times(n uint64) *mOrderServiceMockOrderServiceGetOrder {
+// Times sets number of times OrderService.GetOrder should be invoked
+func (mmGetOrder *mOrderServiceMockGetOrder) Times(n uint64) *mOrderServiceMockGetOrder {
 	if n == 0 {
-		mmOrderServiceGetOrder.mock.t.Fatalf("Times of OrderServiceMock.OrderServiceGetOrder mock can not be zero")
+		mmGetOrder.mock.t.Fatalf("Times of OrderServiceMock.GetOrder mock can not be zero")
 	}
-	mm_atomic.StoreUint64(&mmOrderServiceGetOrder.expectedInvocations, n)
-	return mmOrderServiceGetOrder
+	mm_atomic.StoreUint64(&mmGetOrder.expectedInvocations, n)
+	return mmGetOrder
 }
 
-func (mmOrderServiceGetOrder *mOrderServiceMockOrderServiceGetOrder) invocationsDone() bool {
-	if len(mmOrderServiceGetOrder.expectations) == 0 && mmOrderServiceGetOrder.defaultExpectation == nil && mmOrderServiceGetOrder.mock.funcOrderServiceGetOrder == nil {
+func (mmGetOrder *mOrderServiceMockGetOrder) invocationsDone() bool {
+	if len(mmGetOrder.expectations) == 0 && mmGetOrder.defaultExpectation == nil && mmGetOrder.mock.funcGetOrder == nil {
 		return true
 	}
 
-	totalInvocations := mm_atomic.LoadUint64(&mmOrderServiceGetOrder.mock.afterOrderServiceGetOrderCounter)
-	expectedInvocations := mm_atomic.LoadUint64(&mmOrderServiceGetOrder.expectedInvocations)
+	totalInvocations := mm_atomic.LoadUint64(&mmGetOrder.mock.afterGetOrderCounter)
+	expectedInvocations := mm_atomic.LoadUint64(&mmGetOrder.expectedInvocations)
 
 	return totalInvocations > 0 && (expectedInvocations == 0 || expectedInvocations == totalInvocations)
 }
 
-// OrderServiceGetOrder implements handler.OrderService
-func (mmOrderServiceGetOrder *OrderServiceMock) OrderServiceGetOrder(ctx context.Context, orderID model.OrderID) (op1 *model.Order, err error) {
-	mm_atomic.AddUint64(&mmOrderServiceGetOrder.beforeOrderServiceGetOrderCounter, 1)
-	defer mm_atomic.AddUint64(&mmOrderServiceGetOrder.afterOrderServiceGetOrderCounter, 1)
+// GetOrder implements handler.OrderService
+func (mmGetOrder *OrderServiceMock) GetOrder(ctx context.Context, orderID model.OrderID) (op1 *model.Order, err error) {
+	mm_atomic.AddUint64(&mmGetOrder.beforeGetOrderCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetOrder.afterGetOrderCounter, 1)
 
-	if mmOrderServiceGetOrder.inspectFuncOrderServiceGetOrder != nil {
-		mmOrderServiceGetOrder.inspectFuncOrderServiceGetOrder(ctx, orderID)
+	if mmGetOrder.inspectFuncGetOrder != nil {
+		mmGetOrder.inspectFuncGetOrder(ctx, orderID)
 	}
 
-	mm_params := OrderServiceMockOrderServiceGetOrderParams{ctx, orderID}
+	mm_params := OrderServiceMockGetOrderParams{ctx, orderID}
 
 	// Record call args
-	mmOrderServiceGetOrder.OrderServiceGetOrderMock.mutex.Lock()
-	mmOrderServiceGetOrder.OrderServiceGetOrderMock.callArgs = append(mmOrderServiceGetOrder.OrderServiceGetOrderMock.callArgs, &mm_params)
-	mmOrderServiceGetOrder.OrderServiceGetOrderMock.mutex.Unlock()
+	mmGetOrder.GetOrderMock.mutex.Lock()
+	mmGetOrder.GetOrderMock.callArgs = append(mmGetOrder.GetOrderMock.callArgs, &mm_params)
+	mmGetOrder.GetOrderMock.mutex.Unlock()
 
-	for _, e := range mmOrderServiceGetOrder.OrderServiceGetOrderMock.expectations {
+	for _, e := range mmGetOrder.GetOrderMock.expectations {
 		if minimock.Equal(*e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
 			return e.results.op1, e.results.err
 		}
 	}
 
-	if mmOrderServiceGetOrder.OrderServiceGetOrderMock.defaultExpectation != nil {
-		mm_atomic.AddUint64(&mmOrderServiceGetOrder.OrderServiceGetOrderMock.defaultExpectation.Counter, 1)
-		mm_want := mmOrderServiceGetOrder.OrderServiceGetOrderMock.defaultExpectation.params
-		mm_want_ptrs := mmOrderServiceGetOrder.OrderServiceGetOrderMock.defaultExpectation.paramPtrs
+	if mmGetOrder.GetOrderMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetOrder.GetOrderMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetOrder.GetOrderMock.defaultExpectation.params
+		mm_want_ptrs := mmGetOrder.GetOrderMock.defaultExpectation.paramPtrs
 
-		mm_got := OrderServiceMockOrderServiceGetOrderParams{ctx, orderID}
+		mm_got := OrderServiceMockGetOrderParams{ctx, orderID}
 
 		if mm_want_ptrs != nil {
 
 			if mm_want_ptrs.ctx != nil && !minimock.Equal(*mm_want_ptrs.ctx, mm_got.ctx) {
-				mmOrderServiceGetOrder.t.Errorf("OrderServiceMock.OrderServiceGetOrder got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
+				mmGetOrder.t.Errorf("OrderServiceMock.GetOrder got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
 			}
 
 			if mm_want_ptrs.orderID != nil && !minimock.Equal(*mm_want_ptrs.orderID, mm_got.orderID) {
-				mmOrderServiceGetOrder.t.Errorf("OrderServiceMock.OrderServiceGetOrder got unexpected parameter orderID, want: %#v, got: %#v%s\n", *mm_want_ptrs.orderID, mm_got.orderID, minimock.Diff(*mm_want_ptrs.orderID, mm_got.orderID))
+				mmGetOrder.t.Errorf("OrderServiceMock.GetOrder got unexpected parameter orderID, want: %#v, got: %#v%s\n", *mm_want_ptrs.orderID, mm_got.orderID, minimock.Diff(*mm_want_ptrs.orderID, mm_got.orderID))
 			}
 
 		} else if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmOrderServiceGetOrder.t.Errorf("OrderServiceMock.OrderServiceGetOrder got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+			mmGetOrder.t.Errorf("OrderServiceMock.GetOrder got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
 
-		mm_results := mmOrderServiceGetOrder.OrderServiceGetOrderMock.defaultExpectation.results
+		mm_results := mmGetOrder.GetOrderMock.defaultExpectation.results
 		if mm_results == nil {
-			mmOrderServiceGetOrder.t.Fatal("No results are set for the OrderServiceMock.OrderServiceGetOrder")
+			mmGetOrder.t.Fatal("No results are set for the OrderServiceMock.GetOrder")
 		}
 		return (*mm_results).op1, (*mm_results).err
 	}
-	if mmOrderServiceGetOrder.funcOrderServiceGetOrder != nil {
-		return mmOrderServiceGetOrder.funcOrderServiceGetOrder(ctx, orderID)
+	if mmGetOrder.funcGetOrder != nil {
+		return mmGetOrder.funcGetOrder(ctx, orderID)
 	}
-	mmOrderServiceGetOrder.t.Fatalf("Unexpected call to OrderServiceMock.OrderServiceGetOrder. %v %v", ctx, orderID)
+	mmGetOrder.t.Fatalf("Unexpected call to OrderServiceMock.GetOrder. %v %v", ctx, orderID)
 	return
 }
 
-// OrderServiceGetOrderAfterCounter returns a count of finished OrderServiceMock.OrderServiceGetOrder invocations
-func (mmOrderServiceGetOrder *OrderServiceMock) OrderServiceGetOrderAfterCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmOrderServiceGetOrder.afterOrderServiceGetOrderCounter)
+// GetOrderAfterCounter returns a count of finished OrderServiceMock.GetOrder invocations
+func (mmGetOrder *OrderServiceMock) GetOrderAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetOrder.afterGetOrderCounter)
 }
 
-// OrderServiceGetOrderBeforeCounter returns a count of OrderServiceMock.OrderServiceGetOrder invocations
-func (mmOrderServiceGetOrder *OrderServiceMock) OrderServiceGetOrderBeforeCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmOrderServiceGetOrder.beforeOrderServiceGetOrderCounter)
+// GetOrderBeforeCounter returns a count of OrderServiceMock.GetOrder invocations
+func (mmGetOrder *OrderServiceMock) GetOrderBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetOrder.beforeGetOrderCounter)
 }
 
-// Calls returns a list of arguments used in each call to OrderServiceMock.OrderServiceGetOrder.
+// Calls returns a list of arguments used in each call to OrderServiceMock.GetOrder.
 // The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmOrderServiceGetOrder *mOrderServiceMockOrderServiceGetOrder) Calls() []*OrderServiceMockOrderServiceGetOrderParams {
-	mmOrderServiceGetOrder.mutex.RLock()
+func (mmGetOrder *mOrderServiceMockGetOrder) Calls() []*OrderServiceMockGetOrderParams {
+	mmGetOrder.mutex.RLock()
 
-	argCopy := make([]*OrderServiceMockOrderServiceGetOrderParams, len(mmOrderServiceGetOrder.callArgs))
-	copy(argCopy, mmOrderServiceGetOrder.callArgs)
+	argCopy := make([]*OrderServiceMockGetOrderParams, len(mmGetOrder.callArgs))
+	copy(argCopy, mmGetOrder.callArgs)
 
-	mmOrderServiceGetOrder.mutex.RUnlock()
+	mmGetOrder.mutex.RUnlock()
 
 	return argCopy
 }
 
-// MinimockOrderServiceGetOrderDone returns true if the count of the OrderServiceGetOrder invocations corresponds
+// MinimockGetOrderDone returns true if the count of the GetOrder invocations corresponds
 // the number of defined expectations
-func (m *OrderServiceMock) MinimockOrderServiceGetOrderDone() bool {
-	if m.OrderServiceGetOrderMock.optional {
+func (m *OrderServiceMock) MinimockGetOrderDone() bool {
+	if m.GetOrderMock.optional {
 		// Optional methods provide '0 or more' call count restriction.
 		return true
 	}
 
-	for _, e := range m.OrderServiceGetOrderMock.expectations {
+	for _, e := range m.GetOrderMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
 			return false
 		}
 	}
 
-	return m.OrderServiceGetOrderMock.invocationsDone()
+	return m.GetOrderMock.invocationsDone()
 }
 
-// MinimockOrderServiceGetOrderInspect logs each unmet expectation
-func (m *OrderServiceMock) MinimockOrderServiceGetOrderInspect() {
-	for _, e := range m.OrderServiceGetOrderMock.expectations {
+// MinimockGetOrderInspect logs each unmet expectation
+func (m *OrderServiceMock) MinimockGetOrderInspect() {
+	for _, e := range m.GetOrderMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to OrderServiceMock.OrderServiceGetOrder with params: %#v", *e.params)
+			m.t.Errorf("Expected call to OrderServiceMock.GetOrder with params: %#v", *e.params)
 		}
 	}
 
-	afterOrderServiceGetOrderCounter := mm_atomic.LoadUint64(&m.afterOrderServiceGetOrderCounter)
+	afterGetOrderCounter := mm_atomic.LoadUint64(&m.afterGetOrderCounter)
 	// if default expectation was set then invocations count should be greater than zero
-	if m.OrderServiceGetOrderMock.defaultExpectation != nil && afterOrderServiceGetOrderCounter < 1 {
-		if m.OrderServiceGetOrderMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to OrderServiceMock.OrderServiceGetOrder")
+	if m.GetOrderMock.defaultExpectation != nil && afterGetOrderCounter < 1 {
+		if m.GetOrderMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to OrderServiceMock.GetOrder")
 		} else {
-			m.t.Errorf("Expected call to OrderServiceMock.OrderServiceGetOrder with params: %#v", *m.OrderServiceGetOrderMock.defaultExpectation.params)
+			m.t.Errorf("Expected call to OrderServiceMock.GetOrder with params: %#v", *m.GetOrderMock.defaultExpectation.params)
 		}
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcOrderServiceGetOrder != nil && afterOrderServiceGetOrderCounter < 1 {
-		m.t.Error("Expected call to OrderServiceMock.OrderServiceGetOrder")
+	if m.funcGetOrder != nil && afterGetOrderCounter < 1 {
+		m.t.Error("Expected call to OrderServiceMock.GetOrder")
 	}
 
-	if !m.OrderServiceGetOrderMock.invocationsDone() && afterOrderServiceGetOrderCounter > 0 {
-		m.t.Errorf("Expected %d calls to OrderServiceMock.OrderServiceGetOrder but found %d calls",
-			mm_atomic.LoadUint64(&m.OrderServiceGetOrderMock.expectedInvocations), afterOrderServiceGetOrderCounter)
+	if !m.GetOrderMock.invocationsDone() && afterGetOrderCounter > 0 {
+		m.t.Errorf("Expected %d calls to OrderServiceMock.GetOrder but found %d calls",
+			mm_atomic.LoadUint64(&m.GetOrderMock.expectedInvocations), afterGetOrderCounter)
 	}
 }
 
-type mOrderServiceMockOrderServiceSetStatus struct {
+type mOrderServiceMockSetStatus struct {
 	optional           bool
 	mock               *OrderServiceMock
-	defaultExpectation *OrderServiceMockOrderServiceSetStatusExpectation
-	expectations       []*OrderServiceMockOrderServiceSetStatusExpectation
+	defaultExpectation *OrderServiceMockSetStatusExpectation
+	expectations       []*OrderServiceMockSetStatusExpectation
 
-	callArgs []*OrderServiceMockOrderServiceSetStatusParams
+	callArgs []*OrderServiceMockSetStatusParams
 	mutex    sync.RWMutex
 
 	expectedInvocations uint64
 }
 
-// OrderServiceMockOrderServiceSetStatusExpectation specifies expectation struct of the OrderService.OrderServiceSetStatus
-type OrderServiceMockOrderServiceSetStatusExpectation struct {
+// OrderServiceMockSetStatusExpectation specifies expectation struct of the OrderService.SetStatus
+type OrderServiceMockSetStatusExpectation struct {
 	mock      *OrderServiceMock
-	params    *OrderServiceMockOrderServiceSetStatusParams
-	paramPtrs *OrderServiceMockOrderServiceSetStatusParamPtrs
-	results   *OrderServiceMockOrderServiceSetStatusResults
+	params    *OrderServiceMockSetStatusParams
+	paramPtrs *OrderServiceMockSetStatusParamPtrs
+	results   *OrderServiceMockSetStatusResults
 	Counter   uint64
 }
 
-// OrderServiceMockOrderServiceSetStatusParams contains parameters of the OrderService.OrderServiceSetStatus
-type OrderServiceMockOrderServiceSetStatusParams struct {
+// OrderServiceMockSetStatusParams contains parameters of the OrderService.SetStatus
+type OrderServiceMockSetStatusParams struct {
 	ctx     context.Context
 	orderID model.OrderID
 	status  model.Status
 }
 
-// OrderServiceMockOrderServiceSetStatusParamPtrs contains pointers to parameters of the OrderService.OrderServiceSetStatus
-type OrderServiceMockOrderServiceSetStatusParamPtrs struct {
+// OrderServiceMockSetStatusParamPtrs contains pointers to parameters of the OrderService.SetStatus
+type OrderServiceMockSetStatusParamPtrs struct {
 	ctx     *context.Context
 	orderID *model.OrderID
 	status  *model.Status
 }
 
-// OrderServiceMockOrderServiceSetStatusResults contains results of the OrderService.OrderServiceSetStatus
-type OrderServiceMockOrderServiceSetStatusResults struct {
+// OrderServiceMockSetStatusResults contains results of the OrderService.SetStatus
+type OrderServiceMockSetStatusResults struct {
 	err error
 }
 
@@ -747,306 +748,306 @@ type OrderServiceMockOrderServiceSetStatusResults struct {
 // Optional() makes method check to work in '0 or more' mode.
 // It is NOT RECOMMENDED to use this option by default unless you really need it, as it helps to
 // catch the problems when the expected method call is totally skipped during test run.
-func (mmOrderServiceSetStatus *mOrderServiceMockOrderServiceSetStatus) Optional() *mOrderServiceMockOrderServiceSetStatus {
-	mmOrderServiceSetStatus.optional = true
-	return mmOrderServiceSetStatus
+func (mmSetStatus *mOrderServiceMockSetStatus) Optional() *mOrderServiceMockSetStatus {
+	mmSetStatus.optional = true
+	return mmSetStatus
 }
 
-// Expect sets up expected params for OrderService.OrderServiceSetStatus
-func (mmOrderServiceSetStatus *mOrderServiceMockOrderServiceSetStatus) Expect(ctx context.Context, orderID model.OrderID, status model.Status) *mOrderServiceMockOrderServiceSetStatus {
-	if mmOrderServiceSetStatus.mock.funcOrderServiceSetStatus != nil {
-		mmOrderServiceSetStatus.mock.t.Fatalf("OrderServiceMock.OrderServiceSetStatus mock is already set by Set")
+// Expect sets up expected params for OrderService.SetStatus
+func (mmSetStatus *mOrderServiceMockSetStatus) Expect(ctx context.Context, orderID model.OrderID, status model.Status) *mOrderServiceMockSetStatus {
+	if mmSetStatus.mock.funcSetStatus != nil {
+		mmSetStatus.mock.t.Fatalf("OrderServiceMock.SetStatus mock is already set by Set")
 	}
 
-	if mmOrderServiceSetStatus.defaultExpectation == nil {
-		mmOrderServiceSetStatus.defaultExpectation = &OrderServiceMockOrderServiceSetStatusExpectation{}
+	if mmSetStatus.defaultExpectation == nil {
+		mmSetStatus.defaultExpectation = &OrderServiceMockSetStatusExpectation{}
 	}
 
-	if mmOrderServiceSetStatus.defaultExpectation.paramPtrs != nil {
-		mmOrderServiceSetStatus.mock.t.Fatalf("OrderServiceMock.OrderServiceSetStatus mock is already set by ExpectParams functions")
+	if mmSetStatus.defaultExpectation.paramPtrs != nil {
+		mmSetStatus.mock.t.Fatalf("OrderServiceMock.SetStatus mock is already set by ExpectParams functions")
 	}
 
-	mmOrderServiceSetStatus.defaultExpectation.params = &OrderServiceMockOrderServiceSetStatusParams{ctx, orderID, status}
-	for _, e := range mmOrderServiceSetStatus.expectations {
-		if minimock.Equal(e.params, mmOrderServiceSetStatus.defaultExpectation.params) {
-			mmOrderServiceSetStatus.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmOrderServiceSetStatus.defaultExpectation.params)
+	mmSetStatus.defaultExpectation.params = &OrderServiceMockSetStatusParams{ctx, orderID, status}
+	for _, e := range mmSetStatus.expectations {
+		if minimock.Equal(e.params, mmSetStatus.defaultExpectation.params) {
+			mmSetStatus.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmSetStatus.defaultExpectation.params)
 		}
 	}
 
-	return mmOrderServiceSetStatus
+	return mmSetStatus
 }
 
-// ExpectCtxParam1 sets up expected param ctx for OrderService.OrderServiceSetStatus
-func (mmOrderServiceSetStatus *mOrderServiceMockOrderServiceSetStatus) ExpectCtxParam1(ctx context.Context) *mOrderServiceMockOrderServiceSetStatus {
-	if mmOrderServiceSetStatus.mock.funcOrderServiceSetStatus != nil {
-		mmOrderServiceSetStatus.mock.t.Fatalf("OrderServiceMock.OrderServiceSetStatus mock is already set by Set")
+// ExpectCtxParam1 sets up expected param ctx for OrderService.SetStatus
+func (mmSetStatus *mOrderServiceMockSetStatus) ExpectCtxParam1(ctx context.Context) *mOrderServiceMockSetStatus {
+	if mmSetStatus.mock.funcSetStatus != nil {
+		mmSetStatus.mock.t.Fatalf("OrderServiceMock.SetStatus mock is already set by Set")
 	}
 
-	if mmOrderServiceSetStatus.defaultExpectation == nil {
-		mmOrderServiceSetStatus.defaultExpectation = &OrderServiceMockOrderServiceSetStatusExpectation{}
+	if mmSetStatus.defaultExpectation == nil {
+		mmSetStatus.defaultExpectation = &OrderServiceMockSetStatusExpectation{}
 	}
 
-	if mmOrderServiceSetStatus.defaultExpectation.params != nil {
-		mmOrderServiceSetStatus.mock.t.Fatalf("OrderServiceMock.OrderServiceSetStatus mock is already set by Expect")
+	if mmSetStatus.defaultExpectation.params != nil {
+		mmSetStatus.mock.t.Fatalf("OrderServiceMock.SetStatus mock is already set by Expect")
 	}
 
-	if mmOrderServiceSetStatus.defaultExpectation.paramPtrs == nil {
-		mmOrderServiceSetStatus.defaultExpectation.paramPtrs = &OrderServiceMockOrderServiceSetStatusParamPtrs{}
+	if mmSetStatus.defaultExpectation.paramPtrs == nil {
+		mmSetStatus.defaultExpectation.paramPtrs = &OrderServiceMockSetStatusParamPtrs{}
 	}
-	mmOrderServiceSetStatus.defaultExpectation.paramPtrs.ctx = &ctx
+	mmSetStatus.defaultExpectation.paramPtrs.ctx = &ctx
 
-	return mmOrderServiceSetStatus
+	return mmSetStatus
 }
 
-// ExpectOrderIDParam2 sets up expected param orderID for OrderService.OrderServiceSetStatus
-func (mmOrderServiceSetStatus *mOrderServiceMockOrderServiceSetStatus) ExpectOrderIDParam2(orderID model.OrderID) *mOrderServiceMockOrderServiceSetStatus {
-	if mmOrderServiceSetStatus.mock.funcOrderServiceSetStatus != nil {
-		mmOrderServiceSetStatus.mock.t.Fatalf("OrderServiceMock.OrderServiceSetStatus mock is already set by Set")
+// ExpectOrderIDParam2 sets up expected param orderID for OrderService.SetStatus
+func (mmSetStatus *mOrderServiceMockSetStatus) ExpectOrderIDParam2(orderID model.OrderID) *mOrderServiceMockSetStatus {
+	if mmSetStatus.mock.funcSetStatus != nil {
+		mmSetStatus.mock.t.Fatalf("OrderServiceMock.SetStatus mock is already set by Set")
 	}
 
-	if mmOrderServiceSetStatus.defaultExpectation == nil {
-		mmOrderServiceSetStatus.defaultExpectation = &OrderServiceMockOrderServiceSetStatusExpectation{}
+	if mmSetStatus.defaultExpectation == nil {
+		mmSetStatus.defaultExpectation = &OrderServiceMockSetStatusExpectation{}
 	}
 
-	if mmOrderServiceSetStatus.defaultExpectation.params != nil {
-		mmOrderServiceSetStatus.mock.t.Fatalf("OrderServiceMock.OrderServiceSetStatus mock is already set by Expect")
+	if mmSetStatus.defaultExpectation.params != nil {
+		mmSetStatus.mock.t.Fatalf("OrderServiceMock.SetStatus mock is already set by Expect")
 	}
 
-	if mmOrderServiceSetStatus.defaultExpectation.paramPtrs == nil {
-		mmOrderServiceSetStatus.defaultExpectation.paramPtrs = &OrderServiceMockOrderServiceSetStatusParamPtrs{}
+	if mmSetStatus.defaultExpectation.paramPtrs == nil {
+		mmSetStatus.defaultExpectation.paramPtrs = &OrderServiceMockSetStatusParamPtrs{}
 	}
-	mmOrderServiceSetStatus.defaultExpectation.paramPtrs.orderID = &orderID
+	mmSetStatus.defaultExpectation.paramPtrs.orderID = &orderID
 
-	return mmOrderServiceSetStatus
+	return mmSetStatus
 }
 
-// ExpectStatusParam3 sets up expected param status for OrderService.OrderServiceSetStatus
-func (mmOrderServiceSetStatus *mOrderServiceMockOrderServiceSetStatus) ExpectStatusParam3(status model.Status) *mOrderServiceMockOrderServiceSetStatus {
-	if mmOrderServiceSetStatus.mock.funcOrderServiceSetStatus != nil {
-		mmOrderServiceSetStatus.mock.t.Fatalf("OrderServiceMock.OrderServiceSetStatus mock is already set by Set")
+// ExpectStatusParam3 sets up expected param status for OrderService.SetStatus
+func (mmSetStatus *mOrderServiceMockSetStatus) ExpectStatusParam3(status model.Status) *mOrderServiceMockSetStatus {
+	if mmSetStatus.mock.funcSetStatus != nil {
+		mmSetStatus.mock.t.Fatalf("OrderServiceMock.SetStatus mock is already set by Set")
 	}
 
-	if mmOrderServiceSetStatus.defaultExpectation == nil {
-		mmOrderServiceSetStatus.defaultExpectation = &OrderServiceMockOrderServiceSetStatusExpectation{}
+	if mmSetStatus.defaultExpectation == nil {
+		mmSetStatus.defaultExpectation = &OrderServiceMockSetStatusExpectation{}
 	}
 
-	if mmOrderServiceSetStatus.defaultExpectation.params != nil {
-		mmOrderServiceSetStatus.mock.t.Fatalf("OrderServiceMock.OrderServiceSetStatus mock is already set by Expect")
+	if mmSetStatus.defaultExpectation.params != nil {
+		mmSetStatus.mock.t.Fatalf("OrderServiceMock.SetStatus mock is already set by Expect")
 	}
 
-	if mmOrderServiceSetStatus.defaultExpectation.paramPtrs == nil {
-		mmOrderServiceSetStatus.defaultExpectation.paramPtrs = &OrderServiceMockOrderServiceSetStatusParamPtrs{}
+	if mmSetStatus.defaultExpectation.paramPtrs == nil {
+		mmSetStatus.defaultExpectation.paramPtrs = &OrderServiceMockSetStatusParamPtrs{}
 	}
-	mmOrderServiceSetStatus.defaultExpectation.paramPtrs.status = &status
+	mmSetStatus.defaultExpectation.paramPtrs.status = &status
 
-	return mmOrderServiceSetStatus
+	return mmSetStatus
 }
 
-// Inspect accepts an inspector function that has same arguments as the OrderService.OrderServiceSetStatus
-func (mmOrderServiceSetStatus *mOrderServiceMockOrderServiceSetStatus) Inspect(f func(ctx context.Context, orderID model.OrderID, status model.Status)) *mOrderServiceMockOrderServiceSetStatus {
-	if mmOrderServiceSetStatus.mock.inspectFuncOrderServiceSetStatus != nil {
-		mmOrderServiceSetStatus.mock.t.Fatalf("Inspect function is already set for OrderServiceMock.OrderServiceSetStatus")
+// Inspect accepts an inspector function that has same arguments as the OrderService.SetStatus
+func (mmSetStatus *mOrderServiceMockSetStatus) Inspect(f func(ctx context.Context, orderID model.OrderID, status model.Status)) *mOrderServiceMockSetStatus {
+	if mmSetStatus.mock.inspectFuncSetStatus != nil {
+		mmSetStatus.mock.t.Fatalf("Inspect function is already set for OrderServiceMock.SetStatus")
 	}
 
-	mmOrderServiceSetStatus.mock.inspectFuncOrderServiceSetStatus = f
+	mmSetStatus.mock.inspectFuncSetStatus = f
 
-	return mmOrderServiceSetStatus
+	return mmSetStatus
 }
 
-// Return sets up results that will be returned by OrderService.OrderServiceSetStatus
-func (mmOrderServiceSetStatus *mOrderServiceMockOrderServiceSetStatus) Return(err error) *OrderServiceMock {
-	if mmOrderServiceSetStatus.mock.funcOrderServiceSetStatus != nil {
-		mmOrderServiceSetStatus.mock.t.Fatalf("OrderServiceMock.OrderServiceSetStatus mock is already set by Set")
+// Return sets up results that will be returned by OrderService.SetStatus
+func (mmSetStatus *mOrderServiceMockSetStatus) Return(err error) *OrderServiceMock {
+	if mmSetStatus.mock.funcSetStatus != nil {
+		mmSetStatus.mock.t.Fatalf("OrderServiceMock.SetStatus mock is already set by Set")
 	}
 
-	if mmOrderServiceSetStatus.defaultExpectation == nil {
-		mmOrderServiceSetStatus.defaultExpectation = &OrderServiceMockOrderServiceSetStatusExpectation{mock: mmOrderServiceSetStatus.mock}
+	if mmSetStatus.defaultExpectation == nil {
+		mmSetStatus.defaultExpectation = &OrderServiceMockSetStatusExpectation{mock: mmSetStatus.mock}
 	}
-	mmOrderServiceSetStatus.defaultExpectation.results = &OrderServiceMockOrderServiceSetStatusResults{err}
-	return mmOrderServiceSetStatus.mock
+	mmSetStatus.defaultExpectation.results = &OrderServiceMockSetStatusResults{err}
+	return mmSetStatus.mock
 }
 
-// Set uses given function f to mock the OrderService.OrderServiceSetStatus method
-func (mmOrderServiceSetStatus *mOrderServiceMockOrderServiceSetStatus) Set(f func(ctx context.Context, orderID model.OrderID, status model.Status) (err error)) *OrderServiceMock {
-	if mmOrderServiceSetStatus.defaultExpectation != nil {
-		mmOrderServiceSetStatus.mock.t.Fatalf("Default expectation is already set for the OrderService.OrderServiceSetStatus method")
+// Set uses given function f to mock the OrderService.SetStatus method
+func (mmSetStatus *mOrderServiceMockSetStatus) Set(f func(ctx context.Context, orderID model.OrderID, status model.Status) (err error)) *OrderServiceMock {
+	if mmSetStatus.defaultExpectation != nil {
+		mmSetStatus.mock.t.Fatalf("Default expectation is already set for the OrderService.SetStatus method")
 	}
 
-	if len(mmOrderServiceSetStatus.expectations) > 0 {
-		mmOrderServiceSetStatus.mock.t.Fatalf("Some expectations are already set for the OrderService.OrderServiceSetStatus method")
+	if len(mmSetStatus.expectations) > 0 {
+		mmSetStatus.mock.t.Fatalf("Some expectations are already set for the OrderService.SetStatus method")
 	}
 
-	mmOrderServiceSetStatus.mock.funcOrderServiceSetStatus = f
-	return mmOrderServiceSetStatus.mock
+	mmSetStatus.mock.funcSetStatus = f
+	return mmSetStatus.mock
 }
 
-// When sets expectation for the OrderService.OrderServiceSetStatus which will trigger the result defined by the following
+// When sets expectation for the OrderService.SetStatus which will trigger the result defined by the following
 // Then helper
-func (mmOrderServiceSetStatus *mOrderServiceMockOrderServiceSetStatus) When(ctx context.Context, orderID model.OrderID, status model.Status) *OrderServiceMockOrderServiceSetStatusExpectation {
-	if mmOrderServiceSetStatus.mock.funcOrderServiceSetStatus != nil {
-		mmOrderServiceSetStatus.mock.t.Fatalf("OrderServiceMock.OrderServiceSetStatus mock is already set by Set")
+func (mmSetStatus *mOrderServiceMockSetStatus) When(ctx context.Context, orderID model.OrderID, status model.Status) *OrderServiceMockSetStatusExpectation {
+	if mmSetStatus.mock.funcSetStatus != nil {
+		mmSetStatus.mock.t.Fatalf("OrderServiceMock.SetStatus mock is already set by Set")
 	}
 
-	expectation := &OrderServiceMockOrderServiceSetStatusExpectation{
-		mock:   mmOrderServiceSetStatus.mock,
-		params: &OrderServiceMockOrderServiceSetStatusParams{ctx, orderID, status},
+	expectation := &OrderServiceMockSetStatusExpectation{
+		mock:   mmSetStatus.mock,
+		params: &OrderServiceMockSetStatusParams{ctx, orderID, status},
 	}
-	mmOrderServiceSetStatus.expectations = append(mmOrderServiceSetStatus.expectations, expectation)
+	mmSetStatus.expectations = append(mmSetStatus.expectations, expectation)
 	return expectation
 }
 
-// Then sets up OrderService.OrderServiceSetStatus return parameters for the expectation previously defined by the When method
-func (e *OrderServiceMockOrderServiceSetStatusExpectation) Then(err error) *OrderServiceMock {
-	e.results = &OrderServiceMockOrderServiceSetStatusResults{err}
+// Then sets up OrderService.SetStatus return parameters for the expectation previously defined by the When method
+func (e *OrderServiceMockSetStatusExpectation) Then(err error) *OrderServiceMock {
+	e.results = &OrderServiceMockSetStatusResults{err}
 	return e.mock
 }
 
-// Times sets number of times OrderService.OrderServiceSetStatus should be invoked
-func (mmOrderServiceSetStatus *mOrderServiceMockOrderServiceSetStatus) Times(n uint64) *mOrderServiceMockOrderServiceSetStatus {
+// Times sets number of times OrderService.SetStatus should be invoked
+func (mmSetStatus *mOrderServiceMockSetStatus) Times(n uint64) *mOrderServiceMockSetStatus {
 	if n == 0 {
-		mmOrderServiceSetStatus.mock.t.Fatalf("Times of OrderServiceMock.OrderServiceSetStatus mock can not be zero")
+		mmSetStatus.mock.t.Fatalf("Times of OrderServiceMock.SetStatus mock can not be zero")
 	}
-	mm_atomic.StoreUint64(&mmOrderServiceSetStatus.expectedInvocations, n)
-	return mmOrderServiceSetStatus
+	mm_atomic.StoreUint64(&mmSetStatus.expectedInvocations, n)
+	return mmSetStatus
 }
 
-func (mmOrderServiceSetStatus *mOrderServiceMockOrderServiceSetStatus) invocationsDone() bool {
-	if len(mmOrderServiceSetStatus.expectations) == 0 && mmOrderServiceSetStatus.defaultExpectation == nil && mmOrderServiceSetStatus.mock.funcOrderServiceSetStatus == nil {
+func (mmSetStatus *mOrderServiceMockSetStatus) invocationsDone() bool {
+	if len(mmSetStatus.expectations) == 0 && mmSetStatus.defaultExpectation == nil && mmSetStatus.mock.funcSetStatus == nil {
 		return true
 	}
 
-	totalInvocations := mm_atomic.LoadUint64(&mmOrderServiceSetStatus.mock.afterOrderServiceSetStatusCounter)
-	expectedInvocations := mm_atomic.LoadUint64(&mmOrderServiceSetStatus.expectedInvocations)
+	totalInvocations := mm_atomic.LoadUint64(&mmSetStatus.mock.afterSetStatusCounter)
+	expectedInvocations := mm_atomic.LoadUint64(&mmSetStatus.expectedInvocations)
 
 	return totalInvocations > 0 && (expectedInvocations == 0 || expectedInvocations == totalInvocations)
 }
 
-// OrderServiceSetStatus implements handler.OrderService
-func (mmOrderServiceSetStatus *OrderServiceMock) OrderServiceSetStatus(ctx context.Context, orderID model.OrderID, status model.Status) (err error) {
-	mm_atomic.AddUint64(&mmOrderServiceSetStatus.beforeOrderServiceSetStatusCounter, 1)
-	defer mm_atomic.AddUint64(&mmOrderServiceSetStatus.afterOrderServiceSetStatusCounter, 1)
+// SetStatus implements handler.OrderService
+func (mmSetStatus *OrderServiceMock) SetStatus(ctx context.Context, orderID model.OrderID, status model.Status) (err error) {
+	mm_atomic.AddUint64(&mmSetStatus.beforeSetStatusCounter, 1)
+	defer mm_atomic.AddUint64(&mmSetStatus.afterSetStatusCounter, 1)
 
-	if mmOrderServiceSetStatus.inspectFuncOrderServiceSetStatus != nil {
-		mmOrderServiceSetStatus.inspectFuncOrderServiceSetStatus(ctx, orderID, status)
+	if mmSetStatus.inspectFuncSetStatus != nil {
+		mmSetStatus.inspectFuncSetStatus(ctx, orderID, status)
 	}
 
-	mm_params := OrderServiceMockOrderServiceSetStatusParams{ctx, orderID, status}
+	mm_params := OrderServiceMockSetStatusParams{ctx, orderID, status}
 
 	// Record call args
-	mmOrderServiceSetStatus.OrderServiceSetStatusMock.mutex.Lock()
-	mmOrderServiceSetStatus.OrderServiceSetStatusMock.callArgs = append(mmOrderServiceSetStatus.OrderServiceSetStatusMock.callArgs, &mm_params)
-	mmOrderServiceSetStatus.OrderServiceSetStatusMock.mutex.Unlock()
+	mmSetStatus.SetStatusMock.mutex.Lock()
+	mmSetStatus.SetStatusMock.callArgs = append(mmSetStatus.SetStatusMock.callArgs, &mm_params)
+	mmSetStatus.SetStatusMock.mutex.Unlock()
 
-	for _, e := range mmOrderServiceSetStatus.OrderServiceSetStatusMock.expectations {
+	for _, e := range mmSetStatus.SetStatusMock.expectations {
 		if minimock.Equal(*e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
 			return e.results.err
 		}
 	}
 
-	if mmOrderServiceSetStatus.OrderServiceSetStatusMock.defaultExpectation != nil {
-		mm_atomic.AddUint64(&mmOrderServiceSetStatus.OrderServiceSetStatusMock.defaultExpectation.Counter, 1)
-		mm_want := mmOrderServiceSetStatus.OrderServiceSetStatusMock.defaultExpectation.params
-		mm_want_ptrs := mmOrderServiceSetStatus.OrderServiceSetStatusMock.defaultExpectation.paramPtrs
+	if mmSetStatus.SetStatusMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmSetStatus.SetStatusMock.defaultExpectation.Counter, 1)
+		mm_want := mmSetStatus.SetStatusMock.defaultExpectation.params
+		mm_want_ptrs := mmSetStatus.SetStatusMock.defaultExpectation.paramPtrs
 
-		mm_got := OrderServiceMockOrderServiceSetStatusParams{ctx, orderID, status}
+		mm_got := OrderServiceMockSetStatusParams{ctx, orderID, status}
 
 		if mm_want_ptrs != nil {
 
 			if mm_want_ptrs.ctx != nil && !minimock.Equal(*mm_want_ptrs.ctx, mm_got.ctx) {
-				mmOrderServiceSetStatus.t.Errorf("OrderServiceMock.OrderServiceSetStatus got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
+				mmSetStatus.t.Errorf("OrderServiceMock.SetStatus got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
 			}
 
 			if mm_want_ptrs.orderID != nil && !minimock.Equal(*mm_want_ptrs.orderID, mm_got.orderID) {
-				mmOrderServiceSetStatus.t.Errorf("OrderServiceMock.OrderServiceSetStatus got unexpected parameter orderID, want: %#v, got: %#v%s\n", *mm_want_ptrs.orderID, mm_got.orderID, minimock.Diff(*mm_want_ptrs.orderID, mm_got.orderID))
+				mmSetStatus.t.Errorf("OrderServiceMock.SetStatus got unexpected parameter orderID, want: %#v, got: %#v%s\n", *mm_want_ptrs.orderID, mm_got.orderID, minimock.Diff(*mm_want_ptrs.orderID, mm_got.orderID))
 			}
 
 			if mm_want_ptrs.status != nil && !minimock.Equal(*mm_want_ptrs.status, mm_got.status) {
-				mmOrderServiceSetStatus.t.Errorf("OrderServiceMock.OrderServiceSetStatus got unexpected parameter status, want: %#v, got: %#v%s\n", *mm_want_ptrs.status, mm_got.status, minimock.Diff(*mm_want_ptrs.status, mm_got.status))
+				mmSetStatus.t.Errorf("OrderServiceMock.SetStatus got unexpected parameter status, want: %#v, got: %#v%s\n", *mm_want_ptrs.status, mm_got.status, minimock.Diff(*mm_want_ptrs.status, mm_got.status))
 			}
 
 		} else if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmOrderServiceSetStatus.t.Errorf("OrderServiceMock.OrderServiceSetStatus got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+			mmSetStatus.t.Errorf("OrderServiceMock.SetStatus got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
 
-		mm_results := mmOrderServiceSetStatus.OrderServiceSetStatusMock.defaultExpectation.results
+		mm_results := mmSetStatus.SetStatusMock.defaultExpectation.results
 		if mm_results == nil {
-			mmOrderServiceSetStatus.t.Fatal("No results are set for the OrderServiceMock.OrderServiceSetStatus")
+			mmSetStatus.t.Fatal("No results are set for the OrderServiceMock.SetStatus")
 		}
 		return (*mm_results).err
 	}
-	if mmOrderServiceSetStatus.funcOrderServiceSetStatus != nil {
-		return mmOrderServiceSetStatus.funcOrderServiceSetStatus(ctx, orderID, status)
+	if mmSetStatus.funcSetStatus != nil {
+		return mmSetStatus.funcSetStatus(ctx, orderID, status)
 	}
-	mmOrderServiceSetStatus.t.Fatalf("Unexpected call to OrderServiceMock.OrderServiceSetStatus. %v %v %v", ctx, orderID, status)
+	mmSetStatus.t.Fatalf("Unexpected call to OrderServiceMock.SetStatus. %v %v %v", ctx, orderID, status)
 	return
 }
 
-// OrderServiceSetStatusAfterCounter returns a count of finished OrderServiceMock.OrderServiceSetStatus invocations
-func (mmOrderServiceSetStatus *OrderServiceMock) OrderServiceSetStatusAfterCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmOrderServiceSetStatus.afterOrderServiceSetStatusCounter)
+// SetStatusAfterCounter returns a count of finished OrderServiceMock.SetStatus invocations
+func (mmSetStatus *OrderServiceMock) SetStatusAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmSetStatus.afterSetStatusCounter)
 }
 
-// OrderServiceSetStatusBeforeCounter returns a count of OrderServiceMock.OrderServiceSetStatus invocations
-func (mmOrderServiceSetStatus *OrderServiceMock) OrderServiceSetStatusBeforeCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmOrderServiceSetStatus.beforeOrderServiceSetStatusCounter)
+// SetStatusBeforeCounter returns a count of OrderServiceMock.SetStatus invocations
+func (mmSetStatus *OrderServiceMock) SetStatusBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmSetStatus.beforeSetStatusCounter)
 }
 
-// Calls returns a list of arguments used in each call to OrderServiceMock.OrderServiceSetStatus.
+// Calls returns a list of arguments used in each call to OrderServiceMock.SetStatus.
 // The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmOrderServiceSetStatus *mOrderServiceMockOrderServiceSetStatus) Calls() []*OrderServiceMockOrderServiceSetStatusParams {
-	mmOrderServiceSetStatus.mutex.RLock()
+func (mmSetStatus *mOrderServiceMockSetStatus) Calls() []*OrderServiceMockSetStatusParams {
+	mmSetStatus.mutex.RLock()
 
-	argCopy := make([]*OrderServiceMockOrderServiceSetStatusParams, len(mmOrderServiceSetStatus.callArgs))
-	copy(argCopy, mmOrderServiceSetStatus.callArgs)
+	argCopy := make([]*OrderServiceMockSetStatusParams, len(mmSetStatus.callArgs))
+	copy(argCopy, mmSetStatus.callArgs)
 
-	mmOrderServiceSetStatus.mutex.RUnlock()
+	mmSetStatus.mutex.RUnlock()
 
 	return argCopy
 }
 
-// MinimockOrderServiceSetStatusDone returns true if the count of the OrderServiceSetStatus invocations corresponds
+// MinimockSetStatusDone returns true if the count of the SetStatus invocations corresponds
 // the number of defined expectations
-func (m *OrderServiceMock) MinimockOrderServiceSetStatusDone() bool {
-	if m.OrderServiceSetStatusMock.optional {
+func (m *OrderServiceMock) MinimockSetStatusDone() bool {
+	if m.SetStatusMock.optional {
 		// Optional methods provide '0 or more' call count restriction.
 		return true
 	}
 
-	for _, e := range m.OrderServiceSetStatusMock.expectations {
+	for _, e := range m.SetStatusMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
 			return false
 		}
 	}
 
-	return m.OrderServiceSetStatusMock.invocationsDone()
+	return m.SetStatusMock.invocationsDone()
 }
 
-// MinimockOrderServiceSetStatusInspect logs each unmet expectation
-func (m *OrderServiceMock) MinimockOrderServiceSetStatusInspect() {
-	for _, e := range m.OrderServiceSetStatusMock.expectations {
+// MinimockSetStatusInspect logs each unmet expectation
+func (m *OrderServiceMock) MinimockSetStatusInspect() {
+	for _, e := range m.SetStatusMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to OrderServiceMock.OrderServiceSetStatus with params: %#v", *e.params)
+			m.t.Errorf("Expected call to OrderServiceMock.SetStatus with params: %#v", *e.params)
 		}
 	}
 
-	afterOrderServiceSetStatusCounter := mm_atomic.LoadUint64(&m.afterOrderServiceSetStatusCounter)
+	afterSetStatusCounter := mm_atomic.LoadUint64(&m.afterSetStatusCounter)
 	// if default expectation was set then invocations count should be greater than zero
-	if m.OrderServiceSetStatusMock.defaultExpectation != nil && afterOrderServiceSetStatusCounter < 1 {
-		if m.OrderServiceSetStatusMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to OrderServiceMock.OrderServiceSetStatus")
+	if m.SetStatusMock.defaultExpectation != nil && afterSetStatusCounter < 1 {
+		if m.SetStatusMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to OrderServiceMock.SetStatus")
 		} else {
-			m.t.Errorf("Expected call to OrderServiceMock.OrderServiceSetStatus with params: %#v", *m.OrderServiceSetStatusMock.defaultExpectation.params)
+			m.t.Errorf("Expected call to OrderServiceMock.SetStatus with params: %#v", *m.SetStatusMock.defaultExpectation.params)
 		}
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcOrderServiceSetStatus != nil && afterOrderServiceSetStatusCounter < 1 {
-		m.t.Error("Expected call to OrderServiceMock.OrderServiceSetStatus")
+	if m.funcSetStatus != nil && afterSetStatusCounter < 1 {
+		m.t.Error("Expected call to OrderServiceMock.SetStatus")
 	}
 
-	if !m.OrderServiceSetStatusMock.invocationsDone() && afterOrderServiceSetStatusCounter > 0 {
-		m.t.Errorf("Expected %d calls to OrderServiceMock.OrderServiceSetStatus but found %d calls",
-			mm_atomic.LoadUint64(&m.OrderServiceSetStatusMock.expectedInvocations), afterOrderServiceSetStatusCounter)
+	if !m.SetStatusMock.invocationsDone() && afterSetStatusCounter > 0 {
+		m.t.Errorf("Expected %d calls to OrderServiceMock.SetStatus but found %d calls",
+			mm_atomic.LoadUint64(&m.SetStatusMock.expectedInvocations), afterSetStatusCounter)
 	}
 }
 
@@ -1054,11 +1055,11 @@ func (m *OrderServiceMock) MinimockOrderServiceSetStatusInspect() {
 func (m *OrderServiceMock) MinimockFinish() {
 	m.finishOnce.Do(func() {
 		if !m.minimockDone() {
-			m.MinimockOrderServiceCreateInspect()
+			m.MinimockCreateInspect()
 
-			m.MinimockOrderServiceGetOrderInspect()
+			m.MinimockGetOrderInspect()
 
-			m.MinimockOrderServiceSetStatusInspect()
+			m.MinimockSetStatusInspect()
 			m.t.FailNow()
 		}
 	})
@@ -1083,7 +1084,7 @@ func (m *OrderServiceMock) MinimockWait(timeout mm_time.Duration) {
 func (m *OrderServiceMock) minimockDone() bool {
 	done := true
 	return done &&
-		m.MinimockOrderServiceCreateDone() &&
-		m.MinimockOrderServiceGetOrderDone() &&
-		m.MinimockOrderServiceSetStatusDone()
+		m.MinimockCreateDone() &&
+		m.MinimockGetOrderDone() &&
+		m.MinimockSetStatusDone()
 }

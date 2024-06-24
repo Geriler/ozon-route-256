@@ -15,10 +15,16 @@ func main() {
 
 	log := logger.SetupLogger(cfg.Env)
 
-	grpcApp := app.NewGRPCApp(cfg, log)
+	grpcApp, err := app.NewGRPCApp(cfg, log)
+	if err != nil {
+		log.Error(err.Error())
+		os.Exit(1)
+	}
+
 	httpgw := app.NewHTTPGW(cfg, log)
 
 	go func() {
+		log.Info("Starting gRPC application", "port", cfg.GRPC.Port)
 		err := grpcApp.ListenAndServe()
 		if err != nil {
 			log.Error(err.Error())
@@ -27,6 +33,7 @@ func main() {
 	}()
 
 	go func() {
+		log.Info("Starting HTTP application", "port", cfg.HTTP.Port)
 		err := httpgw.ListenAndServe()
 		if err != nil {
 			log.Error(err.Error())

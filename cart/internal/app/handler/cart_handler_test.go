@@ -673,6 +673,7 @@ func TestCartHandler_Checkout(t *testing.T) {
 		}).Return(&loms.OrderCreateResponse{
 			OrderId: 1,
 		}, nil)
+		cartService.DeleteCartByUserIDMock.Expect(context.Background(), userId)
 
 		_, err = cartHandler.Checkout(context.Background(), &model.UserRequest{
 			UserID: userId,

@@ -9,9 +9,9 @@ import (
 
 type Config struct {
 	Env     string        `yaml:"env"`
-	Port    int           `yaml:"port"`
+	HTTP    AddressConfig `yaml:"http"`
 	Product ProductConfig `yaml:"product"`
-	GRPC    GRPCConfig    `yaml:"grpc"`
+	GRPC    AddressConfig `yaml:"grpc"`
 }
 
 type ProductConfig struct {
@@ -19,8 +19,9 @@ type ProductConfig struct {
 	Token   string `yaml:"token"`
 }
 
-type GRPCConfig struct {
-	Port int `yaml:"port"`
+type AddressConfig struct {
+	Host string `yaml:"host"`
+	Port int    `yaml:"port"`
 }
 
 func MustLoad() Config {

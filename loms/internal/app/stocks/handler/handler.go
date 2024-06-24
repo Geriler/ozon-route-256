@@ -3,15 +3,16 @@ package handler
 import (
 	"context"
 
+	orderModel "route256/loms/internal/order/model"
 	stocksModel "route256/loms/internal/stocks/model"
 	loms "route256/loms/pb/api"
 )
 
 type StocksService interface {
-	StocksServiceReserve(ctx context.Context, sku stocksModel.SKU, count int64) error
-	StocksServiceReserveRemove(ctx context.Context, sku stocksModel.SKU, count int64) error
-	StocksServiceReserveCancel(ctx context.Context, sku stocksModel.SKU, count int64) error
-	StocksServiceGetBySKU(ctx context.Context, sku stocksModel.SKU) (*stocksModel.Stocks, error)
+	Reserve(ctx context.Context, items []*orderModel.Item) error
+	ReserveRemove(ctx context.Context, items []*orderModel.Item) error
+	ReserveCancel(ctx context.Context, items []*orderModel.Item) error
+	GetBySKU(ctx context.Context, sku stocksModel.SKU) (*stocksModel.Stocks, error)
 }
 
 type StocksHandler struct {

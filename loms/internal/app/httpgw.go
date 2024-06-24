@@ -37,13 +37,13 @@ func NewHTTPGW(cfg config.Config, log *slog.Logger) *HTTPGW {
 	return &HTTPGW{
 		cfg:    cfg,
 		log:    log,
-		server: &http.Server{Addr: fmt.Sprintf(":%d", cfg.HTTP.Port), Handler: middleware.WithHTTPLoggingMiddleware(mux, log)},
+		server: &http.Server{Addr: fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port), Handler: middleware.WithHTTPLoggingMiddleware(mux, log)},
 		mux:    mux,
 	}
 }
 
 func (a *HTTPGW) ListenAndServe() error {
-	conn, err := grpc.NewClient(fmt.Sprintf(":%d", a.cfg.GRPC.Port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(fmt.Sprintf("dns:%s:%d", a.cfg.GRPC.Host, a.cfg.GRPC.Port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return err
 	}
