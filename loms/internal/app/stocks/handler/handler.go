@@ -9,10 +9,10 @@ import (
 )
 
 type StocksService interface {
-	StocksServiceReserve(ctx context.Context, items []*orderModel.Item) error
-	StocksServiceReserveRemove(ctx context.Context, items []*orderModel.Item) error
-	StocksServiceReserveCancel(ctx context.Context, items []*orderModel.Item) error
-	StocksServiceGetBySKU(ctx context.Context, sku stocksModel.SKU) (*stocksModel.Stocks, error)
+	Reserve(ctx context.Context, items []*orderModel.Item) error
+	ReserveRemove(ctx context.Context, items []*orderModel.Item) error
+	ReserveCancel(ctx context.Context, items []*orderModel.Item) error
+	GetBySKU(ctx context.Context, sku stocksModel.SKU) (*stocksModel.Stocks, error)
 }
 
 type StocksHandler struct {

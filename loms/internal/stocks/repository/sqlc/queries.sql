@@ -1,16 +1,19 @@
 -- name: Reserve :exec
 UPDATE order_items
-SET status = 'reserved'
+SET status = 'reserved',
+    updated_at = CURRENT_TIMESTAMP
 WHERE order_id = $1 AND item_id = $2;
 
 -- name: ReserveRemove :exec
 UPDATE order_items
-SET status = 'sold'
+SET status = 'sold',
+    updated_at = CURRENT_TIMESTAMP
 WHERE order_id = $1 AND item_id = $2;
 
 -- name: ReserveCancel :exec
 UPDATE order_items
-SET status = 'canceled'
+SET status = 'canceled',
+    updated_at = CURRENT_TIMESTAMP
 WHERE order_id = $1 AND item_id = $2;
 
 -- name: GetBySKU :one

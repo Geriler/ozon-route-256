@@ -42,7 +42,8 @@ func (q *Queries) GetBySKU(ctx context.Context, sku int32) (GetBySKURow, error) 
 
 const reserve = `-- name: Reserve :exec
 UPDATE order_items
-SET status = 'reserved'
+SET status = 'reserved',
+    updated_at = CURRENT_TIMESTAMP
 WHERE order_id = $1 AND item_id = $2
 `
 
@@ -58,7 +59,8 @@ func (q *Queries) Reserve(ctx context.Context, arg ReserveParams) error {
 
 const reserveCancel = `-- name: ReserveCancel :exec
 UPDATE order_items
-SET status = 'canceled'
+SET status = 'canceled',
+    updated_at = CURRENT_TIMESTAMP
 WHERE order_id = $1 AND item_id = $2
 `
 
@@ -74,7 +76,8 @@ func (q *Queries) ReserveCancel(ctx context.Context, arg ReserveCancelParams) er
 
 const reserveRemove = `-- name: ReserveRemove :exec
 UPDATE order_items
-SET status = 'sold'
+SET status = 'sold',
+    updated_at = CURRENT_TIMESTAMP
 WHERE order_id = $1 AND item_id = $2
 `
 

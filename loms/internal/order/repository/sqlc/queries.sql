@@ -1,6 +1,7 @@
 -- name: SetStatus :exec
 UPDATE orders
-SET status = $1
+SET status = $1,
+    updated_at = CURRENT_TIMESTAMP
 WHERE id = $2;
 
 -- name: GetOrder :one
@@ -14,8 +15,8 @@ FROM order_items
 WHERE order_id = $1;
 
 -- name: Create :one
-INSERT INTO orders (user_id, status)
-VALUES ($1, 'new')
+INSERT INTO orders (user_id)
+VALUES ($1)
 RETURNING id;
 
 -- name: AddItemToOrder :exec

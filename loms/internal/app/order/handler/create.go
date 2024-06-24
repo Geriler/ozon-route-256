@@ -11,7 +11,7 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 	var err error
 	items := model.LomsItemsToItems(req.Items)
 
-	orderID, err := h.orderService.OrderServiceCreate(ctx, &model.Order{
+	orderID, err := h.orderService.Create(ctx, &model.Order{
 		UserID: req.UserId,
 		Status: model.StatusNew,
 		Items:  items,
@@ -24,9 +24,9 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 		item.OrderID = int64(orderID)
 	}
 
-	err = h.stocksService.StocksServiceReserve(ctx, items)
+	err = h.stocksService.Reserve(ctx, items)
 	if err != nil {
-		errSetStatus := h.orderService.OrderServiceSetStatus(ctx, orderID, model.StatusFailed)
+		errSetStatus := h.orderService.SetStatus(ctx, orderID, model.StatusFailed)
 		if errSetStatus != nil {
 			return nil, errSetStatus
 		}
@@ -34,7 +34,7 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 		return nil, err
 	}
 
-	err = h.orderService.OrderServiceSetStatus(ctx, orderID, model.StatusAwaitingPayment)
+	err = h.orderService.SetStatus(ctx, orderID, model.StatusAwaitingPayment)
 	if err != nil {
 		return nil, err
 	}

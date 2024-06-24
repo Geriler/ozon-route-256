@@ -33,7 +33,7 @@ func TestStocksHandler_StocksInfo(t *testing.T) {
 		stocksService := mock.NewStocksServiceMock(ctrl)
 		stocksHandler := NewStocksHandler(stocksService)
 
-		stocksService.StocksServiceGetBySKUMock.Expect(context.Background(), items[0].SKU).Return(&stocksModel.Stocks{
+		stocksService.GetBySKUMock.Expect(context.Background(), items[0].SKU).Return(&stocksModel.Stocks{
 			SKU:           items[0].SKU,
 			TotalCount:    10,
 			ReservedCount: 0,
@@ -52,7 +52,7 @@ func TestStocksHandler_StocksInfo(t *testing.T) {
 		stocksService := mock.NewStocksServiceMock(ctrl)
 		stocksHandler := NewStocksHandler(stocksService)
 
-		stocksService.StocksServiceGetBySKUMock.Expect(context.Background(), items[0].SKU).Return(nil, stocksModel.ErrSkuNotFound)
+		stocksService.GetBySKUMock.Expect(context.Background(), items[0].SKU).Return(nil, stocksModel.ErrSkuNotFound)
 
 		_, err := stocksHandler.StocksInfo(context.Background(), &loms.StocksInfoRequest{
 			SkuId: int64(items[0].SKU),

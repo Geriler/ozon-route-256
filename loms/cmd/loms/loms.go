@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,11 +15,16 @@ func main() {
 
 	log := logger.SetupLogger(cfg.Env)
 
-	grpcApp := app.NewGRPCApp(cfg, log)
+	grpcApp, err := app.NewGRPCApp(cfg, log)
+	if err != nil {
+		log.Error(err.Error())
+		os.Exit(1)
+	}
+
 	httpgw := app.NewHTTPGW(cfg, log)
 
 	go func() {
-		log.Info(fmt.Sprintf("Starting gRPC application on port %d", cfg.GRPC.Port))
+		log.Info("Starting gRPC application", "port", cfg.GRPC.Port)
 		err := grpcApp.ListenAndServe()
 		if err != nil {
 			log.Error(err.Error())
@@ -29,7 +33,7 @@ func main() {
 	}()
 
 	go func() {
-		log.Info(fmt.Sprintf("Starting HTTP application on port %d", cfg.HTTP.Port))
+		log.Info("Starting HTTP application", "port", cfg.HTTP.Port)
 		err := httpgw.ListenAndServe()
 		if err != nil {
 			log.Error(err.Error())

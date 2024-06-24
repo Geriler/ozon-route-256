@@ -8,7 +8,7 @@ import (
 )
 
 func (h *StocksHandler) StocksInfo(ctx context.Context, req *loms.StocksInfoRequest) (*loms.StocksInfoResponse, error) {
-	stock, err := h.stocksService.StocksServiceGetBySKU(ctx, model.SKU(req.SkuId))
+	stock, err := h.stocksService.GetBySKU(ctx, model.SKU(req.SkuId))
 	if err != nil {
 		return nil, err
 	}

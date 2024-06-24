@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/jackc/pgx/v5"
 	"route256/loms/internal/order/model"
@@ -47,7 +49,7 @@ func (r *PostgresOrderRepository) GetOrder(ctx context.Context, orderID model.Or
 	if err != nil {
 		return nil, err
 	}
-	if row.ID == 0 {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, model.ErrOrderNotFound
 	}
 

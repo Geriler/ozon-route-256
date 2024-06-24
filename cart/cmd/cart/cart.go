@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"route256/cart/internal/app"
@@ -22,7 +21,7 @@ func main() {
 
 	application := app.NewApp(cfg, log, grpcClient)
 
-	log.Info(fmt.Sprintf("Starting HTTP application on port %d", cfg.HTTP.Port))
+	log.Info("Starting HTTP application", "port", cfg.HTTP.Port)
 
 	err = application.ListenAndServe()
 	if err != nil {

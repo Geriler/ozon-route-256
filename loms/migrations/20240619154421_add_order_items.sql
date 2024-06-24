@@ -9,7 +9,9 @@ CREATE TABLE IF NOT EXISTS order_items
     CONSTRAINT order_items_stocks_items_sku_fk
       REFERENCES stocks_items,
   count    INTEGER DEFAULT 0 NOT NULL,
-  status   TEXT              NOT NULL
+  status   TEXT              NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 -- +goose StatementEnd

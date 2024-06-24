@@ -26,8 +26,8 @@ func (q *Queries) AddItemToOrder(ctx context.Context, arg AddItemToOrderParams) 
 }
 
 const create = `-- name: Create :one
-INSERT INTO orders (user_id, status)
-VALUES ($1, 'new')
+INSERT INTO orders (user_id)
+VALUES ($1)
 RETURNING id
 `
 
@@ -44,9 +44,15 @@ FROM orders
 WHERE id = $1
 `
 
-func (q *Queries) GetOrder(ctx context.Context, id int32) (Order, error) {
+type GetOrderRow struct {
+	ID     int32
+	UserID int32
+	Status string
+}
+
+func (q *Queries) GetOrder(ctx context.Context, id int32) (GetOrderRow, error) {
 	row := q.db.QueryRow(ctx, getOrder, id)
-	var i Order
+	var i GetOrderRow
 	err := row.Scan(&i.ID, &i.UserID, &i.Status)
 	return i, err
 }
@@ -84,7 +90,8 @@ func (q *Queries) GetOrderItems(ctx context.Context, orderID int32) ([]GetOrderI
 
 const setStatus = `-- name: SetStatus :exec
 UPDATE orders
-SET status = $1
+SET status = $1,
+    updated_at = CURRENT_TIMESTAMP
 WHERE id = $2
 `
 

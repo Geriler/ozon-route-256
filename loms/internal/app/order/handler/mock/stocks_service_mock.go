@@ -20,29 +20,29 @@ type StocksServiceMock struct {
 	t          minimock.Tester
 	finishOnce sync.Once
 
-	funcStocksServiceGetBySKU          func(ctx context.Context, sku stocksModel.SKU) (sp1 *stocksModel.Stocks, err error)
-	inspectFuncStocksServiceGetBySKU   func(ctx context.Context, sku stocksModel.SKU)
-	afterStocksServiceGetBySKUCounter  uint64
-	beforeStocksServiceGetBySKUCounter uint64
-	StocksServiceGetBySKUMock          mStocksServiceMockStocksServiceGetBySKU
+	funcGetBySKU          func(ctx context.Context, sku stocksModel.SKU) (sp1 *stocksModel.Stocks, err error)
+	inspectFuncGetBySKU   func(ctx context.Context, sku stocksModel.SKU)
+	afterGetBySKUCounter  uint64
+	beforeGetBySKUCounter uint64
+	GetBySKUMock          mStocksServiceMockGetBySKU
 
-	funcStocksServiceReserve          func(ctx context.Context, items []*orderModel.Item) (err error)
-	inspectFuncStocksServiceReserve   func(ctx context.Context, items []*orderModel.Item)
-	afterStocksServiceReserveCounter  uint64
-	beforeStocksServiceReserveCounter uint64
-	StocksServiceReserveMock          mStocksServiceMockStocksServiceReserve
+	funcReserve          func(ctx context.Context, items []*orderModel.Item) (err error)
+	inspectFuncReserve   func(ctx context.Context, items []*orderModel.Item)
+	afterReserveCounter  uint64
+	beforeReserveCounter uint64
+	ReserveMock          mStocksServiceMockReserve
 
-	funcStocksServiceReserveCancel          func(ctx context.Context, items []*orderModel.Item) (err error)
-	inspectFuncStocksServiceReserveCancel   func(ctx context.Context, items []*orderModel.Item)
-	afterStocksServiceReserveCancelCounter  uint64
-	beforeStocksServiceReserveCancelCounter uint64
-	StocksServiceReserveCancelMock          mStocksServiceMockStocksServiceReserveCancel
+	funcReserveCancel          func(ctx context.Context, items []*orderModel.Item) (err error)
+	inspectFuncReserveCancel   func(ctx context.Context, items []*orderModel.Item)
+	afterReserveCancelCounter  uint64
+	beforeReserveCancelCounter uint64
+	ReserveCancelMock          mStocksServiceMockReserveCancel
 
-	funcStocksServiceReserveRemove          func(ctx context.Context, items []*orderModel.Item) (err error)
-	inspectFuncStocksServiceReserveRemove   func(ctx context.Context, items []*orderModel.Item)
-	afterStocksServiceReserveRemoveCounter  uint64
-	beforeStocksServiceReserveRemoveCounter uint64
-	StocksServiceReserveRemoveMock          mStocksServiceMockStocksServiceReserveRemove
+	funcReserveRemove          func(ctx context.Context, items []*orderModel.Item) (err error)
+	inspectFuncReserveRemove   func(ctx context.Context, items []*orderModel.Item)
+	afterReserveRemoveCounter  uint64
+	beforeReserveRemoveCounter uint64
+	ReserveRemoveMock          mStocksServiceMockReserveRemove
 }
 
 // NewStocksServiceMock returns a mock for handler.StocksService
@@ -53,58 +53,58 @@ func NewStocksServiceMock(t minimock.Tester) *StocksServiceMock {
 		controller.RegisterMocker(m)
 	}
 
-	m.StocksServiceGetBySKUMock = mStocksServiceMockStocksServiceGetBySKU{mock: m}
-	m.StocksServiceGetBySKUMock.callArgs = []*StocksServiceMockStocksServiceGetBySKUParams{}
+	m.GetBySKUMock = mStocksServiceMockGetBySKU{mock: m}
+	m.GetBySKUMock.callArgs = []*StocksServiceMockGetBySKUParams{}
 
-	m.StocksServiceReserveMock = mStocksServiceMockStocksServiceReserve{mock: m}
-	m.StocksServiceReserveMock.callArgs = []*StocksServiceMockStocksServiceReserveParams{}
+	m.ReserveMock = mStocksServiceMockReserve{mock: m}
+	m.ReserveMock.callArgs = []*StocksServiceMockReserveParams{}
 
-	m.StocksServiceReserveCancelMock = mStocksServiceMockStocksServiceReserveCancel{mock: m}
-	m.StocksServiceReserveCancelMock.callArgs = []*StocksServiceMockStocksServiceReserveCancelParams{}
+	m.ReserveCancelMock = mStocksServiceMockReserveCancel{mock: m}
+	m.ReserveCancelMock.callArgs = []*StocksServiceMockReserveCancelParams{}
 
-	m.StocksServiceReserveRemoveMock = mStocksServiceMockStocksServiceReserveRemove{mock: m}
-	m.StocksServiceReserveRemoveMock.callArgs = []*StocksServiceMockStocksServiceReserveRemoveParams{}
+	m.ReserveRemoveMock = mStocksServiceMockReserveRemove{mock: m}
+	m.ReserveRemoveMock.callArgs = []*StocksServiceMockReserveRemoveParams{}
 
 	t.Cleanup(m.MinimockFinish)
 
 	return m
 }
 
-type mStocksServiceMockStocksServiceGetBySKU struct {
+type mStocksServiceMockGetBySKU struct {
 	optional           bool
 	mock               *StocksServiceMock
-	defaultExpectation *StocksServiceMockStocksServiceGetBySKUExpectation
-	expectations       []*StocksServiceMockStocksServiceGetBySKUExpectation
+	defaultExpectation *StocksServiceMockGetBySKUExpectation
+	expectations       []*StocksServiceMockGetBySKUExpectation
 
-	callArgs []*StocksServiceMockStocksServiceGetBySKUParams
+	callArgs []*StocksServiceMockGetBySKUParams
 	mutex    sync.RWMutex
 
 	expectedInvocations uint64
 }
 
-// StocksServiceMockStocksServiceGetBySKUExpectation specifies expectation struct of the StocksService.StocksServiceGetBySKU
-type StocksServiceMockStocksServiceGetBySKUExpectation struct {
+// StocksServiceMockGetBySKUExpectation specifies expectation struct of the StocksService.GetBySKU
+type StocksServiceMockGetBySKUExpectation struct {
 	mock      *StocksServiceMock
-	params    *StocksServiceMockStocksServiceGetBySKUParams
-	paramPtrs *StocksServiceMockStocksServiceGetBySKUParamPtrs
-	results   *StocksServiceMockStocksServiceGetBySKUResults
+	params    *StocksServiceMockGetBySKUParams
+	paramPtrs *StocksServiceMockGetBySKUParamPtrs
+	results   *StocksServiceMockGetBySKUResults
 	Counter   uint64
 }
 
-// StocksServiceMockStocksServiceGetBySKUParams contains parameters of the StocksService.StocksServiceGetBySKU
-type StocksServiceMockStocksServiceGetBySKUParams struct {
+// StocksServiceMockGetBySKUParams contains parameters of the StocksService.GetBySKU
+type StocksServiceMockGetBySKUParams struct {
 	ctx context.Context
 	sku stocksModel.SKU
 }
 
-// StocksServiceMockStocksServiceGetBySKUParamPtrs contains pointers to parameters of the StocksService.StocksServiceGetBySKU
-type StocksServiceMockStocksServiceGetBySKUParamPtrs struct {
+// StocksServiceMockGetBySKUParamPtrs contains pointers to parameters of the StocksService.GetBySKU
+type StocksServiceMockGetBySKUParamPtrs struct {
 	ctx *context.Context
 	sku *stocksModel.SKU
 }
 
-// StocksServiceMockStocksServiceGetBySKUResults contains results of the StocksService.StocksServiceGetBySKU
-type StocksServiceMockStocksServiceGetBySKUResults struct {
+// StocksServiceMockGetBySKUResults contains results of the StocksService.GetBySKU
+type StocksServiceMockGetBySKUResults struct {
 	sp1 *stocksModel.Stocks
 	err error
 }
@@ -114,318 +114,318 @@ type StocksServiceMockStocksServiceGetBySKUResults struct {
 // Optional() makes method check to work in '0 or more' mode.
 // It is NOT RECOMMENDED to use this option by default unless you really need it, as it helps to
 // catch the problems when the expected method call is totally skipped during test run.
-func (mmStocksServiceGetBySKU *mStocksServiceMockStocksServiceGetBySKU) Optional() *mStocksServiceMockStocksServiceGetBySKU {
-	mmStocksServiceGetBySKU.optional = true
-	return mmStocksServiceGetBySKU
+func (mmGetBySKU *mStocksServiceMockGetBySKU) Optional() *mStocksServiceMockGetBySKU {
+	mmGetBySKU.optional = true
+	return mmGetBySKU
 }
 
-// Expect sets up expected params for StocksService.StocksServiceGetBySKU
-func (mmStocksServiceGetBySKU *mStocksServiceMockStocksServiceGetBySKU) Expect(ctx context.Context, sku stocksModel.SKU) *mStocksServiceMockStocksServiceGetBySKU {
-	if mmStocksServiceGetBySKU.mock.funcStocksServiceGetBySKU != nil {
-		mmStocksServiceGetBySKU.mock.t.Fatalf("StocksServiceMock.StocksServiceGetBySKU mock is already set by Set")
+// Expect sets up expected params for StocksService.GetBySKU
+func (mmGetBySKU *mStocksServiceMockGetBySKU) Expect(ctx context.Context, sku stocksModel.SKU) *mStocksServiceMockGetBySKU {
+	if mmGetBySKU.mock.funcGetBySKU != nil {
+		mmGetBySKU.mock.t.Fatalf("StocksServiceMock.GetBySKU mock is already set by Set")
 	}
 
-	if mmStocksServiceGetBySKU.defaultExpectation == nil {
-		mmStocksServiceGetBySKU.defaultExpectation = &StocksServiceMockStocksServiceGetBySKUExpectation{}
+	if mmGetBySKU.defaultExpectation == nil {
+		mmGetBySKU.defaultExpectation = &StocksServiceMockGetBySKUExpectation{}
 	}
 
-	if mmStocksServiceGetBySKU.defaultExpectation.paramPtrs != nil {
-		mmStocksServiceGetBySKU.mock.t.Fatalf("StocksServiceMock.StocksServiceGetBySKU mock is already set by ExpectParams functions")
+	if mmGetBySKU.defaultExpectation.paramPtrs != nil {
+		mmGetBySKU.mock.t.Fatalf("StocksServiceMock.GetBySKU mock is already set by ExpectParams functions")
 	}
 
-	mmStocksServiceGetBySKU.defaultExpectation.params = &StocksServiceMockStocksServiceGetBySKUParams{ctx, sku}
-	for _, e := range mmStocksServiceGetBySKU.expectations {
-		if minimock.Equal(e.params, mmStocksServiceGetBySKU.defaultExpectation.params) {
-			mmStocksServiceGetBySKU.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmStocksServiceGetBySKU.defaultExpectation.params)
+	mmGetBySKU.defaultExpectation.params = &StocksServiceMockGetBySKUParams{ctx, sku}
+	for _, e := range mmGetBySKU.expectations {
+		if minimock.Equal(e.params, mmGetBySKU.defaultExpectation.params) {
+			mmGetBySKU.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetBySKU.defaultExpectation.params)
 		}
 	}
 
-	return mmStocksServiceGetBySKU
+	return mmGetBySKU
 }
 
-// ExpectCtxParam1 sets up expected param ctx for StocksService.StocksServiceGetBySKU
-func (mmStocksServiceGetBySKU *mStocksServiceMockStocksServiceGetBySKU) ExpectCtxParam1(ctx context.Context) *mStocksServiceMockStocksServiceGetBySKU {
-	if mmStocksServiceGetBySKU.mock.funcStocksServiceGetBySKU != nil {
-		mmStocksServiceGetBySKU.mock.t.Fatalf("StocksServiceMock.StocksServiceGetBySKU mock is already set by Set")
+// ExpectCtxParam1 sets up expected param ctx for StocksService.GetBySKU
+func (mmGetBySKU *mStocksServiceMockGetBySKU) ExpectCtxParam1(ctx context.Context) *mStocksServiceMockGetBySKU {
+	if mmGetBySKU.mock.funcGetBySKU != nil {
+		mmGetBySKU.mock.t.Fatalf("StocksServiceMock.GetBySKU mock is already set by Set")
 	}
 
-	if mmStocksServiceGetBySKU.defaultExpectation == nil {
-		mmStocksServiceGetBySKU.defaultExpectation = &StocksServiceMockStocksServiceGetBySKUExpectation{}
+	if mmGetBySKU.defaultExpectation == nil {
+		mmGetBySKU.defaultExpectation = &StocksServiceMockGetBySKUExpectation{}
 	}
 
-	if mmStocksServiceGetBySKU.defaultExpectation.params != nil {
-		mmStocksServiceGetBySKU.mock.t.Fatalf("StocksServiceMock.StocksServiceGetBySKU mock is already set by Expect")
+	if mmGetBySKU.defaultExpectation.params != nil {
+		mmGetBySKU.mock.t.Fatalf("StocksServiceMock.GetBySKU mock is already set by Expect")
 	}
 
-	if mmStocksServiceGetBySKU.defaultExpectation.paramPtrs == nil {
-		mmStocksServiceGetBySKU.defaultExpectation.paramPtrs = &StocksServiceMockStocksServiceGetBySKUParamPtrs{}
+	if mmGetBySKU.defaultExpectation.paramPtrs == nil {
+		mmGetBySKU.defaultExpectation.paramPtrs = &StocksServiceMockGetBySKUParamPtrs{}
 	}
-	mmStocksServiceGetBySKU.defaultExpectation.paramPtrs.ctx = &ctx
+	mmGetBySKU.defaultExpectation.paramPtrs.ctx = &ctx
 
-	return mmStocksServiceGetBySKU
+	return mmGetBySKU
 }
 
-// ExpectSkuParam2 sets up expected param sku for StocksService.StocksServiceGetBySKU
-func (mmStocksServiceGetBySKU *mStocksServiceMockStocksServiceGetBySKU) ExpectSkuParam2(sku stocksModel.SKU) *mStocksServiceMockStocksServiceGetBySKU {
-	if mmStocksServiceGetBySKU.mock.funcStocksServiceGetBySKU != nil {
-		mmStocksServiceGetBySKU.mock.t.Fatalf("StocksServiceMock.StocksServiceGetBySKU mock is already set by Set")
+// ExpectSkuParam2 sets up expected param sku for StocksService.GetBySKU
+func (mmGetBySKU *mStocksServiceMockGetBySKU) ExpectSkuParam2(sku stocksModel.SKU) *mStocksServiceMockGetBySKU {
+	if mmGetBySKU.mock.funcGetBySKU != nil {
+		mmGetBySKU.mock.t.Fatalf("StocksServiceMock.GetBySKU mock is already set by Set")
 	}
 
-	if mmStocksServiceGetBySKU.defaultExpectation == nil {
-		mmStocksServiceGetBySKU.defaultExpectation = &StocksServiceMockStocksServiceGetBySKUExpectation{}
+	if mmGetBySKU.defaultExpectation == nil {
+		mmGetBySKU.defaultExpectation = &StocksServiceMockGetBySKUExpectation{}
 	}
 
-	if mmStocksServiceGetBySKU.defaultExpectation.params != nil {
-		mmStocksServiceGetBySKU.mock.t.Fatalf("StocksServiceMock.StocksServiceGetBySKU mock is already set by Expect")
+	if mmGetBySKU.defaultExpectation.params != nil {
+		mmGetBySKU.mock.t.Fatalf("StocksServiceMock.GetBySKU mock is already set by Expect")
 	}
 
-	if mmStocksServiceGetBySKU.defaultExpectation.paramPtrs == nil {
-		mmStocksServiceGetBySKU.defaultExpectation.paramPtrs = &StocksServiceMockStocksServiceGetBySKUParamPtrs{}
+	if mmGetBySKU.defaultExpectation.paramPtrs == nil {
+		mmGetBySKU.defaultExpectation.paramPtrs = &StocksServiceMockGetBySKUParamPtrs{}
 	}
-	mmStocksServiceGetBySKU.defaultExpectation.paramPtrs.sku = &sku
+	mmGetBySKU.defaultExpectation.paramPtrs.sku = &sku
 
-	return mmStocksServiceGetBySKU
+	return mmGetBySKU
 }
 
-// Inspect accepts an inspector function that has same arguments as the StocksService.StocksServiceGetBySKU
-func (mmStocksServiceGetBySKU *mStocksServiceMockStocksServiceGetBySKU) Inspect(f func(ctx context.Context, sku stocksModel.SKU)) *mStocksServiceMockStocksServiceGetBySKU {
-	if mmStocksServiceGetBySKU.mock.inspectFuncStocksServiceGetBySKU != nil {
-		mmStocksServiceGetBySKU.mock.t.Fatalf("Inspect function is already set for StocksServiceMock.StocksServiceGetBySKU")
+// Inspect accepts an inspector function that has same arguments as the StocksService.GetBySKU
+func (mmGetBySKU *mStocksServiceMockGetBySKU) Inspect(f func(ctx context.Context, sku stocksModel.SKU)) *mStocksServiceMockGetBySKU {
+	if mmGetBySKU.mock.inspectFuncGetBySKU != nil {
+		mmGetBySKU.mock.t.Fatalf("Inspect function is already set for StocksServiceMock.GetBySKU")
 	}
 
-	mmStocksServiceGetBySKU.mock.inspectFuncStocksServiceGetBySKU = f
+	mmGetBySKU.mock.inspectFuncGetBySKU = f
 
-	return mmStocksServiceGetBySKU
+	return mmGetBySKU
 }
 
-// Return sets up results that will be returned by StocksService.StocksServiceGetBySKU
-func (mmStocksServiceGetBySKU *mStocksServiceMockStocksServiceGetBySKU) Return(sp1 *stocksModel.Stocks, err error) *StocksServiceMock {
-	if mmStocksServiceGetBySKU.mock.funcStocksServiceGetBySKU != nil {
-		mmStocksServiceGetBySKU.mock.t.Fatalf("StocksServiceMock.StocksServiceGetBySKU mock is already set by Set")
+// Return sets up results that will be returned by StocksService.GetBySKU
+func (mmGetBySKU *mStocksServiceMockGetBySKU) Return(sp1 *stocksModel.Stocks, err error) *StocksServiceMock {
+	if mmGetBySKU.mock.funcGetBySKU != nil {
+		mmGetBySKU.mock.t.Fatalf("StocksServiceMock.GetBySKU mock is already set by Set")
 	}
 
-	if mmStocksServiceGetBySKU.defaultExpectation == nil {
-		mmStocksServiceGetBySKU.defaultExpectation = &StocksServiceMockStocksServiceGetBySKUExpectation{mock: mmStocksServiceGetBySKU.mock}
+	if mmGetBySKU.defaultExpectation == nil {
+		mmGetBySKU.defaultExpectation = &StocksServiceMockGetBySKUExpectation{mock: mmGetBySKU.mock}
 	}
-	mmStocksServiceGetBySKU.defaultExpectation.results = &StocksServiceMockStocksServiceGetBySKUResults{sp1, err}
-	return mmStocksServiceGetBySKU.mock
+	mmGetBySKU.defaultExpectation.results = &StocksServiceMockGetBySKUResults{sp1, err}
+	return mmGetBySKU.mock
 }
 
-// Set uses given function f to mock the StocksService.StocksServiceGetBySKU method
-func (mmStocksServiceGetBySKU *mStocksServiceMockStocksServiceGetBySKU) Set(f func(ctx context.Context, sku stocksModel.SKU) (sp1 *stocksModel.Stocks, err error)) *StocksServiceMock {
-	if mmStocksServiceGetBySKU.defaultExpectation != nil {
-		mmStocksServiceGetBySKU.mock.t.Fatalf("Default expectation is already set for the StocksService.StocksServiceGetBySKU method")
+// Set uses given function f to mock the StocksService.GetBySKU method
+func (mmGetBySKU *mStocksServiceMockGetBySKU) Set(f func(ctx context.Context, sku stocksModel.SKU) (sp1 *stocksModel.Stocks, err error)) *StocksServiceMock {
+	if mmGetBySKU.defaultExpectation != nil {
+		mmGetBySKU.mock.t.Fatalf("Default expectation is already set for the StocksService.GetBySKU method")
 	}
 
-	if len(mmStocksServiceGetBySKU.expectations) > 0 {
-		mmStocksServiceGetBySKU.mock.t.Fatalf("Some expectations are already set for the StocksService.StocksServiceGetBySKU method")
+	if len(mmGetBySKU.expectations) > 0 {
+		mmGetBySKU.mock.t.Fatalf("Some expectations are already set for the StocksService.GetBySKU method")
 	}
 
-	mmStocksServiceGetBySKU.mock.funcStocksServiceGetBySKU = f
-	return mmStocksServiceGetBySKU.mock
+	mmGetBySKU.mock.funcGetBySKU = f
+	return mmGetBySKU.mock
 }
 
-// When sets expectation for the StocksService.StocksServiceGetBySKU which will trigger the result defined by the following
+// When sets expectation for the StocksService.GetBySKU which will trigger the result defined by the following
 // Then helper
-func (mmStocksServiceGetBySKU *mStocksServiceMockStocksServiceGetBySKU) When(ctx context.Context, sku stocksModel.SKU) *StocksServiceMockStocksServiceGetBySKUExpectation {
-	if mmStocksServiceGetBySKU.mock.funcStocksServiceGetBySKU != nil {
-		mmStocksServiceGetBySKU.mock.t.Fatalf("StocksServiceMock.StocksServiceGetBySKU mock is already set by Set")
+func (mmGetBySKU *mStocksServiceMockGetBySKU) When(ctx context.Context, sku stocksModel.SKU) *StocksServiceMockGetBySKUExpectation {
+	if mmGetBySKU.mock.funcGetBySKU != nil {
+		mmGetBySKU.mock.t.Fatalf("StocksServiceMock.GetBySKU mock is already set by Set")
 	}
 
-	expectation := &StocksServiceMockStocksServiceGetBySKUExpectation{
-		mock:   mmStocksServiceGetBySKU.mock,
-		params: &StocksServiceMockStocksServiceGetBySKUParams{ctx, sku},
+	expectation := &StocksServiceMockGetBySKUExpectation{
+		mock:   mmGetBySKU.mock,
+		params: &StocksServiceMockGetBySKUParams{ctx, sku},
 	}
-	mmStocksServiceGetBySKU.expectations = append(mmStocksServiceGetBySKU.expectations, expectation)
+	mmGetBySKU.expectations = append(mmGetBySKU.expectations, expectation)
 	return expectation
 }
 
-// Then sets up StocksService.StocksServiceGetBySKU return parameters for the expectation previously defined by the When method
-func (e *StocksServiceMockStocksServiceGetBySKUExpectation) Then(sp1 *stocksModel.Stocks, err error) *StocksServiceMock {
-	e.results = &StocksServiceMockStocksServiceGetBySKUResults{sp1, err}
+// Then sets up StocksService.GetBySKU return parameters for the expectation previously defined by the When method
+func (e *StocksServiceMockGetBySKUExpectation) Then(sp1 *stocksModel.Stocks, err error) *StocksServiceMock {
+	e.results = &StocksServiceMockGetBySKUResults{sp1, err}
 	return e.mock
 }
 
-// Times sets number of times StocksService.StocksServiceGetBySKU should be invoked
-func (mmStocksServiceGetBySKU *mStocksServiceMockStocksServiceGetBySKU) Times(n uint64) *mStocksServiceMockStocksServiceGetBySKU {
+// Times sets number of times StocksService.GetBySKU should be invoked
+func (mmGetBySKU *mStocksServiceMockGetBySKU) Times(n uint64) *mStocksServiceMockGetBySKU {
 	if n == 0 {
-		mmStocksServiceGetBySKU.mock.t.Fatalf("Times of StocksServiceMock.StocksServiceGetBySKU mock can not be zero")
+		mmGetBySKU.mock.t.Fatalf("Times of StocksServiceMock.GetBySKU mock can not be zero")
 	}
-	mm_atomic.StoreUint64(&mmStocksServiceGetBySKU.expectedInvocations, n)
-	return mmStocksServiceGetBySKU
+	mm_atomic.StoreUint64(&mmGetBySKU.expectedInvocations, n)
+	return mmGetBySKU
 }
 
-func (mmStocksServiceGetBySKU *mStocksServiceMockStocksServiceGetBySKU) invocationsDone() bool {
-	if len(mmStocksServiceGetBySKU.expectations) == 0 && mmStocksServiceGetBySKU.defaultExpectation == nil && mmStocksServiceGetBySKU.mock.funcStocksServiceGetBySKU == nil {
+func (mmGetBySKU *mStocksServiceMockGetBySKU) invocationsDone() bool {
+	if len(mmGetBySKU.expectations) == 0 && mmGetBySKU.defaultExpectation == nil && mmGetBySKU.mock.funcGetBySKU == nil {
 		return true
 	}
 
-	totalInvocations := mm_atomic.LoadUint64(&mmStocksServiceGetBySKU.mock.afterStocksServiceGetBySKUCounter)
-	expectedInvocations := mm_atomic.LoadUint64(&mmStocksServiceGetBySKU.expectedInvocations)
+	totalInvocations := mm_atomic.LoadUint64(&mmGetBySKU.mock.afterGetBySKUCounter)
+	expectedInvocations := mm_atomic.LoadUint64(&mmGetBySKU.expectedInvocations)
 
 	return totalInvocations > 0 && (expectedInvocations == 0 || expectedInvocations == totalInvocations)
 }
 
-// StocksServiceGetBySKU implements handler.StocksService
-func (mmStocksServiceGetBySKU *StocksServiceMock) StocksServiceGetBySKU(ctx context.Context, sku stocksModel.SKU) (sp1 *stocksModel.Stocks, err error) {
-	mm_atomic.AddUint64(&mmStocksServiceGetBySKU.beforeStocksServiceGetBySKUCounter, 1)
-	defer mm_atomic.AddUint64(&mmStocksServiceGetBySKU.afterStocksServiceGetBySKUCounter, 1)
+// GetBySKU implements handler.StocksService
+func (mmGetBySKU *StocksServiceMock) GetBySKU(ctx context.Context, sku stocksModel.SKU) (sp1 *stocksModel.Stocks, err error) {
+	mm_atomic.AddUint64(&mmGetBySKU.beforeGetBySKUCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetBySKU.afterGetBySKUCounter, 1)
 
-	if mmStocksServiceGetBySKU.inspectFuncStocksServiceGetBySKU != nil {
-		mmStocksServiceGetBySKU.inspectFuncStocksServiceGetBySKU(ctx, sku)
+	if mmGetBySKU.inspectFuncGetBySKU != nil {
+		mmGetBySKU.inspectFuncGetBySKU(ctx, sku)
 	}
 
-	mm_params := StocksServiceMockStocksServiceGetBySKUParams{ctx, sku}
+	mm_params := StocksServiceMockGetBySKUParams{ctx, sku}
 
 	// Record call args
-	mmStocksServiceGetBySKU.StocksServiceGetBySKUMock.mutex.Lock()
-	mmStocksServiceGetBySKU.StocksServiceGetBySKUMock.callArgs = append(mmStocksServiceGetBySKU.StocksServiceGetBySKUMock.callArgs, &mm_params)
-	mmStocksServiceGetBySKU.StocksServiceGetBySKUMock.mutex.Unlock()
+	mmGetBySKU.GetBySKUMock.mutex.Lock()
+	mmGetBySKU.GetBySKUMock.callArgs = append(mmGetBySKU.GetBySKUMock.callArgs, &mm_params)
+	mmGetBySKU.GetBySKUMock.mutex.Unlock()
 
-	for _, e := range mmStocksServiceGetBySKU.StocksServiceGetBySKUMock.expectations {
+	for _, e := range mmGetBySKU.GetBySKUMock.expectations {
 		if minimock.Equal(*e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
 			return e.results.sp1, e.results.err
 		}
 	}
 
-	if mmStocksServiceGetBySKU.StocksServiceGetBySKUMock.defaultExpectation != nil {
-		mm_atomic.AddUint64(&mmStocksServiceGetBySKU.StocksServiceGetBySKUMock.defaultExpectation.Counter, 1)
-		mm_want := mmStocksServiceGetBySKU.StocksServiceGetBySKUMock.defaultExpectation.params
-		mm_want_ptrs := mmStocksServiceGetBySKU.StocksServiceGetBySKUMock.defaultExpectation.paramPtrs
+	if mmGetBySKU.GetBySKUMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetBySKU.GetBySKUMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetBySKU.GetBySKUMock.defaultExpectation.params
+		mm_want_ptrs := mmGetBySKU.GetBySKUMock.defaultExpectation.paramPtrs
 
-		mm_got := StocksServiceMockStocksServiceGetBySKUParams{ctx, sku}
+		mm_got := StocksServiceMockGetBySKUParams{ctx, sku}
 
 		if mm_want_ptrs != nil {
 
 			if mm_want_ptrs.ctx != nil && !minimock.Equal(*mm_want_ptrs.ctx, mm_got.ctx) {
-				mmStocksServiceGetBySKU.t.Errorf("StocksServiceMock.StocksServiceGetBySKU got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
+				mmGetBySKU.t.Errorf("StocksServiceMock.GetBySKU got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
 			}
 
 			if mm_want_ptrs.sku != nil && !minimock.Equal(*mm_want_ptrs.sku, mm_got.sku) {
-				mmStocksServiceGetBySKU.t.Errorf("StocksServiceMock.StocksServiceGetBySKU got unexpected parameter sku, want: %#v, got: %#v%s\n", *mm_want_ptrs.sku, mm_got.sku, minimock.Diff(*mm_want_ptrs.sku, mm_got.sku))
+				mmGetBySKU.t.Errorf("StocksServiceMock.GetBySKU got unexpected parameter sku, want: %#v, got: %#v%s\n", *mm_want_ptrs.sku, mm_got.sku, minimock.Diff(*mm_want_ptrs.sku, mm_got.sku))
 			}
 
 		} else if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmStocksServiceGetBySKU.t.Errorf("StocksServiceMock.StocksServiceGetBySKU got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+			mmGetBySKU.t.Errorf("StocksServiceMock.GetBySKU got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
 
-		mm_results := mmStocksServiceGetBySKU.StocksServiceGetBySKUMock.defaultExpectation.results
+		mm_results := mmGetBySKU.GetBySKUMock.defaultExpectation.results
 		if mm_results == nil {
-			mmStocksServiceGetBySKU.t.Fatal("No results are set for the StocksServiceMock.StocksServiceGetBySKU")
+			mmGetBySKU.t.Fatal("No results are set for the StocksServiceMock.GetBySKU")
 		}
 		return (*mm_results).sp1, (*mm_results).err
 	}
-	if mmStocksServiceGetBySKU.funcStocksServiceGetBySKU != nil {
-		return mmStocksServiceGetBySKU.funcStocksServiceGetBySKU(ctx, sku)
+	if mmGetBySKU.funcGetBySKU != nil {
+		return mmGetBySKU.funcGetBySKU(ctx, sku)
 	}
-	mmStocksServiceGetBySKU.t.Fatalf("Unexpected call to StocksServiceMock.StocksServiceGetBySKU. %v %v", ctx, sku)
+	mmGetBySKU.t.Fatalf("Unexpected call to StocksServiceMock.GetBySKU. %v %v", ctx, sku)
 	return
 }
 
-// StocksServiceGetBySKUAfterCounter returns a count of finished StocksServiceMock.StocksServiceGetBySKU invocations
-func (mmStocksServiceGetBySKU *StocksServiceMock) StocksServiceGetBySKUAfterCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmStocksServiceGetBySKU.afterStocksServiceGetBySKUCounter)
+// GetBySKUAfterCounter returns a count of finished StocksServiceMock.GetBySKU invocations
+func (mmGetBySKU *StocksServiceMock) GetBySKUAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetBySKU.afterGetBySKUCounter)
 }
 
-// StocksServiceGetBySKUBeforeCounter returns a count of StocksServiceMock.StocksServiceGetBySKU invocations
-func (mmStocksServiceGetBySKU *StocksServiceMock) StocksServiceGetBySKUBeforeCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmStocksServiceGetBySKU.beforeStocksServiceGetBySKUCounter)
+// GetBySKUBeforeCounter returns a count of StocksServiceMock.GetBySKU invocations
+func (mmGetBySKU *StocksServiceMock) GetBySKUBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetBySKU.beforeGetBySKUCounter)
 }
 
-// Calls returns a list of arguments used in each call to StocksServiceMock.StocksServiceGetBySKU.
+// Calls returns a list of arguments used in each call to StocksServiceMock.GetBySKU.
 // The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmStocksServiceGetBySKU *mStocksServiceMockStocksServiceGetBySKU) Calls() []*StocksServiceMockStocksServiceGetBySKUParams {
-	mmStocksServiceGetBySKU.mutex.RLock()
+func (mmGetBySKU *mStocksServiceMockGetBySKU) Calls() []*StocksServiceMockGetBySKUParams {
+	mmGetBySKU.mutex.RLock()
 
-	argCopy := make([]*StocksServiceMockStocksServiceGetBySKUParams, len(mmStocksServiceGetBySKU.callArgs))
-	copy(argCopy, mmStocksServiceGetBySKU.callArgs)
+	argCopy := make([]*StocksServiceMockGetBySKUParams, len(mmGetBySKU.callArgs))
+	copy(argCopy, mmGetBySKU.callArgs)
 
-	mmStocksServiceGetBySKU.mutex.RUnlock()
+	mmGetBySKU.mutex.RUnlock()
 
 	return argCopy
 }
 
-// MinimockStocksServiceGetBySKUDone returns true if the count of the StocksServiceGetBySKU invocations corresponds
+// MinimockGetBySKUDone returns true if the count of the GetBySKU invocations corresponds
 // the number of defined expectations
-func (m *StocksServiceMock) MinimockStocksServiceGetBySKUDone() bool {
-	if m.StocksServiceGetBySKUMock.optional {
+func (m *StocksServiceMock) MinimockGetBySKUDone() bool {
+	if m.GetBySKUMock.optional {
 		// Optional methods provide '0 or more' call count restriction.
 		return true
 	}
 
-	for _, e := range m.StocksServiceGetBySKUMock.expectations {
+	for _, e := range m.GetBySKUMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
 			return false
 		}
 	}
 
-	return m.StocksServiceGetBySKUMock.invocationsDone()
+	return m.GetBySKUMock.invocationsDone()
 }
 
-// MinimockStocksServiceGetBySKUInspect logs each unmet expectation
-func (m *StocksServiceMock) MinimockStocksServiceGetBySKUInspect() {
-	for _, e := range m.StocksServiceGetBySKUMock.expectations {
+// MinimockGetBySKUInspect logs each unmet expectation
+func (m *StocksServiceMock) MinimockGetBySKUInspect() {
+	for _, e := range m.GetBySKUMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to StocksServiceMock.StocksServiceGetBySKU with params: %#v", *e.params)
+			m.t.Errorf("Expected call to StocksServiceMock.GetBySKU with params: %#v", *e.params)
 		}
 	}
 
-	afterStocksServiceGetBySKUCounter := mm_atomic.LoadUint64(&m.afterStocksServiceGetBySKUCounter)
+	afterGetBySKUCounter := mm_atomic.LoadUint64(&m.afterGetBySKUCounter)
 	// if default expectation was set then invocations count should be greater than zero
-	if m.StocksServiceGetBySKUMock.defaultExpectation != nil && afterStocksServiceGetBySKUCounter < 1 {
-		if m.StocksServiceGetBySKUMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to StocksServiceMock.StocksServiceGetBySKU")
+	if m.GetBySKUMock.defaultExpectation != nil && afterGetBySKUCounter < 1 {
+		if m.GetBySKUMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to StocksServiceMock.GetBySKU")
 		} else {
-			m.t.Errorf("Expected call to StocksServiceMock.StocksServiceGetBySKU with params: %#v", *m.StocksServiceGetBySKUMock.defaultExpectation.params)
+			m.t.Errorf("Expected call to StocksServiceMock.GetBySKU with params: %#v", *m.GetBySKUMock.defaultExpectation.params)
 		}
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcStocksServiceGetBySKU != nil && afterStocksServiceGetBySKUCounter < 1 {
-		m.t.Error("Expected call to StocksServiceMock.StocksServiceGetBySKU")
+	if m.funcGetBySKU != nil && afterGetBySKUCounter < 1 {
+		m.t.Error("Expected call to StocksServiceMock.GetBySKU")
 	}
 
-	if !m.StocksServiceGetBySKUMock.invocationsDone() && afterStocksServiceGetBySKUCounter > 0 {
-		m.t.Errorf("Expected %d calls to StocksServiceMock.StocksServiceGetBySKU but found %d calls",
-			mm_atomic.LoadUint64(&m.StocksServiceGetBySKUMock.expectedInvocations), afterStocksServiceGetBySKUCounter)
+	if !m.GetBySKUMock.invocationsDone() && afterGetBySKUCounter > 0 {
+		m.t.Errorf("Expected %d calls to StocksServiceMock.GetBySKU but found %d calls",
+			mm_atomic.LoadUint64(&m.GetBySKUMock.expectedInvocations), afterGetBySKUCounter)
 	}
 }
 
-type mStocksServiceMockStocksServiceReserve struct {
+type mStocksServiceMockReserve struct {
 	optional           bool
 	mock               *StocksServiceMock
-	defaultExpectation *StocksServiceMockStocksServiceReserveExpectation
-	expectations       []*StocksServiceMockStocksServiceReserveExpectation
+	defaultExpectation *StocksServiceMockReserveExpectation
+	expectations       []*StocksServiceMockReserveExpectation
 
-	callArgs []*StocksServiceMockStocksServiceReserveParams
+	callArgs []*StocksServiceMockReserveParams
 	mutex    sync.RWMutex
 
 	expectedInvocations uint64
 }
 
-// StocksServiceMockStocksServiceReserveExpectation specifies expectation struct of the StocksService.StocksServiceReserve
-type StocksServiceMockStocksServiceReserveExpectation struct {
+// StocksServiceMockReserveExpectation specifies expectation struct of the StocksService.Reserve
+type StocksServiceMockReserveExpectation struct {
 	mock      *StocksServiceMock
-	params    *StocksServiceMockStocksServiceReserveParams
-	paramPtrs *StocksServiceMockStocksServiceReserveParamPtrs
-	results   *StocksServiceMockStocksServiceReserveResults
+	params    *StocksServiceMockReserveParams
+	paramPtrs *StocksServiceMockReserveParamPtrs
+	results   *StocksServiceMockReserveResults
 	Counter   uint64
 }
 
-// StocksServiceMockStocksServiceReserveParams contains parameters of the StocksService.StocksServiceReserve
-type StocksServiceMockStocksServiceReserveParams struct {
+// StocksServiceMockReserveParams contains parameters of the StocksService.Reserve
+type StocksServiceMockReserveParams struct {
 	ctx   context.Context
 	items []*orderModel.Item
 }
 
-// StocksServiceMockStocksServiceReserveParamPtrs contains pointers to parameters of the StocksService.StocksServiceReserve
-type StocksServiceMockStocksServiceReserveParamPtrs struct {
+// StocksServiceMockReserveParamPtrs contains pointers to parameters of the StocksService.Reserve
+type StocksServiceMockReserveParamPtrs struct {
 	ctx   *context.Context
 	items *[]*orderModel.Item
 }
 
-// StocksServiceMockStocksServiceReserveResults contains results of the StocksService.StocksServiceReserve
-type StocksServiceMockStocksServiceReserveResults struct {
+// StocksServiceMockReserveResults contains results of the StocksService.Reserve
+type StocksServiceMockReserveResults struct {
 	err error
 }
 
@@ -434,318 +434,318 @@ type StocksServiceMockStocksServiceReserveResults struct {
 // Optional() makes method check to work in '0 or more' mode.
 // It is NOT RECOMMENDED to use this option by default unless you really need it, as it helps to
 // catch the problems when the expected method call is totally skipped during test run.
-func (mmStocksServiceReserve *mStocksServiceMockStocksServiceReserve) Optional() *mStocksServiceMockStocksServiceReserve {
-	mmStocksServiceReserve.optional = true
-	return mmStocksServiceReserve
+func (mmReserve *mStocksServiceMockReserve) Optional() *mStocksServiceMockReserve {
+	mmReserve.optional = true
+	return mmReserve
 }
 
-// Expect sets up expected params for StocksService.StocksServiceReserve
-func (mmStocksServiceReserve *mStocksServiceMockStocksServiceReserve) Expect(ctx context.Context, items []*orderModel.Item) *mStocksServiceMockStocksServiceReserve {
-	if mmStocksServiceReserve.mock.funcStocksServiceReserve != nil {
-		mmStocksServiceReserve.mock.t.Fatalf("StocksServiceMock.StocksServiceReserve mock is already set by Set")
+// Expect sets up expected params for StocksService.Reserve
+func (mmReserve *mStocksServiceMockReserve) Expect(ctx context.Context, items []*orderModel.Item) *mStocksServiceMockReserve {
+	if mmReserve.mock.funcReserve != nil {
+		mmReserve.mock.t.Fatalf("StocksServiceMock.Reserve mock is already set by Set")
 	}
 
-	if mmStocksServiceReserve.defaultExpectation == nil {
-		mmStocksServiceReserve.defaultExpectation = &StocksServiceMockStocksServiceReserveExpectation{}
+	if mmReserve.defaultExpectation == nil {
+		mmReserve.defaultExpectation = &StocksServiceMockReserveExpectation{}
 	}
 
-	if mmStocksServiceReserve.defaultExpectation.paramPtrs != nil {
-		mmStocksServiceReserve.mock.t.Fatalf("StocksServiceMock.StocksServiceReserve mock is already set by ExpectParams functions")
+	if mmReserve.defaultExpectation.paramPtrs != nil {
+		mmReserve.mock.t.Fatalf("StocksServiceMock.Reserve mock is already set by ExpectParams functions")
 	}
 
-	mmStocksServiceReserve.defaultExpectation.params = &StocksServiceMockStocksServiceReserveParams{ctx, items}
-	for _, e := range mmStocksServiceReserve.expectations {
-		if minimock.Equal(e.params, mmStocksServiceReserve.defaultExpectation.params) {
-			mmStocksServiceReserve.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmStocksServiceReserve.defaultExpectation.params)
+	mmReserve.defaultExpectation.params = &StocksServiceMockReserveParams{ctx, items}
+	for _, e := range mmReserve.expectations {
+		if minimock.Equal(e.params, mmReserve.defaultExpectation.params) {
+			mmReserve.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmReserve.defaultExpectation.params)
 		}
 	}
 
-	return mmStocksServiceReserve
+	return mmReserve
 }
 
-// ExpectCtxParam1 sets up expected param ctx for StocksService.StocksServiceReserve
-func (mmStocksServiceReserve *mStocksServiceMockStocksServiceReserve) ExpectCtxParam1(ctx context.Context) *mStocksServiceMockStocksServiceReserve {
-	if mmStocksServiceReserve.mock.funcStocksServiceReserve != nil {
-		mmStocksServiceReserve.mock.t.Fatalf("StocksServiceMock.StocksServiceReserve mock is already set by Set")
+// ExpectCtxParam1 sets up expected param ctx for StocksService.Reserve
+func (mmReserve *mStocksServiceMockReserve) ExpectCtxParam1(ctx context.Context) *mStocksServiceMockReserve {
+	if mmReserve.mock.funcReserve != nil {
+		mmReserve.mock.t.Fatalf("StocksServiceMock.Reserve mock is already set by Set")
 	}
 
-	if mmStocksServiceReserve.defaultExpectation == nil {
-		mmStocksServiceReserve.defaultExpectation = &StocksServiceMockStocksServiceReserveExpectation{}
+	if mmReserve.defaultExpectation == nil {
+		mmReserve.defaultExpectation = &StocksServiceMockReserveExpectation{}
 	}
 
-	if mmStocksServiceReserve.defaultExpectation.params != nil {
-		mmStocksServiceReserve.mock.t.Fatalf("StocksServiceMock.StocksServiceReserve mock is already set by Expect")
+	if mmReserve.defaultExpectation.params != nil {
+		mmReserve.mock.t.Fatalf("StocksServiceMock.Reserve mock is already set by Expect")
 	}
 
-	if mmStocksServiceReserve.defaultExpectation.paramPtrs == nil {
-		mmStocksServiceReserve.defaultExpectation.paramPtrs = &StocksServiceMockStocksServiceReserveParamPtrs{}
+	if mmReserve.defaultExpectation.paramPtrs == nil {
+		mmReserve.defaultExpectation.paramPtrs = &StocksServiceMockReserveParamPtrs{}
 	}
-	mmStocksServiceReserve.defaultExpectation.paramPtrs.ctx = &ctx
+	mmReserve.defaultExpectation.paramPtrs.ctx = &ctx
 
-	return mmStocksServiceReserve
+	return mmReserve
 }
 
-// ExpectItemsParam2 sets up expected param items for StocksService.StocksServiceReserve
-func (mmStocksServiceReserve *mStocksServiceMockStocksServiceReserve) ExpectItemsParam2(items []*orderModel.Item) *mStocksServiceMockStocksServiceReserve {
-	if mmStocksServiceReserve.mock.funcStocksServiceReserve != nil {
-		mmStocksServiceReserve.mock.t.Fatalf("StocksServiceMock.StocksServiceReserve mock is already set by Set")
+// ExpectItemsParam2 sets up expected param items for StocksService.Reserve
+func (mmReserve *mStocksServiceMockReserve) ExpectItemsParam2(items []*orderModel.Item) *mStocksServiceMockReserve {
+	if mmReserve.mock.funcReserve != nil {
+		mmReserve.mock.t.Fatalf("StocksServiceMock.Reserve mock is already set by Set")
 	}
 
-	if mmStocksServiceReserve.defaultExpectation == nil {
-		mmStocksServiceReserve.defaultExpectation = &StocksServiceMockStocksServiceReserveExpectation{}
+	if mmReserve.defaultExpectation == nil {
+		mmReserve.defaultExpectation = &StocksServiceMockReserveExpectation{}
 	}
 
-	if mmStocksServiceReserve.defaultExpectation.params != nil {
-		mmStocksServiceReserve.mock.t.Fatalf("StocksServiceMock.StocksServiceReserve mock is already set by Expect")
+	if mmReserve.defaultExpectation.params != nil {
+		mmReserve.mock.t.Fatalf("StocksServiceMock.Reserve mock is already set by Expect")
 	}
 
-	if mmStocksServiceReserve.defaultExpectation.paramPtrs == nil {
-		mmStocksServiceReserve.defaultExpectation.paramPtrs = &StocksServiceMockStocksServiceReserveParamPtrs{}
+	if mmReserve.defaultExpectation.paramPtrs == nil {
+		mmReserve.defaultExpectation.paramPtrs = &StocksServiceMockReserveParamPtrs{}
 	}
-	mmStocksServiceReserve.defaultExpectation.paramPtrs.items = &items
+	mmReserve.defaultExpectation.paramPtrs.items = &items
 
-	return mmStocksServiceReserve
+	return mmReserve
 }
 
-// Inspect accepts an inspector function that has same arguments as the StocksService.StocksServiceReserve
-func (mmStocksServiceReserve *mStocksServiceMockStocksServiceReserve) Inspect(f func(ctx context.Context, items []*orderModel.Item)) *mStocksServiceMockStocksServiceReserve {
-	if mmStocksServiceReserve.mock.inspectFuncStocksServiceReserve != nil {
-		mmStocksServiceReserve.mock.t.Fatalf("Inspect function is already set for StocksServiceMock.StocksServiceReserve")
+// Inspect accepts an inspector function that has same arguments as the StocksService.Reserve
+func (mmReserve *mStocksServiceMockReserve) Inspect(f func(ctx context.Context, items []*orderModel.Item)) *mStocksServiceMockReserve {
+	if mmReserve.mock.inspectFuncReserve != nil {
+		mmReserve.mock.t.Fatalf("Inspect function is already set for StocksServiceMock.Reserve")
 	}
 
-	mmStocksServiceReserve.mock.inspectFuncStocksServiceReserve = f
+	mmReserve.mock.inspectFuncReserve = f
 
-	return mmStocksServiceReserve
+	return mmReserve
 }
 
-// Return sets up results that will be returned by StocksService.StocksServiceReserve
-func (mmStocksServiceReserve *mStocksServiceMockStocksServiceReserve) Return(err error) *StocksServiceMock {
-	if mmStocksServiceReserve.mock.funcStocksServiceReserve != nil {
-		mmStocksServiceReserve.mock.t.Fatalf("StocksServiceMock.StocksServiceReserve mock is already set by Set")
+// Return sets up results that will be returned by StocksService.Reserve
+func (mmReserve *mStocksServiceMockReserve) Return(err error) *StocksServiceMock {
+	if mmReserve.mock.funcReserve != nil {
+		mmReserve.mock.t.Fatalf("StocksServiceMock.Reserve mock is already set by Set")
 	}
 
-	if mmStocksServiceReserve.defaultExpectation == nil {
-		mmStocksServiceReserve.defaultExpectation = &StocksServiceMockStocksServiceReserveExpectation{mock: mmStocksServiceReserve.mock}
+	if mmReserve.defaultExpectation == nil {
+		mmReserve.defaultExpectation = &StocksServiceMockReserveExpectation{mock: mmReserve.mock}
 	}
-	mmStocksServiceReserve.defaultExpectation.results = &StocksServiceMockStocksServiceReserveResults{err}
-	return mmStocksServiceReserve.mock
+	mmReserve.defaultExpectation.results = &StocksServiceMockReserveResults{err}
+	return mmReserve.mock
 }
 
-// Set uses given function f to mock the StocksService.StocksServiceReserve method
-func (mmStocksServiceReserve *mStocksServiceMockStocksServiceReserve) Set(f func(ctx context.Context, items []*orderModel.Item) (err error)) *StocksServiceMock {
-	if mmStocksServiceReserve.defaultExpectation != nil {
-		mmStocksServiceReserve.mock.t.Fatalf("Default expectation is already set for the StocksService.StocksServiceReserve method")
+// Set uses given function f to mock the StocksService.Reserve method
+func (mmReserve *mStocksServiceMockReserve) Set(f func(ctx context.Context, items []*orderModel.Item) (err error)) *StocksServiceMock {
+	if mmReserve.defaultExpectation != nil {
+		mmReserve.mock.t.Fatalf("Default expectation is already set for the StocksService.Reserve method")
 	}
 
-	if len(mmStocksServiceReserve.expectations) > 0 {
-		mmStocksServiceReserve.mock.t.Fatalf("Some expectations are already set for the StocksService.StocksServiceReserve method")
+	if len(mmReserve.expectations) > 0 {
+		mmReserve.mock.t.Fatalf("Some expectations are already set for the StocksService.Reserve method")
 	}
 
-	mmStocksServiceReserve.mock.funcStocksServiceReserve = f
-	return mmStocksServiceReserve.mock
+	mmReserve.mock.funcReserve = f
+	return mmReserve.mock
 }
 
-// When sets expectation for the StocksService.StocksServiceReserve which will trigger the result defined by the following
+// When sets expectation for the StocksService.Reserve which will trigger the result defined by the following
 // Then helper
-func (mmStocksServiceReserve *mStocksServiceMockStocksServiceReserve) When(ctx context.Context, items []*orderModel.Item) *StocksServiceMockStocksServiceReserveExpectation {
-	if mmStocksServiceReserve.mock.funcStocksServiceReserve != nil {
-		mmStocksServiceReserve.mock.t.Fatalf("StocksServiceMock.StocksServiceReserve mock is already set by Set")
+func (mmReserve *mStocksServiceMockReserve) When(ctx context.Context, items []*orderModel.Item) *StocksServiceMockReserveExpectation {
+	if mmReserve.mock.funcReserve != nil {
+		mmReserve.mock.t.Fatalf("StocksServiceMock.Reserve mock is already set by Set")
 	}
 
-	expectation := &StocksServiceMockStocksServiceReserveExpectation{
-		mock:   mmStocksServiceReserve.mock,
-		params: &StocksServiceMockStocksServiceReserveParams{ctx, items},
+	expectation := &StocksServiceMockReserveExpectation{
+		mock:   mmReserve.mock,
+		params: &StocksServiceMockReserveParams{ctx, items},
 	}
-	mmStocksServiceReserve.expectations = append(mmStocksServiceReserve.expectations, expectation)
+	mmReserve.expectations = append(mmReserve.expectations, expectation)
 	return expectation
 }
 
-// Then sets up StocksService.StocksServiceReserve return parameters for the expectation previously defined by the When method
-func (e *StocksServiceMockStocksServiceReserveExpectation) Then(err error) *StocksServiceMock {
-	e.results = &StocksServiceMockStocksServiceReserveResults{err}
+// Then sets up StocksService.Reserve return parameters for the expectation previously defined by the When method
+func (e *StocksServiceMockReserveExpectation) Then(err error) *StocksServiceMock {
+	e.results = &StocksServiceMockReserveResults{err}
 	return e.mock
 }
 
-// Times sets number of times StocksService.StocksServiceReserve should be invoked
-func (mmStocksServiceReserve *mStocksServiceMockStocksServiceReserve) Times(n uint64) *mStocksServiceMockStocksServiceReserve {
+// Times sets number of times StocksService.Reserve should be invoked
+func (mmReserve *mStocksServiceMockReserve) Times(n uint64) *mStocksServiceMockReserve {
 	if n == 0 {
-		mmStocksServiceReserve.mock.t.Fatalf("Times of StocksServiceMock.StocksServiceReserve mock can not be zero")
+		mmReserve.mock.t.Fatalf("Times of StocksServiceMock.Reserve mock can not be zero")
 	}
-	mm_atomic.StoreUint64(&mmStocksServiceReserve.expectedInvocations, n)
-	return mmStocksServiceReserve
+	mm_atomic.StoreUint64(&mmReserve.expectedInvocations, n)
+	return mmReserve
 }
 
-func (mmStocksServiceReserve *mStocksServiceMockStocksServiceReserve) invocationsDone() bool {
-	if len(mmStocksServiceReserve.expectations) == 0 && mmStocksServiceReserve.defaultExpectation == nil && mmStocksServiceReserve.mock.funcStocksServiceReserve == nil {
+func (mmReserve *mStocksServiceMockReserve) invocationsDone() bool {
+	if len(mmReserve.expectations) == 0 && mmReserve.defaultExpectation == nil && mmReserve.mock.funcReserve == nil {
 		return true
 	}
 
-	totalInvocations := mm_atomic.LoadUint64(&mmStocksServiceReserve.mock.afterStocksServiceReserveCounter)
-	expectedInvocations := mm_atomic.LoadUint64(&mmStocksServiceReserve.expectedInvocations)
+	totalInvocations := mm_atomic.LoadUint64(&mmReserve.mock.afterReserveCounter)
+	expectedInvocations := mm_atomic.LoadUint64(&mmReserve.expectedInvocations)
 
 	return totalInvocations > 0 && (expectedInvocations == 0 || expectedInvocations == totalInvocations)
 }
 
-// StocksServiceReserve implements handler.StocksService
-func (mmStocksServiceReserve *StocksServiceMock) StocksServiceReserve(ctx context.Context, items []*orderModel.Item) (err error) {
-	mm_atomic.AddUint64(&mmStocksServiceReserve.beforeStocksServiceReserveCounter, 1)
-	defer mm_atomic.AddUint64(&mmStocksServiceReserve.afterStocksServiceReserveCounter, 1)
+// Reserve implements handler.StocksService
+func (mmReserve *StocksServiceMock) Reserve(ctx context.Context, items []*orderModel.Item) (err error) {
+	mm_atomic.AddUint64(&mmReserve.beforeReserveCounter, 1)
+	defer mm_atomic.AddUint64(&mmReserve.afterReserveCounter, 1)
 
-	if mmStocksServiceReserve.inspectFuncStocksServiceReserve != nil {
-		mmStocksServiceReserve.inspectFuncStocksServiceReserve(ctx, items)
+	if mmReserve.inspectFuncReserve != nil {
+		mmReserve.inspectFuncReserve(ctx, items)
 	}
 
-	mm_params := StocksServiceMockStocksServiceReserveParams{ctx, items}
+	mm_params := StocksServiceMockReserveParams{ctx, items}
 
 	// Record call args
-	mmStocksServiceReserve.StocksServiceReserveMock.mutex.Lock()
-	mmStocksServiceReserve.StocksServiceReserveMock.callArgs = append(mmStocksServiceReserve.StocksServiceReserveMock.callArgs, &mm_params)
-	mmStocksServiceReserve.StocksServiceReserveMock.mutex.Unlock()
+	mmReserve.ReserveMock.mutex.Lock()
+	mmReserve.ReserveMock.callArgs = append(mmReserve.ReserveMock.callArgs, &mm_params)
+	mmReserve.ReserveMock.mutex.Unlock()
 
-	for _, e := range mmStocksServiceReserve.StocksServiceReserveMock.expectations {
+	for _, e := range mmReserve.ReserveMock.expectations {
 		if minimock.Equal(*e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
 			return e.results.err
 		}
 	}
 
-	if mmStocksServiceReserve.StocksServiceReserveMock.defaultExpectation != nil {
-		mm_atomic.AddUint64(&mmStocksServiceReserve.StocksServiceReserveMock.defaultExpectation.Counter, 1)
-		mm_want := mmStocksServiceReserve.StocksServiceReserveMock.defaultExpectation.params
-		mm_want_ptrs := mmStocksServiceReserve.StocksServiceReserveMock.defaultExpectation.paramPtrs
+	if mmReserve.ReserveMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmReserve.ReserveMock.defaultExpectation.Counter, 1)
+		mm_want := mmReserve.ReserveMock.defaultExpectation.params
+		mm_want_ptrs := mmReserve.ReserveMock.defaultExpectation.paramPtrs
 
-		mm_got := StocksServiceMockStocksServiceReserveParams{ctx, items}
+		mm_got := StocksServiceMockReserveParams{ctx, items}
 
 		if mm_want_ptrs != nil {
 
 			if mm_want_ptrs.ctx != nil && !minimock.Equal(*mm_want_ptrs.ctx, mm_got.ctx) {
-				mmStocksServiceReserve.t.Errorf("StocksServiceMock.StocksServiceReserve got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
+				mmReserve.t.Errorf("StocksServiceMock.Reserve got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
 			}
 
 			if mm_want_ptrs.items != nil && !minimock.Equal(*mm_want_ptrs.items, mm_got.items) {
-				mmStocksServiceReserve.t.Errorf("StocksServiceMock.StocksServiceReserve got unexpected parameter items, want: %#v, got: %#v%s\n", *mm_want_ptrs.items, mm_got.items, minimock.Diff(*mm_want_ptrs.items, mm_got.items))
+				mmReserve.t.Errorf("StocksServiceMock.Reserve got unexpected parameter items, want: %#v, got: %#v%s\n", *mm_want_ptrs.items, mm_got.items, minimock.Diff(*mm_want_ptrs.items, mm_got.items))
 			}
 
 		} else if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmStocksServiceReserve.t.Errorf("StocksServiceMock.StocksServiceReserve got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+			mmReserve.t.Errorf("StocksServiceMock.Reserve got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
 
-		mm_results := mmStocksServiceReserve.StocksServiceReserveMock.defaultExpectation.results
+		mm_results := mmReserve.ReserveMock.defaultExpectation.results
 		if mm_results == nil {
-			mmStocksServiceReserve.t.Fatal("No results are set for the StocksServiceMock.StocksServiceReserve")
+			mmReserve.t.Fatal("No results are set for the StocksServiceMock.Reserve")
 		}
 		return (*mm_results).err
 	}
-	if mmStocksServiceReserve.funcStocksServiceReserve != nil {
-		return mmStocksServiceReserve.funcStocksServiceReserve(ctx, items)
+	if mmReserve.funcReserve != nil {
+		return mmReserve.funcReserve(ctx, items)
 	}
-	mmStocksServiceReserve.t.Fatalf("Unexpected call to StocksServiceMock.StocksServiceReserve. %v %v", ctx, items)
+	mmReserve.t.Fatalf("Unexpected call to StocksServiceMock.Reserve. %v %v", ctx, items)
 	return
 }
 
-// StocksServiceReserveAfterCounter returns a count of finished StocksServiceMock.StocksServiceReserve invocations
-func (mmStocksServiceReserve *StocksServiceMock) StocksServiceReserveAfterCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmStocksServiceReserve.afterStocksServiceReserveCounter)
+// ReserveAfterCounter returns a count of finished StocksServiceMock.Reserve invocations
+func (mmReserve *StocksServiceMock) ReserveAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmReserve.afterReserveCounter)
 }
 
-// StocksServiceReserveBeforeCounter returns a count of StocksServiceMock.StocksServiceReserve invocations
-func (mmStocksServiceReserve *StocksServiceMock) StocksServiceReserveBeforeCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmStocksServiceReserve.beforeStocksServiceReserveCounter)
+// ReserveBeforeCounter returns a count of StocksServiceMock.Reserve invocations
+func (mmReserve *StocksServiceMock) ReserveBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmReserve.beforeReserveCounter)
 }
 
-// Calls returns a list of arguments used in each call to StocksServiceMock.StocksServiceReserve.
+// Calls returns a list of arguments used in each call to StocksServiceMock.Reserve.
 // The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmStocksServiceReserve *mStocksServiceMockStocksServiceReserve) Calls() []*StocksServiceMockStocksServiceReserveParams {
-	mmStocksServiceReserve.mutex.RLock()
+func (mmReserve *mStocksServiceMockReserve) Calls() []*StocksServiceMockReserveParams {
+	mmReserve.mutex.RLock()
 
-	argCopy := make([]*StocksServiceMockStocksServiceReserveParams, len(mmStocksServiceReserve.callArgs))
-	copy(argCopy, mmStocksServiceReserve.callArgs)
+	argCopy := make([]*StocksServiceMockReserveParams, len(mmReserve.callArgs))
+	copy(argCopy, mmReserve.callArgs)
 
-	mmStocksServiceReserve.mutex.RUnlock()
+	mmReserve.mutex.RUnlock()
 
 	return argCopy
 }
 
-// MinimockStocksServiceReserveDone returns true if the count of the StocksServiceReserve invocations corresponds
+// MinimockReserveDone returns true if the count of the Reserve invocations corresponds
 // the number of defined expectations
-func (m *StocksServiceMock) MinimockStocksServiceReserveDone() bool {
-	if m.StocksServiceReserveMock.optional {
+func (m *StocksServiceMock) MinimockReserveDone() bool {
+	if m.ReserveMock.optional {
 		// Optional methods provide '0 or more' call count restriction.
 		return true
 	}
 
-	for _, e := range m.StocksServiceReserveMock.expectations {
+	for _, e := range m.ReserveMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
 			return false
 		}
 	}
 
-	return m.StocksServiceReserveMock.invocationsDone()
+	return m.ReserveMock.invocationsDone()
 }
 
-// MinimockStocksServiceReserveInspect logs each unmet expectation
-func (m *StocksServiceMock) MinimockStocksServiceReserveInspect() {
-	for _, e := range m.StocksServiceReserveMock.expectations {
+// MinimockReserveInspect logs each unmet expectation
+func (m *StocksServiceMock) MinimockReserveInspect() {
+	for _, e := range m.ReserveMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to StocksServiceMock.StocksServiceReserve with params: %#v", *e.params)
+			m.t.Errorf("Expected call to StocksServiceMock.Reserve with params: %#v", *e.params)
 		}
 	}
 
-	afterStocksServiceReserveCounter := mm_atomic.LoadUint64(&m.afterStocksServiceReserveCounter)
+	afterReserveCounter := mm_atomic.LoadUint64(&m.afterReserveCounter)
 	// if default expectation was set then invocations count should be greater than zero
-	if m.StocksServiceReserveMock.defaultExpectation != nil && afterStocksServiceReserveCounter < 1 {
-		if m.StocksServiceReserveMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to StocksServiceMock.StocksServiceReserve")
+	if m.ReserveMock.defaultExpectation != nil && afterReserveCounter < 1 {
+		if m.ReserveMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to StocksServiceMock.Reserve")
 		} else {
-			m.t.Errorf("Expected call to StocksServiceMock.StocksServiceReserve with params: %#v", *m.StocksServiceReserveMock.defaultExpectation.params)
+			m.t.Errorf("Expected call to StocksServiceMock.Reserve with params: %#v", *m.ReserveMock.defaultExpectation.params)
 		}
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcStocksServiceReserve != nil && afterStocksServiceReserveCounter < 1 {
-		m.t.Error("Expected call to StocksServiceMock.StocksServiceReserve")
+	if m.funcReserve != nil && afterReserveCounter < 1 {
+		m.t.Error("Expected call to StocksServiceMock.Reserve")
 	}
 
-	if !m.StocksServiceReserveMock.invocationsDone() && afterStocksServiceReserveCounter > 0 {
-		m.t.Errorf("Expected %d calls to StocksServiceMock.StocksServiceReserve but found %d calls",
-			mm_atomic.LoadUint64(&m.StocksServiceReserveMock.expectedInvocations), afterStocksServiceReserveCounter)
+	if !m.ReserveMock.invocationsDone() && afterReserveCounter > 0 {
+		m.t.Errorf("Expected %d calls to StocksServiceMock.Reserve but found %d calls",
+			mm_atomic.LoadUint64(&m.ReserveMock.expectedInvocations), afterReserveCounter)
 	}
 }
 
-type mStocksServiceMockStocksServiceReserveCancel struct {
+type mStocksServiceMockReserveCancel struct {
 	optional           bool
 	mock               *StocksServiceMock
-	defaultExpectation *StocksServiceMockStocksServiceReserveCancelExpectation
-	expectations       []*StocksServiceMockStocksServiceReserveCancelExpectation
+	defaultExpectation *StocksServiceMockReserveCancelExpectation
+	expectations       []*StocksServiceMockReserveCancelExpectation
 
-	callArgs []*StocksServiceMockStocksServiceReserveCancelParams
+	callArgs []*StocksServiceMockReserveCancelParams
 	mutex    sync.RWMutex
 
 	expectedInvocations uint64
 }
 
-// StocksServiceMockStocksServiceReserveCancelExpectation specifies expectation struct of the StocksService.StocksServiceReserveCancel
-type StocksServiceMockStocksServiceReserveCancelExpectation struct {
+// StocksServiceMockReserveCancelExpectation specifies expectation struct of the StocksService.ReserveCancel
+type StocksServiceMockReserveCancelExpectation struct {
 	mock      *StocksServiceMock
-	params    *StocksServiceMockStocksServiceReserveCancelParams
-	paramPtrs *StocksServiceMockStocksServiceReserveCancelParamPtrs
-	results   *StocksServiceMockStocksServiceReserveCancelResults
+	params    *StocksServiceMockReserveCancelParams
+	paramPtrs *StocksServiceMockReserveCancelParamPtrs
+	results   *StocksServiceMockReserveCancelResults
 	Counter   uint64
 }
 
-// StocksServiceMockStocksServiceReserveCancelParams contains parameters of the StocksService.StocksServiceReserveCancel
-type StocksServiceMockStocksServiceReserveCancelParams struct {
+// StocksServiceMockReserveCancelParams contains parameters of the StocksService.ReserveCancel
+type StocksServiceMockReserveCancelParams struct {
 	ctx   context.Context
 	items []*orderModel.Item
 }
 
-// StocksServiceMockStocksServiceReserveCancelParamPtrs contains pointers to parameters of the StocksService.StocksServiceReserveCancel
-type StocksServiceMockStocksServiceReserveCancelParamPtrs struct {
+// StocksServiceMockReserveCancelParamPtrs contains pointers to parameters of the StocksService.ReserveCancel
+type StocksServiceMockReserveCancelParamPtrs struct {
 	ctx   *context.Context
 	items *[]*orderModel.Item
 }
 
-// StocksServiceMockStocksServiceReserveCancelResults contains results of the StocksService.StocksServiceReserveCancel
-type StocksServiceMockStocksServiceReserveCancelResults struct {
+// StocksServiceMockReserveCancelResults contains results of the StocksService.ReserveCancel
+type StocksServiceMockReserveCancelResults struct {
 	err error
 }
 
@@ -754,318 +754,318 @@ type StocksServiceMockStocksServiceReserveCancelResults struct {
 // Optional() makes method check to work in '0 or more' mode.
 // It is NOT RECOMMENDED to use this option by default unless you really need it, as it helps to
 // catch the problems when the expected method call is totally skipped during test run.
-func (mmStocksServiceReserveCancel *mStocksServiceMockStocksServiceReserveCancel) Optional() *mStocksServiceMockStocksServiceReserveCancel {
-	mmStocksServiceReserveCancel.optional = true
-	return mmStocksServiceReserveCancel
+func (mmReserveCancel *mStocksServiceMockReserveCancel) Optional() *mStocksServiceMockReserveCancel {
+	mmReserveCancel.optional = true
+	return mmReserveCancel
 }
 
-// Expect sets up expected params for StocksService.StocksServiceReserveCancel
-func (mmStocksServiceReserveCancel *mStocksServiceMockStocksServiceReserveCancel) Expect(ctx context.Context, items []*orderModel.Item) *mStocksServiceMockStocksServiceReserveCancel {
-	if mmStocksServiceReserveCancel.mock.funcStocksServiceReserveCancel != nil {
-		mmStocksServiceReserveCancel.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveCancel mock is already set by Set")
+// Expect sets up expected params for StocksService.ReserveCancel
+func (mmReserveCancel *mStocksServiceMockReserveCancel) Expect(ctx context.Context, items []*orderModel.Item) *mStocksServiceMockReserveCancel {
+	if mmReserveCancel.mock.funcReserveCancel != nil {
+		mmReserveCancel.mock.t.Fatalf("StocksServiceMock.ReserveCancel mock is already set by Set")
 	}
 
-	if mmStocksServiceReserveCancel.defaultExpectation == nil {
-		mmStocksServiceReserveCancel.defaultExpectation = &StocksServiceMockStocksServiceReserveCancelExpectation{}
+	if mmReserveCancel.defaultExpectation == nil {
+		mmReserveCancel.defaultExpectation = &StocksServiceMockReserveCancelExpectation{}
 	}
 
-	if mmStocksServiceReserveCancel.defaultExpectation.paramPtrs != nil {
-		mmStocksServiceReserveCancel.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveCancel mock is already set by ExpectParams functions")
+	if mmReserveCancel.defaultExpectation.paramPtrs != nil {
+		mmReserveCancel.mock.t.Fatalf("StocksServiceMock.ReserveCancel mock is already set by ExpectParams functions")
 	}
 
-	mmStocksServiceReserveCancel.defaultExpectation.params = &StocksServiceMockStocksServiceReserveCancelParams{ctx, items}
-	for _, e := range mmStocksServiceReserveCancel.expectations {
-		if minimock.Equal(e.params, mmStocksServiceReserveCancel.defaultExpectation.params) {
-			mmStocksServiceReserveCancel.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmStocksServiceReserveCancel.defaultExpectation.params)
+	mmReserveCancel.defaultExpectation.params = &StocksServiceMockReserveCancelParams{ctx, items}
+	for _, e := range mmReserveCancel.expectations {
+		if minimock.Equal(e.params, mmReserveCancel.defaultExpectation.params) {
+			mmReserveCancel.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmReserveCancel.defaultExpectation.params)
 		}
 	}
 
-	return mmStocksServiceReserveCancel
+	return mmReserveCancel
 }
 
-// ExpectCtxParam1 sets up expected param ctx for StocksService.StocksServiceReserveCancel
-func (mmStocksServiceReserveCancel *mStocksServiceMockStocksServiceReserveCancel) ExpectCtxParam1(ctx context.Context) *mStocksServiceMockStocksServiceReserveCancel {
-	if mmStocksServiceReserveCancel.mock.funcStocksServiceReserveCancel != nil {
-		mmStocksServiceReserveCancel.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveCancel mock is already set by Set")
+// ExpectCtxParam1 sets up expected param ctx for StocksService.ReserveCancel
+func (mmReserveCancel *mStocksServiceMockReserveCancel) ExpectCtxParam1(ctx context.Context) *mStocksServiceMockReserveCancel {
+	if mmReserveCancel.mock.funcReserveCancel != nil {
+		mmReserveCancel.mock.t.Fatalf("StocksServiceMock.ReserveCancel mock is already set by Set")
 	}
 
-	if mmStocksServiceReserveCancel.defaultExpectation == nil {
-		mmStocksServiceReserveCancel.defaultExpectation = &StocksServiceMockStocksServiceReserveCancelExpectation{}
+	if mmReserveCancel.defaultExpectation == nil {
+		mmReserveCancel.defaultExpectation = &StocksServiceMockReserveCancelExpectation{}
 	}
 
-	if mmStocksServiceReserveCancel.defaultExpectation.params != nil {
-		mmStocksServiceReserveCancel.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveCancel mock is already set by Expect")
+	if mmReserveCancel.defaultExpectation.params != nil {
+		mmReserveCancel.mock.t.Fatalf("StocksServiceMock.ReserveCancel mock is already set by Expect")
 	}
 
-	if mmStocksServiceReserveCancel.defaultExpectation.paramPtrs == nil {
-		mmStocksServiceReserveCancel.defaultExpectation.paramPtrs = &StocksServiceMockStocksServiceReserveCancelParamPtrs{}
+	if mmReserveCancel.defaultExpectation.paramPtrs == nil {
+		mmReserveCancel.defaultExpectation.paramPtrs = &StocksServiceMockReserveCancelParamPtrs{}
 	}
-	mmStocksServiceReserveCancel.defaultExpectation.paramPtrs.ctx = &ctx
+	mmReserveCancel.defaultExpectation.paramPtrs.ctx = &ctx
 
-	return mmStocksServiceReserveCancel
+	return mmReserveCancel
 }
 
-// ExpectItemsParam2 sets up expected param items for StocksService.StocksServiceReserveCancel
-func (mmStocksServiceReserveCancel *mStocksServiceMockStocksServiceReserveCancel) ExpectItemsParam2(items []*orderModel.Item) *mStocksServiceMockStocksServiceReserveCancel {
-	if mmStocksServiceReserveCancel.mock.funcStocksServiceReserveCancel != nil {
-		mmStocksServiceReserveCancel.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveCancel mock is already set by Set")
+// ExpectItemsParam2 sets up expected param items for StocksService.ReserveCancel
+func (mmReserveCancel *mStocksServiceMockReserveCancel) ExpectItemsParam2(items []*orderModel.Item) *mStocksServiceMockReserveCancel {
+	if mmReserveCancel.mock.funcReserveCancel != nil {
+		mmReserveCancel.mock.t.Fatalf("StocksServiceMock.ReserveCancel mock is already set by Set")
 	}
 
-	if mmStocksServiceReserveCancel.defaultExpectation == nil {
-		mmStocksServiceReserveCancel.defaultExpectation = &StocksServiceMockStocksServiceReserveCancelExpectation{}
+	if mmReserveCancel.defaultExpectation == nil {
+		mmReserveCancel.defaultExpectation = &StocksServiceMockReserveCancelExpectation{}
 	}
 
-	if mmStocksServiceReserveCancel.defaultExpectation.params != nil {
-		mmStocksServiceReserveCancel.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveCancel mock is already set by Expect")
+	if mmReserveCancel.defaultExpectation.params != nil {
+		mmReserveCancel.mock.t.Fatalf("StocksServiceMock.ReserveCancel mock is already set by Expect")
 	}
 
-	if mmStocksServiceReserveCancel.defaultExpectation.paramPtrs == nil {
-		mmStocksServiceReserveCancel.defaultExpectation.paramPtrs = &StocksServiceMockStocksServiceReserveCancelParamPtrs{}
+	if mmReserveCancel.defaultExpectation.paramPtrs == nil {
+		mmReserveCancel.defaultExpectation.paramPtrs = &StocksServiceMockReserveCancelParamPtrs{}
 	}
-	mmStocksServiceReserveCancel.defaultExpectation.paramPtrs.items = &items
+	mmReserveCancel.defaultExpectation.paramPtrs.items = &items
 
-	return mmStocksServiceReserveCancel
+	return mmReserveCancel
 }
 
-// Inspect accepts an inspector function that has same arguments as the StocksService.StocksServiceReserveCancel
-func (mmStocksServiceReserveCancel *mStocksServiceMockStocksServiceReserveCancel) Inspect(f func(ctx context.Context, items []*orderModel.Item)) *mStocksServiceMockStocksServiceReserveCancel {
-	if mmStocksServiceReserveCancel.mock.inspectFuncStocksServiceReserveCancel != nil {
-		mmStocksServiceReserveCancel.mock.t.Fatalf("Inspect function is already set for StocksServiceMock.StocksServiceReserveCancel")
+// Inspect accepts an inspector function that has same arguments as the StocksService.ReserveCancel
+func (mmReserveCancel *mStocksServiceMockReserveCancel) Inspect(f func(ctx context.Context, items []*orderModel.Item)) *mStocksServiceMockReserveCancel {
+	if mmReserveCancel.mock.inspectFuncReserveCancel != nil {
+		mmReserveCancel.mock.t.Fatalf("Inspect function is already set for StocksServiceMock.ReserveCancel")
 	}
 
-	mmStocksServiceReserveCancel.mock.inspectFuncStocksServiceReserveCancel = f
+	mmReserveCancel.mock.inspectFuncReserveCancel = f
 
-	return mmStocksServiceReserveCancel
+	return mmReserveCancel
 }
 
-// Return sets up results that will be returned by StocksService.StocksServiceReserveCancel
-func (mmStocksServiceReserveCancel *mStocksServiceMockStocksServiceReserveCancel) Return(err error) *StocksServiceMock {
-	if mmStocksServiceReserveCancel.mock.funcStocksServiceReserveCancel != nil {
-		mmStocksServiceReserveCancel.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveCancel mock is already set by Set")
+// Return sets up results that will be returned by StocksService.ReserveCancel
+func (mmReserveCancel *mStocksServiceMockReserveCancel) Return(err error) *StocksServiceMock {
+	if mmReserveCancel.mock.funcReserveCancel != nil {
+		mmReserveCancel.mock.t.Fatalf("StocksServiceMock.ReserveCancel mock is already set by Set")
 	}
 
-	if mmStocksServiceReserveCancel.defaultExpectation == nil {
-		mmStocksServiceReserveCancel.defaultExpectation = &StocksServiceMockStocksServiceReserveCancelExpectation{mock: mmStocksServiceReserveCancel.mock}
+	if mmReserveCancel.defaultExpectation == nil {
+		mmReserveCancel.defaultExpectation = &StocksServiceMockReserveCancelExpectation{mock: mmReserveCancel.mock}
 	}
-	mmStocksServiceReserveCancel.defaultExpectation.results = &StocksServiceMockStocksServiceReserveCancelResults{err}
-	return mmStocksServiceReserveCancel.mock
+	mmReserveCancel.defaultExpectation.results = &StocksServiceMockReserveCancelResults{err}
+	return mmReserveCancel.mock
 }
 
-// Set uses given function f to mock the StocksService.StocksServiceReserveCancel method
-func (mmStocksServiceReserveCancel *mStocksServiceMockStocksServiceReserveCancel) Set(f func(ctx context.Context, items []*orderModel.Item) (err error)) *StocksServiceMock {
-	if mmStocksServiceReserveCancel.defaultExpectation != nil {
-		mmStocksServiceReserveCancel.mock.t.Fatalf("Default expectation is already set for the StocksService.StocksServiceReserveCancel method")
+// Set uses given function f to mock the StocksService.ReserveCancel method
+func (mmReserveCancel *mStocksServiceMockReserveCancel) Set(f func(ctx context.Context, items []*orderModel.Item) (err error)) *StocksServiceMock {
+	if mmReserveCancel.defaultExpectation != nil {
+		mmReserveCancel.mock.t.Fatalf("Default expectation is already set for the StocksService.ReserveCancel method")
 	}
 
-	if len(mmStocksServiceReserveCancel.expectations) > 0 {
-		mmStocksServiceReserveCancel.mock.t.Fatalf("Some expectations are already set for the StocksService.StocksServiceReserveCancel method")
+	if len(mmReserveCancel.expectations) > 0 {
+		mmReserveCancel.mock.t.Fatalf("Some expectations are already set for the StocksService.ReserveCancel method")
 	}
 
-	mmStocksServiceReserveCancel.mock.funcStocksServiceReserveCancel = f
-	return mmStocksServiceReserveCancel.mock
+	mmReserveCancel.mock.funcReserveCancel = f
+	return mmReserveCancel.mock
 }
 
-// When sets expectation for the StocksService.StocksServiceReserveCancel which will trigger the result defined by the following
+// When sets expectation for the StocksService.ReserveCancel which will trigger the result defined by the following
 // Then helper
-func (mmStocksServiceReserveCancel *mStocksServiceMockStocksServiceReserveCancel) When(ctx context.Context, items []*orderModel.Item) *StocksServiceMockStocksServiceReserveCancelExpectation {
-	if mmStocksServiceReserveCancel.mock.funcStocksServiceReserveCancel != nil {
-		mmStocksServiceReserveCancel.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveCancel mock is already set by Set")
+func (mmReserveCancel *mStocksServiceMockReserveCancel) When(ctx context.Context, items []*orderModel.Item) *StocksServiceMockReserveCancelExpectation {
+	if mmReserveCancel.mock.funcReserveCancel != nil {
+		mmReserveCancel.mock.t.Fatalf("StocksServiceMock.ReserveCancel mock is already set by Set")
 	}
 
-	expectation := &StocksServiceMockStocksServiceReserveCancelExpectation{
-		mock:   mmStocksServiceReserveCancel.mock,
-		params: &StocksServiceMockStocksServiceReserveCancelParams{ctx, items},
+	expectation := &StocksServiceMockReserveCancelExpectation{
+		mock:   mmReserveCancel.mock,
+		params: &StocksServiceMockReserveCancelParams{ctx, items},
 	}
-	mmStocksServiceReserveCancel.expectations = append(mmStocksServiceReserveCancel.expectations, expectation)
+	mmReserveCancel.expectations = append(mmReserveCancel.expectations, expectation)
 	return expectation
 }
 
-// Then sets up StocksService.StocksServiceReserveCancel return parameters for the expectation previously defined by the When method
-func (e *StocksServiceMockStocksServiceReserveCancelExpectation) Then(err error) *StocksServiceMock {
-	e.results = &StocksServiceMockStocksServiceReserveCancelResults{err}
+// Then sets up StocksService.ReserveCancel return parameters for the expectation previously defined by the When method
+func (e *StocksServiceMockReserveCancelExpectation) Then(err error) *StocksServiceMock {
+	e.results = &StocksServiceMockReserveCancelResults{err}
 	return e.mock
 }
 
-// Times sets number of times StocksService.StocksServiceReserveCancel should be invoked
-func (mmStocksServiceReserveCancel *mStocksServiceMockStocksServiceReserveCancel) Times(n uint64) *mStocksServiceMockStocksServiceReserveCancel {
+// Times sets number of times StocksService.ReserveCancel should be invoked
+func (mmReserveCancel *mStocksServiceMockReserveCancel) Times(n uint64) *mStocksServiceMockReserveCancel {
 	if n == 0 {
-		mmStocksServiceReserveCancel.mock.t.Fatalf("Times of StocksServiceMock.StocksServiceReserveCancel mock can not be zero")
+		mmReserveCancel.mock.t.Fatalf("Times of StocksServiceMock.ReserveCancel mock can not be zero")
 	}
-	mm_atomic.StoreUint64(&mmStocksServiceReserveCancel.expectedInvocations, n)
-	return mmStocksServiceReserveCancel
+	mm_atomic.StoreUint64(&mmReserveCancel.expectedInvocations, n)
+	return mmReserveCancel
 }
 
-func (mmStocksServiceReserveCancel *mStocksServiceMockStocksServiceReserveCancel) invocationsDone() bool {
-	if len(mmStocksServiceReserveCancel.expectations) == 0 && mmStocksServiceReserveCancel.defaultExpectation == nil && mmStocksServiceReserveCancel.mock.funcStocksServiceReserveCancel == nil {
+func (mmReserveCancel *mStocksServiceMockReserveCancel) invocationsDone() bool {
+	if len(mmReserveCancel.expectations) == 0 && mmReserveCancel.defaultExpectation == nil && mmReserveCancel.mock.funcReserveCancel == nil {
 		return true
 	}
 
-	totalInvocations := mm_atomic.LoadUint64(&mmStocksServiceReserveCancel.mock.afterStocksServiceReserveCancelCounter)
-	expectedInvocations := mm_atomic.LoadUint64(&mmStocksServiceReserveCancel.expectedInvocations)
+	totalInvocations := mm_atomic.LoadUint64(&mmReserveCancel.mock.afterReserveCancelCounter)
+	expectedInvocations := mm_atomic.LoadUint64(&mmReserveCancel.expectedInvocations)
 
 	return totalInvocations > 0 && (expectedInvocations == 0 || expectedInvocations == totalInvocations)
 }
 
-// StocksServiceReserveCancel implements handler.StocksService
-func (mmStocksServiceReserveCancel *StocksServiceMock) StocksServiceReserveCancel(ctx context.Context, items []*orderModel.Item) (err error) {
-	mm_atomic.AddUint64(&mmStocksServiceReserveCancel.beforeStocksServiceReserveCancelCounter, 1)
-	defer mm_atomic.AddUint64(&mmStocksServiceReserveCancel.afterStocksServiceReserveCancelCounter, 1)
+// ReserveCancel implements handler.StocksService
+func (mmReserveCancel *StocksServiceMock) ReserveCancel(ctx context.Context, items []*orderModel.Item) (err error) {
+	mm_atomic.AddUint64(&mmReserveCancel.beforeReserveCancelCounter, 1)
+	defer mm_atomic.AddUint64(&mmReserveCancel.afterReserveCancelCounter, 1)
 
-	if mmStocksServiceReserveCancel.inspectFuncStocksServiceReserveCancel != nil {
-		mmStocksServiceReserveCancel.inspectFuncStocksServiceReserveCancel(ctx, items)
+	if mmReserveCancel.inspectFuncReserveCancel != nil {
+		mmReserveCancel.inspectFuncReserveCancel(ctx, items)
 	}
 
-	mm_params := StocksServiceMockStocksServiceReserveCancelParams{ctx, items}
+	mm_params := StocksServiceMockReserveCancelParams{ctx, items}
 
 	// Record call args
-	mmStocksServiceReserveCancel.StocksServiceReserveCancelMock.mutex.Lock()
-	mmStocksServiceReserveCancel.StocksServiceReserveCancelMock.callArgs = append(mmStocksServiceReserveCancel.StocksServiceReserveCancelMock.callArgs, &mm_params)
-	mmStocksServiceReserveCancel.StocksServiceReserveCancelMock.mutex.Unlock()
+	mmReserveCancel.ReserveCancelMock.mutex.Lock()
+	mmReserveCancel.ReserveCancelMock.callArgs = append(mmReserveCancel.ReserveCancelMock.callArgs, &mm_params)
+	mmReserveCancel.ReserveCancelMock.mutex.Unlock()
 
-	for _, e := range mmStocksServiceReserveCancel.StocksServiceReserveCancelMock.expectations {
+	for _, e := range mmReserveCancel.ReserveCancelMock.expectations {
 		if minimock.Equal(*e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
 			return e.results.err
 		}
 	}
 
-	if mmStocksServiceReserveCancel.StocksServiceReserveCancelMock.defaultExpectation != nil {
-		mm_atomic.AddUint64(&mmStocksServiceReserveCancel.StocksServiceReserveCancelMock.defaultExpectation.Counter, 1)
-		mm_want := mmStocksServiceReserveCancel.StocksServiceReserveCancelMock.defaultExpectation.params
-		mm_want_ptrs := mmStocksServiceReserveCancel.StocksServiceReserveCancelMock.defaultExpectation.paramPtrs
+	if mmReserveCancel.ReserveCancelMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmReserveCancel.ReserveCancelMock.defaultExpectation.Counter, 1)
+		mm_want := mmReserveCancel.ReserveCancelMock.defaultExpectation.params
+		mm_want_ptrs := mmReserveCancel.ReserveCancelMock.defaultExpectation.paramPtrs
 
-		mm_got := StocksServiceMockStocksServiceReserveCancelParams{ctx, items}
+		mm_got := StocksServiceMockReserveCancelParams{ctx, items}
 
 		if mm_want_ptrs != nil {
 
 			if mm_want_ptrs.ctx != nil && !minimock.Equal(*mm_want_ptrs.ctx, mm_got.ctx) {
-				mmStocksServiceReserveCancel.t.Errorf("StocksServiceMock.StocksServiceReserveCancel got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
+				mmReserveCancel.t.Errorf("StocksServiceMock.ReserveCancel got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
 			}
 
 			if mm_want_ptrs.items != nil && !minimock.Equal(*mm_want_ptrs.items, mm_got.items) {
-				mmStocksServiceReserveCancel.t.Errorf("StocksServiceMock.StocksServiceReserveCancel got unexpected parameter items, want: %#v, got: %#v%s\n", *mm_want_ptrs.items, mm_got.items, minimock.Diff(*mm_want_ptrs.items, mm_got.items))
+				mmReserveCancel.t.Errorf("StocksServiceMock.ReserveCancel got unexpected parameter items, want: %#v, got: %#v%s\n", *mm_want_ptrs.items, mm_got.items, minimock.Diff(*mm_want_ptrs.items, mm_got.items))
 			}
 
 		} else if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmStocksServiceReserveCancel.t.Errorf("StocksServiceMock.StocksServiceReserveCancel got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+			mmReserveCancel.t.Errorf("StocksServiceMock.ReserveCancel got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
 
-		mm_results := mmStocksServiceReserveCancel.StocksServiceReserveCancelMock.defaultExpectation.results
+		mm_results := mmReserveCancel.ReserveCancelMock.defaultExpectation.results
 		if mm_results == nil {
-			mmStocksServiceReserveCancel.t.Fatal("No results are set for the StocksServiceMock.StocksServiceReserveCancel")
+			mmReserveCancel.t.Fatal("No results are set for the StocksServiceMock.ReserveCancel")
 		}
 		return (*mm_results).err
 	}
-	if mmStocksServiceReserveCancel.funcStocksServiceReserveCancel != nil {
-		return mmStocksServiceReserveCancel.funcStocksServiceReserveCancel(ctx, items)
+	if mmReserveCancel.funcReserveCancel != nil {
+		return mmReserveCancel.funcReserveCancel(ctx, items)
 	}
-	mmStocksServiceReserveCancel.t.Fatalf("Unexpected call to StocksServiceMock.StocksServiceReserveCancel. %v %v", ctx, items)
+	mmReserveCancel.t.Fatalf("Unexpected call to StocksServiceMock.ReserveCancel. %v %v", ctx, items)
 	return
 }
 
-// StocksServiceReserveCancelAfterCounter returns a count of finished StocksServiceMock.StocksServiceReserveCancel invocations
-func (mmStocksServiceReserveCancel *StocksServiceMock) StocksServiceReserveCancelAfterCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmStocksServiceReserveCancel.afterStocksServiceReserveCancelCounter)
+// ReserveCancelAfterCounter returns a count of finished StocksServiceMock.ReserveCancel invocations
+func (mmReserveCancel *StocksServiceMock) ReserveCancelAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmReserveCancel.afterReserveCancelCounter)
 }
 
-// StocksServiceReserveCancelBeforeCounter returns a count of StocksServiceMock.StocksServiceReserveCancel invocations
-func (mmStocksServiceReserveCancel *StocksServiceMock) StocksServiceReserveCancelBeforeCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmStocksServiceReserveCancel.beforeStocksServiceReserveCancelCounter)
+// ReserveCancelBeforeCounter returns a count of StocksServiceMock.ReserveCancel invocations
+func (mmReserveCancel *StocksServiceMock) ReserveCancelBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmReserveCancel.beforeReserveCancelCounter)
 }
 
-// Calls returns a list of arguments used in each call to StocksServiceMock.StocksServiceReserveCancel.
+// Calls returns a list of arguments used in each call to StocksServiceMock.ReserveCancel.
 // The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmStocksServiceReserveCancel *mStocksServiceMockStocksServiceReserveCancel) Calls() []*StocksServiceMockStocksServiceReserveCancelParams {
-	mmStocksServiceReserveCancel.mutex.RLock()
+func (mmReserveCancel *mStocksServiceMockReserveCancel) Calls() []*StocksServiceMockReserveCancelParams {
+	mmReserveCancel.mutex.RLock()
 
-	argCopy := make([]*StocksServiceMockStocksServiceReserveCancelParams, len(mmStocksServiceReserveCancel.callArgs))
-	copy(argCopy, mmStocksServiceReserveCancel.callArgs)
+	argCopy := make([]*StocksServiceMockReserveCancelParams, len(mmReserveCancel.callArgs))
+	copy(argCopy, mmReserveCancel.callArgs)
 
-	mmStocksServiceReserveCancel.mutex.RUnlock()
+	mmReserveCancel.mutex.RUnlock()
 
 	return argCopy
 }
 
-// MinimockStocksServiceReserveCancelDone returns true if the count of the StocksServiceReserveCancel invocations corresponds
+// MinimockReserveCancelDone returns true if the count of the ReserveCancel invocations corresponds
 // the number of defined expectations
-func (m *StocksServiceMock) MinimockStocksServiceReserveCancelDone() bool {
-	if m.StocksServiceReserveCancelMock.optional {
+func (m *StocksServiceMock) MinimockReserveCancelDone() bool {
+	if m.ReserveCancelMock.optional {
 		// Optional methods provide '0 or more' call count restriction.
 		return true
 	}
 
-	for _, e := range m.StocksServiceReserveCancelMock.expectations {
+	for _, e := range m.ReserveCancelMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
 			return false
 		}
 	}
 
-	return m.StocksServiceReserveCancelMock.invocationsDone()
+	return m.ReserveCancelMock.invocationsDone()
 }
 
-// MinimockStocksServiceReserveCancelInspect logs each unmet expectation
-func (m *StocksServiceMock) MinimockStocksServiceReserveCancelInspect() {
-	for _, e := range m.StocksServiceReserveCancelMock.expectations {
+// MinimockReserveCancelInspect logs each unmet expectation
+func (m *StocksServiceMock) MinimockReserveCancelInspect() {
+	for _, e := range m.ReserveCancelMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to StocksServiceMock.StocksServiceReserveCancel with params: %#v", *e.params)
+			m.t.Errorf("Expected call to StocksServiceMock.ReserveCancel with params: %#v", *e.params)
 		}
 	}
 
-	afterStocksServiceReserveCancelCounter := mm_atomic.LoadUint64(&m.afterStocksServiceReserveCancelCounter)
+	afterReserveCancelCounter := mm_atomic.LoadUint64(&m.afterReserveCancelCounter)
 	// if default expectation was set then invocations count should be greater than zero
-	if m.StocksServiceReserveCancelMock.defaultExpectation != nil && afterStocksServiceReserveCancelCounter < 1 {
-		if m.StocksServiceReserveCancelMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to StocksServiceMock.StocksServiceReserveCancel")
+	if m.ReserveCancelMock.defaultExpectation != nil && afterReserveCancelCounter < 1 {
+		if m.ReserveCancelMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to StocksServiceMock.ReserveCancel")
 		} else {
-			m.t.Errorf("Expected call to StocksServiceMock.StocksServiceReserveCancel with params: %#v", *m.StocksServiceReserveCancelMock.defaultExpectation.params)
+			m.t.Errorf("Expected call to StocksServiceMock.ReserveCancel with params: %#v", *m.ReserveCancelMock.defaultExpectation.params)
 		}
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcStocksServiceReserveCancel != nil && afterStocksServiceReserveCancelCounter < 1 {
-		m.t.Error("Expected call to StocksServiceMock.StocksServiceReserveCancel")
+	if m.funcReserveCancel != nil && afterReserveCancelCounter < 1 {
+		m.t.Error("Expected call to StocksServiceMock.ReserveCancel")
 	}
 
-	if !m.StocksServiceReserveCancelMock.invocationsDone() && afterStocksServiceReserveCancelCounter > 0 {
-		m.t.Errorf("Expected %d calls to StocksServiceMock.StocksServiceReserveCancel but found %d calls",
-			mm_atomic.LoadUint64(&m.StocksServiceReserveCancelMock.expectedInvocations), afterStocksServiceReserveCancelCounter)
+	if !m.ReserveCancelMock.invocationsDone() && afterReserveCancelCounter > 0 {
+		m.t.Errorf("Expected %d calls to StocksServiceMock.ReserveCancel but found %d calls",
+			mm_atomic.LoadUint64(&m.ReserveCancelMock.expectedInvocations), afterReserveCancelCounter)
 	}
 }
 
-type mStocksServiceMockStocksServiceReserveRemove struct {
+type mStocksServiceMockReserveRemove struct {
 	optional           bool
 	mock               *StocksServiceMock
-	defaultExpectation *StocksServiceMockStocksServiceReserveRemoveExpectation
-	expectations       []*StocksServiceMockStocksServiceReserveRemoveExpectation
+	defaultExpectation *StocksServiceMockReserveRemoveExpectation
+	expectations       []*StocksServiceMockReserveRemoveExpectation
 
-	callArgs []*StocksServiceMockStocksServiceReserveRemoveParams
+	callArgs []*StocksServiceMockReserveRemoveParams
 	mutex    sync.RWMutex
 
 	expectedInvocations uint64
 }
 
-// StocksServiceMockStocksServiceReserveRemoveExpectation specifies expectation struct of the StocksService.StocksServiceReserveRemove
-type StocksServiceMockStocksServiceReserveRemoveExpectation struct {
+// StocksServiceMockReserveRemoveExpectation specifies expectation struct of the StocksService.ReserveRemove
+type StocksServiceMockReserveRemoveExpectation struct {
 	mock      *StocksServiceMock
-	params    *StocksServiceMockStocksServiceReserveRemoveParams
-	paramPtrs *StocksServiceMockStocksServiceReserveRemoveParamPtrs
-	results   *StocksServiceMockStocksServiceReserveRemoveResults
+	params    *StocksServiceMockReserveRemoveParams
+	paramPtrs *StocksServiceMockReserveRemoveParamPtrs
+	results   *StocksServiceMockReserveRemoveResults
 	Counter   uint64
 }
 
-// StocksServiceMockStocksServiceReserveRemoveParams contains parameters of the StocksService.StocksServiceReserveRemove
-type StocksServiceMockStocksServiceReserveRemoveParams struct {
+// StocksServiceMockReserveRemoveParams contains parameters of the StocksService.ReserveRemove
+type StocksServiceMockReserveRemoveParams struct {
 	ctx   context.Context
 	items []*orderModel.Item
 }
 
-// StocksServiceMockStocksServiceReserveRemoveParamPtrs contains pointers to parameters of the StocksService.StocksServiceReserveRemove
-type StocksServiceMockStocksServiceReserveRemoveParamPtrs struct {
+// StocksServiceMockReserveRemoveParamPtrs contains pointers to parameters of the StocksService.ReserveRemove
+type StocksServiceMockReserveRemoveParamPtrs struct {
 	ctx   *context.Context
 	items *[]*orderModel.Item
 }
 
-// StocksServiceMockStocksServiceReserveRemoveResults contains results of the StocksService.StocksServiceReserveRemove
-type StocksServiceMockStocksServiceReserveRemoveResults struct {
+// StocksServiceMockReserveRemoveResults contains results of the StocksService.ReserveRemove
+type StocksServiceMockReserveRemoveResults struct {
 	err error
 }
 
@@ -1074,280 +1074,280 @@ type StocksServiceMockStocksServiceReserveRemoveResults struct {
 // Optional() makes method check to work in '0 or more' mode.
 // It is NOT RECOMMENDED to use this option by default unless you really need it, as it helps to
 // catch the problems when the expected method call is totally skipped during test run.
-func (mmStocksServiceReserveRemove *mStocksServiceMockStocksServiceReserveRemove) Optional() *mStocksServiceMockStocksServiceReserveRemove {
-	mmStocksServiceReserveRemove.optional = true
-	return mmStocksServiceReserveRemove
+func (mmReserveRemove *mStocksServiceMockReserveRemove) Optional() *mStocksServiceMockReserveRemove {
+	mmReserveRemove.optional = true
+	return mmReserveRemove
 }
 
-// Expect sets up expected params for StocksService.StocksServiceReserveRemove
-func (mmStocksServiceReserveRemove *mStocksServiceMockStocksServiceReserveRemove) Expect(ctx context.Context, items []*orderModel.Item) *mStocksServiceMockStocksServiceReserveRemove {
-	if mmStocksServiceReserveRemove.mock.funcStocksServiceReserveRemove != nil {
-		mmStocksServiceReserveRemove.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveRemove mock is already set by Set")
+// Expect sets up expected params for StocksService.ReserveRemove
+func (mmReserveRemove *mStocksServiceMockReserveRemove) Expect(ctx context.Context, items []*orderModel.Item) *mStocksServiceMockReserveRemove {
+	if mmReserveRemove.mock.funcReserveRemove != nil {
+		mmReserveRemove.mock.t.Fatalf("StocksServiceMock.ReserveRemove mock is already set by Set")
 	}
 
-	if mmStocksServiceReserveRemove.defaultExpectation == nil {
-		mmStocksServiceReserveRemove.defaultExpectation = &StocksServiceMockStocksServiceReserveRemoveExpectation{}
+	if mmReserveRemove.defaultExpectation == nil {
+		mmReserveRemove.defaultExpectation = &StocksServiceMockReserveRemoveExpectation{}
 	}
 
-	if mmStocksServiceReserveRemove.defaultExpectation.paramPtrs != nil {
-		mmStocksServiceReserveRemove.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveRemove mock is already set by ExpectParams functions")
+	if mmReserveRemove.defaultExpectation.paramPtrs != nil {
+		mmReserveRemove.mock.t.Fatalf("StocksServiceMock.ReserveRemove mock is already set by ExpectParams functions")
 	}
 
-	mmStocksServiceReserveRemove.defaultExpectation.params = &StocksServiceMockStocksServiceReserveRemoveParams{ctx, items}
-	for _, e := range mmStocksServiceReserveRemove.expectations {
-		if minimock.Equal(e.params, mmStocksServiceReserveRemove.defaultExpectation.params) {
-			mmStocksServiceReserveRemove.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmStocksServiceReserveRemove.defaultExpectation.params)
+	mmReserveRemove.defaultExpectation.params = &StocksServiceMockReserveRemoveParams{ctx, items}
+	for _, e := range mmReserveRemove.expectations {
+		if minimock.Equal(e.params, mmReserveRemove.defaultExpectation.params) {
+			mmReserveRemove.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmReserveRemove.defaultExpectation.params)
 		}
 	}
 
-	return mmStocksServiceReserveRemove
+	return mmReserveRemove
 }
 
-// ExpectCtxParam1 sets up expected param ctx for StocksService.StocksServiceReserveRemove
-func (mmStocksServiceReserveRemove *mStocksServiceMockStocksServiceReserveRemove) ExpectCtxParam1(ctx context.Context) *mStocksServiceMockStocksServiceReserveRemove {
-	if mmStocksServiceReserveRemove.mock.funcStocksServiceReserveRemove != nil {
-		mmStocksServiceReserveRemove.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveRemove mock is already set by Set")
+// ExpectCtxParam1 sets up expected param ctx for StocksService.ReserveRemove
+func (mmReserveRemove *mStocksServiceMockReserveRemove) ExpectCtxParam1(ctx context.Context) *mStocksServiceMockReserveRemove {
+	if mmReserveRemove.mock.funcReserveRemove != nil {
+		mmReserveRemove.mock.t.Fatalf("StocksServiceMock.ReserveRemove mock is already set by Set")
 	}
 
-	if mmStocksServiceReserveRemove.defaultExpectation == nil {
-		mmStocksServiceReserveRemove.defaultExpectation = &StocksServiceMockStocksServiceReserveRemoveExpectation{}
+	if mmReserveRemove.defaultExpectation == nil {
+		mmReserveRemove.defaultExpectation = &StocksServiceMockReserveRemoveExpectation{}
 	}
 
-	if mmStocksServiceReserveRemove.defaultExpectation.params != nil {
-		mmStocksServiceReserveRemove.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveRemove mock is already set by Expect")
+	if mmReserveRemove.defaultExpectation.params != nil {
+		mmReserveRemove.mock.t.Fatalf("StocksServiceMock.ReserveRemove mock is already set by Expect")
 	}
 
-	if mmStocksServiceReserveRemove.defaultExpectation.paramPtrs == nil {
-		mmStocksServiceReserveRemove.defaultExpectation.paramPtrs = &StocksServiceMockStocksServiceReserveRemoveParamPtrs{}
+	if mmReserveRemove.defaultExpectation.paramPtrs == nil {
+		mmReserveRemove.defaultExpectation.paramPtrs = &StocksServiceMockReserveRemoveParamPtrs{}
 	}
-	mmStocksServiceReserveRemove.defaultExpectation.paramPtrs.ctx = &ctx
+	mmReserveRemove.defaultExpectation.paramPtrs.ctx = &ctx
 
-	return mmStocksServiceReserveRemove
+	return mmReserveRemove
 }
 
-// ExpectItemsParam2 sets up expected param items for StocksService.StocksServiceReserveRemove
-func (mmStocksServiceReserveRemove *mStocksServiceMockStocksServiceReserveRemove) ExpectItemsParam2(items []*orderModel.Item) *mStocksServiceMockStocksServiceReserveRemove {
-	if mmStocksServiceReserveRemove.mock.funcStocksServiceReserveRemove != nil {
-		mmStocksServiceReserveRemove.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveRemove mock is already set by Set")
+// ExpectItemsParam2 sets up expected param items for StocksService.ReserveRemove
+func (mmReserveRemove *mStocksServiceMockReserveRemove) ExpectItemsParam2(items []*orderModel.Item) *mStocksServiceMockReserveRemove {
+	if mmReserveRemove.mock.funcReserveRemove != nil {
+		mmReserveRemove.mock.t.Fatalf("StocksServiceMock.ReserveRemove mock is already set by Set")
 	}
 
-	if mmStocksServiceReserveRemove.defaultExpectation == nil {
-		mmStocksServiceReserveRemove.defaultExpectation = &StocksServiceMockStocksServiceReserveRemoveExpectation{}
+	if mmReserveRemove.defaultExpectation == nil {
+		mmReserveRemove.defaultExpectation = &StocksServiceMockReserveRemoveExpectation{}
 	}
 
-	if mmStocksServiceReserveRemove.defaultExpectation.params != nil {
-		mmStocksServiceReserveRemove.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveRemove mock is already set by Expect")
+	if mmReserveRemove.defaultExpectation.params != nil {
+		mmReserveRemove.mock.t.Fatalf("StocksServiceMock.ReserveRemove mock is already set by Expect")
 	}
 
-	if mmStocksServiceReserveRemove.defaultExpectation.paramPtrs == nil {
-		mmStocksServiceReserveRemove.defaultExpectation.paramPtrs = &StocksServiceMockStocksServiceReserveRemoveParamPtrs{}
+	if mmReserveRemove.defaultExpectation.paramPtrs == nil {
+		mmReserveRemove.defaultExpectation.paramPtrs = &StocksServiceMockReserveRemoveParamPtrs{}
 	}
-	mmStocksServiceReserveRemove.defaultExpectation.paramPtrs.items = &items
+	mmReserveRemove.defaultExpectation.paramPtrs.items = &items
 
-	return mmStocksServiceReserveRemove
+	return mmReserveRemove
 }
 
-// Inspect accepts an inspector function that has same arguments as the StocksService.StocksServiceReserveRemove
-func (mmStocksServiceReserveRemove *mStocksServiceMockStocksServiceReserveRemove) Inspect(f func(ctx context.Context, items []*orderModel.Item)) *mStocksServiceMockStocksServiceReserveRemove {
-	if mmStocksServiceReserveRemove.mock.inspectFuncStocksServiceReserveRemove != nil {
-		mmStocksServiceReserveRemove.mock.t.Fatalf("Inspect function is already set for StocksServiceMock.StocksServiceReserveRemove")
+// Inspect accepts an inspector function that has same arguments as the StocksService.ReserveRemove
+func (mmReserveRemove *mStocksServiceMockReserveRemove) Inspect(f func(ctx context.Context, items []*orderModel.Item)) *mStocksServiceMockReserveRemove {
+	if mmReserveRemove.mock.inspectFuncReserveRemove != nil {
+		mmReserveRemove.mock.t.Fatalf("Inspect function is already set for StocksServiceMock.ReserveRemove")
 	}
 
-	mmStocksServiceReserveRemove.mock.inspectFuncStocksServiceReserveRemove = f
+	mmReserveRemove.mock.inspectFuncReserveRemove = f
 
-	return mmStocksServiceReserveRemove
+	return mmReserveRemove
 }
 
-// Return sets up results that will be returned by StocksService.StocksServiceReserveRemove
-func (mmStocksServiceReserveRemove *mStocksServiceMockStocksServiceReserveRemove) Return(err error) *StocksServiceMock {
-	if mmStocksServiceReserveRemove.mock.funcStocksServiceReserveRemove != nil {
-		mmStocksServiceReserveRemove.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveRemove mock is already set by Set")
+// Return sets up results that will be returned by StocksService.ReserveRemove
+func (mmReserveRemove *mStocksServiceMockReserveRemove) Return(err error) *StocksServiceMock {
+	if mmReserveRemove.mock.funcReserveRemove != nil {
+		mmReserveRemove.mock.t.Fatalf("StocksServiceMock.ReserveRemove mock is already set by Set")
 	}
 
-	if mmStocksServiceReserveRemove.defaultExpectation == nil {
-		mmStocksServiceReserveRemove.defaultExpectation = &StocksServiceMockStocksServiceReserveRemoveExpectation{mock: mmStocksServiceReserveRemove.mock}
+	if mmReserveRemove.defaultExpectation == nil {
+		mmReserveRemove.defaultExpectation = &StocksServiceMockReserveRemoveExpectation{mock: mmReserveRemove.mock}
 	}
-	mmStocksServiceReserveRemove.defaultExpectation.results = &StocksServiceMockStocksServiceReserveRemoveResults{err}
-	return mmStocksServiceReserveRemove.mock
+	mmReserveRemove.defaultExpectation.results = &StocksServiceMockReserveRemoveResults{err}
+	return mmReserveRemove.mock
 }
 
-// Set uses given function f to mock the StocksService.StocksServiceReserveRemove method
-func (mmStocksServiceReserveRemove *mStocksServiceMockStocksServiceReserveRemove) Set(f func(ctx context.Context, items []*orderModel.Item) (err error)) *StocksServiceMock {
-	if mmStocksServiceReserveRemove.defaultExpectation != nil {
-		mmStocksServiceReserveRemove.mock.t.Fatalf("Default expectation is already set for the StocksService.StocksServiceReserveRemove method")
+// Set uses given function f to mock the StocksService.ReserveRemove method
+func (mmReserveRemove *mStocksServiceMockReserveRemove) Set(f func(ctx context.Context, items []*orderModel.Item) (err error)) *StocksServiceMock {
+	if mmReserveRemove.defaultExpectation != nil {
+		mmReserveRemove.mock.t.Fatalf("Default expectation is already set for the StocksService.ReserveRemove method")
 	}
 
-	if len(mmStocksServiceReserveRemove.expectations) > 0 {
-		mmStocksServiceReserveRemove.mock.t.Fatalf("Some expectations are already set for the StocksService.StocksServiceReserveRemove method")
+	if len(mmReserveRemove.expectations) > 0 {
+		mmReserveRemove.mock.t.Fatalf("Some expectations are already set for the StocksService.ReserveRemove method")
 	}
 
-	mmStocksServiceReserveRemove.mock.funcStocksServiceReserveRemove = f
-	return mmStocksServiceReserveRemove.mock
+	mmReserveRemove.mock.funcReserveRemove = f
+	return mmReserveRemove.mock
 }
 
-// When sets expectation for the StocksService.StocksServiceReserveRemove which will trigger the result defined by the following
+// When sets expectation for the StocksService.ReserveRemove which will trigger the result defined by the following
 // Then helper
-func (mmStocksServiceReserveRemove *mStocksServiceMockStocksServiceReserveRemove) When(ctx context.Context, items []*orderModel.Item) *StocksServiceMockStocksServiceReserveRemoveExpectation {
-	if mmStocksServiceReserveRemove.mock.funcStocksServiceReserveRemove != nil {
-		mmStocksServiceReserveRemove.mock.t.Fatalf("StocksServiceMock.StocksServiceReserveRemove mock is already set by Set")
+func (mmReserveRemove *mStocksServiceMockReserveRemove) When(ctx context.Context, items []*orderModel.Item) *StocksServiceMockReserveRemoveExpectation {
+	if mmReserveRemove.mock.funcReserveRemove != nil {
+		mmReserveRemove.mock.t.Fatalf("StocksServiceMock.ReserveRemove mock is already set by Set")
 	}
 
-	expectation := &StocksServiceMockStocksServiceReserveRemoveExpectation{
-		mock:   mmStocksServiceReserveRemove.mock,
-		params: &StocksServiceMockStocksServiceReserveRemoveParams{ctx, items},
+	expectation := &StocksServiceMockReserveRemoveExpectation{
+		mock:   mmReserveRemove.mock,
+		params: &StocksServiceMockReserveRemoveParams{ctx, items},
 	}
-	mmStocksServiceReserveRemove.expectations = append(mmStocksServiceReserveRemove.expectations, expectation)
+	mmReserveRemove.expectations = append(mmReserveRemove.expectations, expectation)
 	return expectation
 }
 
-// Then sets up StocksService.StocksServiceReserveRemove return parameters for the expectation previously defined by the When method
-func (e *StocksServiceMockStocksServiceReserveRemoveExpectation) Then(err error) *StocksServiceMock {
-	e.results = &StocksServiceMockStocksServiceReserveRemoveResults{err}
+// Then sets up StocksService.ReserveRemove return parameters for the expectation previously defined by the When method
+func (e *StocksServiceMockReserveRemoveExpectation) Then(err error) *StocksServiceMock {
+	e.results = &StocksServiceMockReserveRemoveResults{err}
 	return e.mock
 }
 
-// Times sets number of times StocksService.StocksServiceReserveRemove should be invoked
-func (mmStocksServiceReserveRemove *mStocksServiceMockStocksServiceReserveRemove) Times(n uint64) *mStocksServiceMockStocksServiceReserveRemove {
+// Times sets number of times StocksService.ReserveRemove should be invoked
+func (mmReserveRemove *mStocksServiceMockReserveRemove) Times(n uint64) *mStocksServiceMockReserveRemove {
 	if n == 0 {
-		mmStocksServiceReserveRemove.mock.t.Fatalf("Times of StocksServiceMock.StocksServiceReserveRemove mock can not be zero")
+		mmReserveRemove.mock.t.Fatalf("Times of StocksServiceMock.ReserveRemove mock can not be zero")
 	}
-	mm_atomic.StoreUint64(&mmStocksServiceReserveRemove.expectedInvocations, n)
-	return mmStocksServiceReserveRemove
+	mm_atomic.StoreUint64(&mmReserveRemove.expectedInvocations, n)
+	return mmReserveRemove
 }
 
-func (mmStocksServiceReserveRemove *mStocksServiceMockStocksServiceReserveRemove) invocationsDone() bool {
-	if len(mmStocksServiceReserveRemove.expectations) == 0 && mmStocksServiceReserveRemove.defaultExpectation == nil && mmStocksServiceReserveRemove.mock.funcStocksServiceReserveRemove == nil {
+func (mmReserveRemove *mStocksServiceMockReserveRemove) invocationsDone() bool {
+	if len(mmReserveRemove.expectations) == 0 && mmReserveRemove.defaultExpectation == nil && mmReserveRemove.mock.funcReserveRemove == nil {
 		return true
 	}
 
-	totalInvocations := mm_atomic.LoadUint64(&mmStocksServiceReserveRemove.mock.afterStocksServiceReserveRemoveCounter)
-	expectedInvocations := mm_atomic.LoadUint64(&mmStocksServiceReserveRemove.expectedInvocations)
+	totalInvocations := mm_atomic.LoadUint64(&mmReserveRemove.mock.afterReserveRemoveCounter)
+	expectedInvocations := mm_atomic.LoadUint64(&mmReserveRemove.expectedInvocations)
 
 	return totalInvocations > 0 && (expectedInvocations == 0 || expectedInvocations == totalInvocations)
 }
 
-// StocksServiceReserveRemove implements handler.StocksService
-func (mmStocksServiceReserveRemove *StocksServiceMock) StocksServiceReserveRemove(ctx context.Context, items []*orderModel.Item) (err error) {
-	mm_atomic.AddUint64(&mmStocksServiceReserveRemove.beforeStocksServiceReserveRemoveCounter, 1)
-	defer mm_atomic.AddUint64(&mmStocksServiceReserveRemove.afterStocksServiceReserveRemoveCounter, 1)
+// ReserveRemove implements handler.StocksService
+func (mmReserveRemove *StocksServiceMock) ReserveRemove(ctx context.Context, items []*orderModel.Item) (err error) {
+	mm_atomic.AddUint64(&mmReserveRemove.beforeReserveRemoveCounter, 1)
+	defer mm_atomic.AddUint64(&mmReserveRemove.afterReserveRemoveCounter, 1)
 
-	if mmStocksServiceReserveRemove.inspectFuncStocksServiceReserveRemove != nil {
-		mmStocksServiceReserveRemove.inspectFuncStocksServiceReserveRemove(ctx, items)
+	if mmReserveRemove.inspectFuncReserveRemove != nil {
+		mmReserveRemove.inspectFuncReserveRemove(ctx, items)
 	}
 
-	mm_params := StocksServiceMockStocksServiceReserveRemoveParams{ctx, items}
+	mm_params := StocksServiceMockReserveRemoveParams{ctx, items}
 
 	// Record call args
-	mmStocksServiceReserveRemove.StocksServiceReserveRemoveMock.mutex.Lock()
-	mmStocksServiceReserveRemove.StocksServiceReserveRemoveMock.callArgs = append(mmStocksServiceReserveRemove.StocksServiceReserveRemoveMock.callArgs, &mm_params)
-	mmStocksServiceReserveRemove.StocksServiceReserveRemoveMock.mutex.Unlock()
+	mmReserveRemove.ReserveRemoveMock.mutex.Lock()
+	mmReserveRemove.ReserveRemoveMock.callArgs = append(mmReserveRemove.ReserveRemoveMock.callArgs, &mm_params)
+	mmReserveRemove.ReserveRemoveMock.mutex.Unlock()
 
-	for _, e := range mmStocksServiceReserveRemove.StocksServiceReserveRemoveMock.expectations {
+	for _, e := range mmReserveRemove.ReserveRemoveMock.expectations {
 		if minimock.Equal(*e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
 			return e.results.err
 		}
 	}
 
-	if mmStocksServiceReserveRemove.StocksServiceReserveRemoveMock.defaultExpectation != nil {
-		mm_atomic.AddUint64(&mmStocksServiceReserveRemove.StocksServiceReserveRemoveMock.defaultExpectation.Counter, 1)
-		mm_want := mmStocksServiceReserveRemove.StocksServiceReserveRemoveMock.defaultExpectation.params
-		mm_want_ptrs := mmStocksServiceReserveRemove.StocksServiceReserveRemoveMock.defaultExpectation.paramPtrs
+	if mmReserveRemove.ReserveRemoveMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmReserveRemove.ReserveRemoveMock.defaultExpectation.Counter, 1)
+		mm_want := mmReserveRemove.ReserveRemoveMock.defaultExpectation.params
+		mm_want_ptrs := mmReserveRemove.ReserveRemoveMock.defaultExpectation.paramPtrs
 
-		mm_got := StocksServiceMockStocksServiceReserveRemoveParams{ctx, items}
+		mm_got := StocksServiceMockReserveRemoveParams{ctx, items}
 
 		if mm_want_ptrs != nil {
 
 			if mm_want_ptrs.ctx != nil && !minimock.Equal(*mm_want_ptrs.ctx, mm_got.ctx) {
-				mmStocksServiceReserveRemove.t.Errorf("StocksServiceMock.StocksServiceReserveRemove got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
+				mmReserveRemove.t.Errorf("StocksServiceMock.ReserveRemove got unexpected parameter ctx, want: %#v, got: %#v%s\n", *mm_want_ptrs.ctx, mm_got.ctx, minimock.Diff(*mm_want_ptrs.ctx, mm_got.ctx))
 			}
 
 			if mm_want_ptrs.items != nil && !minimock.Equal(*mm_want_ptrs.items, mm_got.items) {
-				mmStocksServiceReserveRemove.t.Errorf("StocksServiceMock.StocksServiceReserveRemove got unexpected parameter items, want: %#v, got: %#v%s\n", *mm_want_ptrs.items, mm_got.items, minimock.Diff(*mm_want_ptrs.items, mm_got.items))
+				mmReserveRemove.t.Errorf("StocksServiceMock.ReserveRemove got unexpected parameter items, want: %#v, got: %#v%s\n", *mm_want_ptrs.items, mm_got.items, minimock.Diff(*mm_want_ptrs.items, mm_got.items))
 			}
 
 		} else if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmStocksServiceReserveRemove.t.Errorf("StocksServiceMock.StocksServiceReserveRemove got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+			mmReserveRemove.t.Errorf("StocksServiceMock.ReserveRemove got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
 
-		mm_results := mmStocksServiceReserveRemove.StocksServiceReserveRemoveMock.defaultExpectation.results
+		mm_results := mmReserveRemove.ReserveRemoveMock.defaultExpectation.results
 		if mm_results == nil {
-			mmStocksServiceReserveRemove.t.Fatal("No results are set for the StocksServiceMock.StocksServiceReserveRemove")
+			mmReserveRemove.t.Fatal("No results are set for the StocksServiceMock.ReserveRemove")
 		}
 		return (*mm_results).err
 	}
-	if mmStocksServiceReserveRemove.funcStocksServiceReserveRemove != nil {
-		return mmStocksServiceReserveRemove.funcStocksServiceReserveRemove(ctx, items)
+	if mmReserveRemove.funcReserveRemove != nil {
+		return mmReserveRemove.funcReserveRemove(ctx, items)
 	}
-	mmStocksServiceReserveRemove.t.Fatalf("Unexpected call to StocksServiceMock.StocksServiceReserveRemove. %v %v", ctx, items)
+	mmReserveRemove.t.Fatalf("Unexpected call to StocksServiceMock.ReserveRemove. %v %v", ctx, items)
 	return
 }
 
-// StocksServiceReserveRemoveAfterCounter returns a count of finished StocksServiceMock.StocksServiceReserveRemove invocations
-func (mmStocksServiceReserveRemove *StocksServiceMock) StocksServiceReserveRemoveAfterCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmStocksServiceReserveRemove.afterStocksServiceReserveRemoveCounter)
+// ReserveRemoveAfterCounter returns a count of finished StocksServiceMock.ReserveRemove invocations
+func (mmReserveRemove *StocksServiceMock) ReserveRemoveAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmReserveRemove.afterReserveRemoveCounter)
 }
 
-// StocksServiceReserveRemoveBeforeCounter returns a count of StocksServiceMock.StocksServiceReserveRemove invocations
-func (mmStocksServiceReserveRemove *StocksServiceMock) StocksServiceReserveRemoveBeforeCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmStocksServiceReserveRemove.beforeStocksServiceReserveRemoveCounter)
+// ReserveRemoveBeforeCounter returns a count of StocksServiceMock.ReserveRemove invocations
+func (mmReserveRemove *StocksServiceMock) ReserveRemoveBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmReserveRemove.beforeReserveRemoveCounter)
 }
 
-// Calls returns a list of arguments used in each call to StocksServiceMock.StocksServiceReserveRemove.
+// Calls returns a list of arguments used in each call to StocksServiceMock.ReserveRemove.
 // The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmStocksServiceReserveRemove *mStocksServiceMockStocksServiceReserveRemove) Calls() []*StocksServiceMockStocksServiceReserveRemoveParams {
-	mmStocksServiceReserveRemove.mutex.RLock()
+func (mmReserveRemove *mStocksServiceMockReserveRemove) Calls() []*StocksServiceMockReserveRemoveParams {
+	mmReserveRemove.mutex.RLock()
 
-	argCopy := make([]*StocksServiceMockStocksServiceReserveRemoveParams, len(mmStocksServiceReserveRemove.callArgs))
-	copy(argCopy, mmStocksServiceReserveRemove.callArgs)
+	argCopy := make([]*StocksServiceMockReserveRemoveParams, len(mmReserveRemove.callArgs))
+	copy(argCopy, mmReserveRemove.callArgs)
 
-	mmStocksServiceReserveRemove.mutex.RUnlock()
+	mmReserveRemove.mutex.RUnlock()
 
 	return argCopy
 }
 
-// MinimockStocksServiceReserveRemoveDone returns true if the count of the StocksServiceReserveRemove invocations corresponds
+// MinimockReserveRemoveDone returns true if the count of the ReserveRemove invocations corresponds
 // the number of defined expectations
-func (m *StocksServiceMock) MinimockStocksServiceReserveRemoveDone() bool {
-	if m.StocksServiceReserveRemoveMock.optional {
+func (m *StocksServiceMock) MinimockReserveRemoveDone() bool {
+	if m.ReserveRemoveMock.optional {
 		// Optional methods provide '0 or more' call count restriction.
 		return true
 	}
 
-	for _, e := range m.StocksServiceReserveRemoveMock.expectations {
+	for _, e := range m.ReserveRemoveMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
 			return false
 		}
 	}
 
-	return m.StocksServiceReserveRemoveMock.invocationsDone()
+	return m.ReserveRemoveMock.invocationsDone()
 }
 
-// MinimockStocksServiceReserveRemoveInspect logs each unmet expectation
-func (m *StocksServiceMock) MinimockStocksServiceReserveRemoveInspect() {
-	for _, e := range m.StocksServiceReserveRemoveMock.expectations {
+// MinimockReserveRemoveInspect logs each unmet expectation
+func (m *StocksServiceMock) MinimockReserveRemoveInspect() {
+	for _, e := range m.ReserveRemoveMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to StocksServiceMock.StocksServiceReserveRemove with params: %#v", *e.params)
+			m.t.Errorf("Expected call to StocksServiceMock.ReserveRemove with params: %#v", *e.params)
 		}
 	}
 
-	afterStocksServiceReserveRemoveCounter := mm_atomic.LoadUint64(&m.afterStocksServiceReserveRemoveCounter)
+	afterReserveRemoveCounter := mm_atomic.LoadUint64(&m.afterReserveRemoveCounter)
 	// if default expectation was set then invocations count should be greater than zero
-	if m.StocksServiceReserveRemoveMock.defaultExpectation != nil && afterStocksServiceReserveRemoveCounter < 1 {
-		if m.StocksServiceReserveRemoveMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to StocksServiceMock.StocksServiceReserveRemove")
+	if m.ReserveRemoveMock.defaultExpectation != nil && afterReserveRemoveCounter < 1 {
+		if m.ReserveRemoveMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to StocksServiceMock.ReserveRemove")
 		} else {
-			m.t.Errorf("Expected call to StocksServiceMock.StocksServiceReserveRemove with params: %#v", *m.StocksServiceReserveRemoveMock.defaultExpectation.params)
+			m.t.Errorf("Expected call to StocksServiceMock.ReserveRemove with params: %#v", *m.ReserveRemoveMock.defaultExpectation.params)
 		}
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcStocksServiceReserveRemove != nil && afterStocksServiceReserveRemoveCounter < 1 {
-		m.t.Error("Expected call to StocksServiceMock.StocksServiceReserveRemove")
+	if m.funcReserveRemove != nil && afterReserveRemoveCounter < 1 {
+		m.t.Error("Expected call to StocksServiceMock.ReserveRemove")
 	}
 
-	if !m.StocksServiceReserveRemoveMock.invocationsDone() && afterStocksServiceReserveRemoveCounter > 0 {
-		m.t.Errorf("Expected %d calls to StocksServiceMock.StocksServiceReserveRemove but found %d calls",
-			mm_atomic.LoadUint64(&m.StocksServiceReserveRemoveMock.expectedInvocations), afterStocksServiceReserveRemoveCounter)
+	if !m.ReserveRemoveMock.invocationsDone() && afterReserveRemoveCounter > 0 {
+		m.t.Errorf("Expected %d calls to StocksServiceMock.ReserveRemove but found %d calls",
+			mm_atomic.LoadUint64(&m.ReserveRemoveMock.expectedInvocations), afterReserveRemoveCounter)
 	}
 }
 
@@ -1355,13 +1355,13 @@ func (m *StocksServiceMock) MinimockStocksServiceReserveRemoveInspect() {
 func (m *StocksServiceMock) MinimockFinish() {
 	m.finishOnce.Do(func() {
 		if !m.minimockDone() {
-			m.MinimockStocksServiceGetBySKUInspect()
+			m.MinimockGetBySKUInspect()
 
-			m.MinimockStocksServiceReserveInspect()
+			m.MinimockReserveInspect()
 
-			m.MinimockStocksServiceReserveCancelInspect()
+			m.MinimockReserveCancelInspect()
 
-			m.MinimockStocksServiceReserveRemoveInspect()
+			m.MinimockReserveRemoveInspect()
 			m.t.FailNow()
 		}
 	})
@@ -1386,8 +1386,8 @@ func (m *StocksServiceMock) MinimockWait(timeout mm_time.Duration) {
 func (m *StocksServiceMock) minimockDone() bool {
 	done := true
 	return done &&
-		m.MinimockStocksServiceGetBySKUDone() &&
-		m.MinimockStocksServiceReserveDone() &&
-		m.MinimockStocksServiceReserveCancelDone() &&
-		m.MinimockStocksServiceReserveRemoveDone()
+		m.MinimockGetBySKUDone() &&
+		m.MinimockReserveDone() &&
+		m.MinimockReserveCancelDone() &&
+		m.MinimockReserveRemoveDone()
 }

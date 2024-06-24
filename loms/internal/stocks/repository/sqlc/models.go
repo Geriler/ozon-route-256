@@ -4,20 +4,30 @@
 
 package repository
 
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
 type Order struct {
-	ID     int32
-	UserID int32
-	Status string
+	ID        int32
+	UserID    int32
+	Status    string
+	CreatedAt pgtype.Timestamp
+	UpdatedAt pgtype.Timestamp
 }
 
 type OrderItem struct {
-	OrderID int32
-	ItemID  int32
-	Count   int32
-	Status  string
+	OrderID   int32
+	ItemID    int32
+	Count     int32
+	Status    string
+	CreatedAt pgtype.Timestamp
+	UpdatedAt pgtype.Timestamp
 }
 
 type StocksItem struct {
 	Sku        int32
 	TotalCount int32
+	CreatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamp
 }

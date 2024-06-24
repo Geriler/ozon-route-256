@@ -24,18 +24,18 @@ func NewStocksService(stocksRepository StocksRepository) *StocksService {
 	}
 }
 
-func (ss *StocksService) StocksServiceReserve(ctx context.Context, items []*orderModel.Item) error {
+func (ss *StocksService) Reserve(ctx context.Context, items []*orderModel.Item) error {
 	return ss.stocksRepository.Reserve(ctx, items)
 }
 
-func (ss *StocksService) StocksServiceReserveRemove(ctx context.Context, items []*orderModel.Item) error {
+func (ss *StocksService) ReserveRemove(ctx context.Context, items []*orderModel.Item) error {
 	return ss.stocksRepository.ReserveRemove(ctx, items)
 }
 
-func (ss *StocksService) StocksServiceReserveCancel(ctx context.Context, items []*orderModel.Item) error {
+func (ss *StocksService) ReserveCancel(ctx context.Context, items []*orderModel.Item) error {
 	return ss.stocksRepository.ReserveCancel(ctx, items)
 }
 
-func (ss *StocksService) StocksServiceGetBySKU(ctx context.Context, sku stocksModel.SKU) (*stocksModel.Stocks, error) {
+func (ss *StocksService) GetBySKU(ctx context.Context, sku stocksModel.SKU) (*stocksModel.Stocks, error) {
 	return ss.stocksRepository.GetBySKU(ctx, sku)
 }

@@ -25,19 +25,10 @@ type GRPCApp struct {
 	server *grpc.Server
 }
 
-func NewGRPCApp(config config.Config, logger *slog.Logger) *GRPCApp {
-	server := grpc.NewServer(getServerOption())
-	return &GRPCApp{
-		cfg:    config,
-		log:    logger,
-		server: server,
-	}
-}
-
-func (a *GRPCApp) ListenAndServe() error {
-	conn, err := a.dbConnect(context.Background())
+func NewGRPCApp(config config.Config, logger *slog.Logger) (*GRPCApp, error) {
+	conn, err := dbConnect(context.Background(), config.Database.DSN)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	orderRepo := orderRepository.NewPostgresOrderRepository(conn)
@@ -49,9 +40,19 @@ func (a *GRPCApp) ListenAndServe() error {
 	orderHandler := handlerOrder.NewOrderHandler(orderService, stocksService)
 	stocksHandler := handlerStocks.NewStocksHandler(stocksService)
 
-	loms.RegisterOrderServer(a.server, orderHandler)
-	loms.RegisterStocksServer(a.server, stocksHandler)
+	server := grpc.NewServer(getServerOption())
 
+	loms.RegisterOrderServer(server, orderHandler)
+	loms.RegisterStocksServer(server, stocksHandler)
+
+	return &GRPCApp{
+		cfg:    config,
+		log:    logger,
+		server: server,
+	}, nil
+}
+
+func (a *GRPCApp) ListenAndServe() error {
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", a.cfg.GRPC.Host, a.cfg.GRPC.Port))
 	if err != nil {
 		return err
@@ -70,8 +71,8 @@ func getServerOption() grpc.ServerOption {
 	)
 }
 
-func (a *GRPCApp) dbConnect(ctx context.Context) (*pgx.Conn, error) {
-	conn, err := pgx.Connect(ctx, a.cfg.Database.DSN)
+func dbConnect(ctx context.Context, dsn string) (*pgx.Conn, error) {
+	conn, err := pgx.Connect(ctx, dsn)
 	if err != nil {
 		return nil, err
 	}
