@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	_ "embed"
+	"errors"
+	"log/slog"
 
 	"github.com/jackc/pgx/v5"
 	orderModel "route256/loms/internal/order/model"
@@ -11,16 +13,18 @@ import (
 )
 
 type PostgresStocksRepository struct {
-	conn *pgx.Conn
-	cmd  *repository.Queries
+	conn   *pgx.Conn
+	cmd    *repository.Queries
+	logger *slog.Logger
 }
 
-func NewPostgresStocksRepository(conn *pgx.Conn) *PostgresStocksRepository {
+func NewPostgresStocksRepository(conn *pgx.Conn, logger *slog.Logger) *PostgresStocksRepository {
 	cmd := repository.New(conn)
 
 	return &PostgresStocksRepository{
-		conn: conn,
-		cmd:  cmd,
+		conn:   conn,
+		cmd:    cmd,
+		logger: logger,
 	}
 }
 
@@ -29,7 +33,14 @@ func (r *PostgresStocksRepository) Reserve(ctx context.Context, items []*orderMo
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func(tx pgx.Tx, ctx context.Context) {
+		rollbackErr := tx.Rollback(ctx)
+		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
+			r.logger.Error("Error in PostgresStocksRepository.Reserve.Rollback",
+				slog.String("error", rollbackErr.Error()),
+			)
+		}
+	}(tx, ctx)
 
 	for _, item := range items {
 		err = r.cmd.WithTx(tx).Reserve(ctx, repository.ReserveParams{
@@ -50,7 +61,14 @@ func (r *PostgresStocksRepository) ReserveRemove(ctx context.Context, items []*o
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func(tx pgx.Tx, ctx context.Context) {
+		rollbackErr := tx.Rollback(ctx)
+		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
+			r.logger.Error("Error in PostgresStocksRepository.ReserveRemove.Rollback",
+				slog.String("error", rollbackErr.Error()),
+			)
+		}
+	}(tx, ctx)
 
 	for _, item := range items {
 		err = r.cmd.WithTx(tx).ReserveRemove(ctx, repository.ReserveRemoveParams{
@@ -71,7 +89,14 @@ func (r *PostgresStocksRepository) ReserveCancel(ctx context.Context, items []*o
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func(tx pgx.Tx, ctx context.Context) {
+		rollbackErr := tx.Rollback(ctx)
+		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
+			r.logger.Error("Error in PostgresStocksRepository.ReserveCancel.Rollback",
+				slog.String("error", rollbackErr.Error()),
+			)
+		}
+	}(tx, ctx)
 
 	for _, item := range items {
 		err = r.cmd.WithTx(tx).ReserveCancel(ctx, repository.ReserveCancelParams{

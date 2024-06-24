@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log/slog"
 
 	"github.com/jackc/pgx/v5"
 	"route256/loms/internal/order/model"
@@ -12,16 +13,18 @@ import (
 )
 
 type PostgresOrderRepository struct {
-	conn *pgx.Conn
-	cmd  *repository.Queries
+	conn   *pgx.Conn
+	cmd    *repository.Queries
+	logger *slog.Logger
 }
 
-func NewPostgresOrderRepository(conn *pgx.Conn) *PostgresOrderRepository {
+func NewPostgresOrderRepository(conn *pgx.Conn, logger *slog.Logger) *PostgresOrderRepository {
 	cmd := repository.New(conn)
 
 	return &PostgresOrderRepository{
-		conn: conn,
-		cmd:  cmd,
+		conn:   conn,
+		cmd:    cmd,
+		logger: logger,
 	}
 }
 
@@ -30,7 +33,14 @@ func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.O
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func(tx pgx.Tx, ctx context.Context) {
+		rollbackErr := tx.Rollback(ctx)
+		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
+			r.logger.Error("Error in PostgresOrderRepository.SetStatus.Rollback",
+				slog.String("error", rollbackErr.Error()),
+			)
+		}
+	}(tx, ctx)
 
 	err = r.cmd.WithTx(tx).SetStatus(ctx, repository.SetStatusParams{
 		Status: string(status),
@@ -79,7 +89,14 @@ func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order
 	if err != nil {
 		return 0, err
 	}
-	defer tx.Rollback(ctx)
+	defer func(tx pgx.Tx, ctx context.Context) {
+		rollbackErr := tx.Rollback(ctx)
+		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
+			r.logger.Error("Error in PostgresOrderRepository.Create.Rollback",
+				slog.String("error", rollbackErr.Error()),
+			)
+		}
+	}(tx, ctx)
 
 	create, err := r.cmd.WithTx(tx).Create(ctx, int32(order.UserID))
 	if err != nil {

@@ -31,10 +31,10 @@ func NewGRPCApp(config config.Config, logger *slog.Logger) (*GRPCApp, error) {
 		return nil, err
 	}
 
-	orderRepo := orderRepository.NewPostgresOrderRepository(conn)
+	orderRepo := orderRepository.NewPostgresOrderRepository(conn, logger)
 	orderService := serviceOrder.NewOrderService(orderRepo)
 
-	stocksRepo := repositoryStocks.NewPostgresStocksRepository(conn)
+	stocksRepo := repositoryStocks.NewPostgresStocksRepository(conn, logger)
 	stocksService := srviceStocks.NewStocksService(stocksRepo)
 
 	orderHandler := handlerOrder.NewOrderHandler(orderService, stocksService)
