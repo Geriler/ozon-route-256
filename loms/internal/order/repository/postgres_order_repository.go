@@ -50,7 +50,13 @@ func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.O
 		return err
 	}
 
-	tx.Commit(ctx)
+	commitErr := tx.Commit(ctx)
+	if commitErr != nil {
+		r.logger.Error("Error in PostgresOrderRepository.SetStatus.Commit",
+			slog.String("error", commitErr.Error()),
+		)
+		return commitErr
+	}
 	return nil
 }
 
@@ -114,6 +120,12 @@ func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order
 		}
 	}
 
-	tx.Commit(ctx)
+	commitErr := tx.Commit(ctx)
+	if commitErr != nil {
+		r.logger.Error("Error in PostgresOrderRepository.Create.Commit",
+			slog.String("error", commitErr.Error()),
+		)
+		return 0, commitErr
+	}
 	return model.OrderID(create), nil
 }

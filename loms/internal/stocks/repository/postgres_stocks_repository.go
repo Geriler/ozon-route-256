@@ -52,7 +52,13 @@ func (r *PostgresStocksRepository) Reserve(ctx context.Context, items []*orderMo
 		}
 	}
 
-	tx.Commit(ctx)
+	commitErr := tx.Commit(ctx)
+	if commitErr != nil {
+		r.logger.Error("Error in PostgresStocksRepository.Reserve.Commit",
+			slog.String("error", commitErr.Error()),
+		)
+		return commitErr
+	}
 	return nil
 }
 
@@ -80,7 +86,13 @@ func (r *PostgresStocksRepository) ReserveRemove(ctx context.Context, items []*o
 		}
 	}
 
-	tx.Commit(ctx)
+	commitErr := tx.Commit(ctx)
+	if commitErr != nil {
+		r.logger.Error("Error in PostgresStocksRepository.ReserveRemove.Commit",
+			slog.String("error", commitErr.Error()),
+		)
+		return commitErr
+	}
 	return nil
 }
 
@@ -108,7 +120,13 @@ func (r *PostgresStocksRepository) ReserveCancel(ctx context.Context, items []*o
 		}
 	}
 
-	tx.Commit(ctx)
+	commitErr := tx.Commit(ctx)
+	if commitErr != nil {
+		r.logger.Error("Error in PostgresStocksRepository.ReserveCancel.Commit",
+			slog.String("error", commitErr.Error()),
+		)
+		return commitErr
+	}
 	return nil
 }
 
