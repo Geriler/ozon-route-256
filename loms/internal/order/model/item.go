@@ -22,9 +22,9 @@ func LomsItemToItem(lomsItem *loms.Item) *Item {
 }
 
 func LomsItemsToItems(lomsItems []*loms.Item) []*Item {
-	items := make([]*Item, 0)
-	for _, item := range lomsItems {
-		items = append(items, LomsItemToItem(item))
+	items := make([]*Item, len(lomsItems))
+	for i, item := range lomsItems {
+		items[i] = LomsItemToItem(item)
 	}
 	return items
 }
@@ -40,9 +40,9 @@ func ItemToLomsItem(item *Item) *loms.Item {
 }
 
 func ItemsToLomsItems(items []*Item) []*loms.Item {
-	lomsItems := make([]*loms.Item, 0)
-	for _, item := range items {
-		lomsItems = append(lomsItems, ItemToLomsItem(item))
+	lomsItems := make([]*loms.Item, len(items))
+	for i, item := range items {
+		lomsItems[i] = ItemToLomsItem(item)
 	}
 	return lomsItems
 }
