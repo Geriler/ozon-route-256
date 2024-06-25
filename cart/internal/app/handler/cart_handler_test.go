@@ -56,7 +56,7 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
@@ -83,7 +83,7 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
@@ -117,7 +117,7 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
@@ -159,7 +159,7 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[2].SKU).Return(nil, errors.New("sku not found"))
@@ -180,7 +180,7 @@ func TestCartHandler_AddItemsToCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
@@ -230,7 +230,7 @@ func TestCartHandler_DeleteItemsFromCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		cartService.DeleteItemsFromCartMock.Expect(context.Background(), userId, items[0].SKU)
@@ -250,7 +250,7 @@ func TestCartHandler_DeleteItemsFromCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
@@ -309,7 +309,7 @@ func TestCartHandler_DeleteCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		cartService.DeleteCartByUserIDMock.Expect(context.Background(), userId)
@@ -328,7 +328,7 @@ func TestCartHandler_DeleteCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
@@ -370,7 +370,7 @@ func TestCartHandler_DeleteCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
@@ -434,7 +434,7 @@ func TestCartHandler_GetCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(&model.Cart{}, repository.ErrCartNotFoundOrEmpty)
@@ -454,7 +454,7 @@ func TestCartHandler_GetCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
@@ -497,7 +497,7 @@ func TestCartHandler_GetCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
@@ -540,7 +540,7 @@ func TestCartHandler_GetCart(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
@@ -619,7 +619,7 @@ func TestCartHandler_Checkout(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(&model.Cart{}, repository.ErrCartNotFoundOrEmpty)
@@ -638,7 +638,7 @@ func TestCartHandler_Checkout(t *testing.T) {
 		cartService := mock.NewCartServiceMock(ctrl)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		grpcClient := client.NewGRPCClient(orderService, stocksService)
+		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
 		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
