@@ -14,12 +14,14 @@ import (
 type ProductService struct {
 	baseUrl string
 	token   string
+	rps     int
 }
 
-func NewProductService(baseUrl, token string) *ProductService {
+func NewProductService(baseUrl, token string, rps int) *ProductService {
 	return &ProductService{
 		baseUrl: baseUrl,
 		token:   token,
+		rps:     rps,
 	}
 }
 
@@ -63,4 +65,8 @@ func (s *ProductService) GetProduct(skuId cartModel.SkuID) (*model.Product, erro
 	}
 
 	return &product, nil
+}
+
+func (s *ProductService) GetRPS() int {
+	return s.rps
 }

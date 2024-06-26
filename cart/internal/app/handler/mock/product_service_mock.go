@@ -24,6 +24,12 @@ type ProductServiceMock struct {
 	afterGetProductCounter  uint64
 	beforeGetProductCounter uint64
 	GetProductMock          mProductServiceMockGetProduct
+
+	funcGetRPS          func() (i1 int)
+	inspectFuncGetRPS   func()
+	afterGetRPSCounter  uint64
+	beforeGetRPSCounter uint64
+	GetRPSMock          mProductServiceMockGetRPS
 }
 
 // NewProductServiceMock returns a mock for handler.ProductService
@@ -36,6 +42,8 @@ func NewProductServiceMock(t minimock.Tester) *ProductServiceMock {
 
 	m.GetProductMock = mProductServiceMockGetProduct{mock: m}
 	m.GetProductMock.callArgs = []*ProductServiceMockGetProductParams{}
+
+	m.GetRPSMock = mProductServiceMockGetRPS{mock: m}
 
 	t.Cleanup(m.MinimockFinish)
 
@@ -335,11 +343,192 @@ func (m *ProductServiceMock) MinimockGetProductInspect() {
 	}
 }
 
+type mProductServiceMockGetRPS struct {
+	optional           bool
+	mock               *ProductServiceMock
+	defaultExpectation *ProductServiceMockGetRPSExpectation
+	expectations       []*ProductServiceMockGetRPSExpectation
+
+	expectedInvocations uint64
+}
+
+// ProductServiceMockGetRPSExpectation specifies expectation struct of the ProductService.GetRPS
+type ProductServiceMockGetRPSExpectation struct {
+	mock *ProductServiceMock
+
+	results *ProductServiceMockGetRPSResults
+	Counter uint64
+}
+
+// ProductServiceMockGetRPSResults contains results of the ProductService.GetRPS
+type ProductServiceMockGetRPSResults struct {
+	i1 int
+}
+
+// Marks this method to be optional. The default behavior of any method with Return() is '1 or more', meaning
+// the test will fail minimock's automatic final call check if the mocked method was not called at least once.
+// Optional() makes method check to work in '0 or more' mode.
+// It is NOT RECOMMENDED to use this option by default unless you really need it, as it helps to
+// catch the problems when the expected method call is totally skipped during test run.
+func (mmGetRPS *mProductServiceMockGetRPS) Optional() *mProductServiceMockGetRPS {
+	mmGetRPS.optional = true
+	return mmGetRPS
+}
+
+// Expect sets up expected params for ProductService.GetRPS
+func (mmGetRPS *mProductServiceMockGetRPS) Expect() *mProductServiceMockGetRPS {
+	if mmGetRPS.mock.funcGetRPS != nil {
+		mmGetRPS.mock.t.Fatalf("ProductServiceMock.GetRPS mock is already set by Set")
+	}
+
+	if mmGetRPS.defaultExpectation == nil {
+		mmGetRPS.defaultExpectation = &ProductServiceMockGetRPSExpectation{}
+	}
+
+	return mmGetRPS
+}
+
+// Inspect accepts an inspector function that has same arguments as the ProductService.GetRPS
+func (mmGetRPS *mProductServiceMockGetRPS) Inspect(f func()) *mProductServiceMockGetRPS {
+	if mmGetRPS.mock.inspectFuncGetRPS != nil {
+		mmGetRPS.mock.t.Fatalf("Inspect function is already set for ProductServiceMock.GetRPS")
+	}
+
+	mmGetRPS.mock.inspectFuncGetRPS = f
+
+	return mmGetRPS
+}
+
+// Return sets up results that will be returned by ProductService.GetRPS
+func (mmGetRPS *mProductServiceMockGetRPS) Return(i1 int) *ProductServiceMock {
+	if mmGetRPS.mock.funcGetRPS != nil {
+		mmGetRPS.mock.t.Fatalf("ProductServiceMock.GetRPS mock is already set by Set")
+	}
+
+	if mmGetRPS.defaultExpectation == nil {
+		mmGetRPS.defaultExpectation = &ProductServiceMockGetRPSExpectation{mock: mmGetRPS.mock}
+	}
+	mmGetRPS.defaultExpectation.results = &ProductServiceMockGetRPSResults{i1}
+	return mmGetRPS.mock
+}
+
+// Set uses given function f to mock the ProductService.GetRPS method
+func (mmGetRPS *mProductServiceMockGetRPS) Set(f func() (i1 int)) *ProductServiceMock {
+	if mmGetRPS.defaultExpectation != nil {
+		mmGetRPS.mock.t.Fatalf("Default expectation is already set for the ProductService.GetRPS method")
+	}
+
+	if len(mmGetRPS.expectations) > 0 {
+		mmGetRPS.mock.t.Fatalf("Some expectations are already set for the ProductService.GetRPS method")
+	}
+
+	mmGetRPS.mock.funcGetRPS = f
+	return mmGetRPS.mock
+}
+
+// Times sets number of times ProductService.GetRPS should be invoked
+func (mmGetRPS *mProductServiceMockGetRPS) Times(n uint64) *mProductServiceMockGetRPS {
+	if n == 0 {
+		mmGetRPS.mock.t.Fatalf("Times of ProductServiceMock.GetRPS mock can not be zero")
+	}
+	mm_atomic.StoreUint64(&mmGetRPS.expectedInvocations, n)
+	return mmGetRPS
+}
+
+func (mmGetRPS *mProductServiceMockGetRPS) invocationsDone() bool {
+	if len(mmGetRPS.expectations) == 0 && mmGetRPS.defaultExpectation == nil && mmGetRPS.mock.funcGetRPS == nil {
+		return true
+	}
+
+	totalInvocations := mm_atomic.LoadUint64(&mmGetRPS.mock.afterGetRPSCounter)
+	expectedInvocations := mm_atomic.LoadUint64(&mmGetRPS.expectedInvocations)
+
+	return totalInvocations > 0 && (expectedInvocations == 0 || expectedInvocations == totalInvocations)
+}
+
+// GetRPS implements handler.ProductService
+func (mmGetRPS *ProductServiceMock) GetRPS() (i1 int) {
+	mm_atomic.AddUint64(&mmGetRPS.beforeGetRPSCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetRPS.afterGetRPSCounter, 1)
+
+	if mmGetRPS.inspectFuncGetRPS != nil {
+		mmGetRPS.inspectFuncGetRPS()
+	}
+
+	if mmGetRPS.GetRPSMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetRPS.GetRPSMock.defaultExpectation.Counter, 1)
+
+		mm_results := mmGetRPS.GetRPSMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetRPS.t.Fatal("No results are set for the ProductServiceMock.GetRPS")
+		}
+		return (*mm_results).i1
+	}
+	if mmGetRPS.funcGetRPS != nil {
+		return mmGetRPS.funcGetRPS()
+	}
+	mmGetRPS.t.Fatalf("Unexpected call to ProductServiceMock.GetRPS.")
+	return
+}
+
+// GetRPSAfterCounter returns a count of finished ProductServiceMock.GetRPS invocations
+func (mmGetRPS *ProductServiceMock) GetRPSAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetRPS.afterGetRPSCounter)
+}
+
+// GetRPSBeforeCounter returns a count of ProductServiceMock.GetRPS invocations
+func (mmGetRPS *ProductServiceMock) GetRPSBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetRPS.beforeGetRPSCounter)
+}
+
+// MinimockGetRPSDone returns true if the count of the GetRPS invocations corresponds
+// the number of defined expectations
+func (m *ProductServiceMock) MinimockGetRPSDone() bool {
+	if m.GetRPSMock.optional {
+		// Optional methods provide '0 or more' call count restriction.
+		return true
+	}
+
+	for _, e := range m.GetRPSMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	return m.GetRPSMock.invocationsDone()
+}
+
+// MinimockGetRPSInspect logs each unmet expectation
+func (m *ProductServiceMock) MinimockGetRPSInspect() {
+	for _, e := range m.GetRPSMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Error("Expected call to ProductServiceMock.GetRPS")
+		}
+	}
+
+	afterGetRPSCounter := mm_atomic.LoadUint64(&m.afterGetRPSCounter)
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetRPSMock.defaultExpectation != nil && afterGetRPSCounter < 1 {
+		m.t.Error("Expected call to ProductServiceMock.GetRPS")
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetRPS != nil && afterGetRPSCounter < 1 {
+		m.t.Error("Expected call to ProductServiceMock.GetRPS")
+	}
+
+	if !m.GetRPSMock.invocationsDone() && afterGetRPSCounter > 0 {
+		m.t.Errorf("Expected %d calls to ProductServiceMock.GetRPS but found %d calls",
+			mm_atomic.LoadUint64(&m.GetRPSMock.expectedInvocations), afterGetRPSCounter)
+	}
+}
+
 // MinimockFinish checks that all mocked methods have been called the expected number of times
 func (m *ProductServiceMock) MinimockFinish() {
 	m.finishOnce.Do(func() {
 		if !m.minimockDone() {
 			m.MinimockGetProductInspect()
+
+			m.MinimockGetRPSInspect()
 			m.t.FailNow()
 		}
 	})
@@ -364,5 +553,6 @@ func (m *ProductServiceMock) MinimockWait(timeout mm_time.Duration) {
 func (m *ProductServiceMock) minimockDone() bool {
 	done := true
 	return done &&
-		m.MinimockGetProductDone()
+		m.MinimockGetProductDone() &&
+		m.MinimockGetRPSDone()
 }

@@ -19,6 +19,7 @@ type Config struct {
 type ProductConfig struct {
 	BaseUrl string `yaml:"base_url"`
 	Token   string `yaml:"token"`
+	RPS     int    `yaml:"rps"`
 }
 
 type AddressConfig struct {

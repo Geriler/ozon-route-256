@@ -521,6 +521,7 @@ func TestCartHandler_GetCart(t *testing.T) {
 			Items: cartItems,
 		}
 
+		productService.GetRPSMock.Expect().Return(10)
 		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(cart, nil)
 		cartService.GetTotalPriceMock.Expect(context.Background(), cart).Return(10)
 
@@ -543,7 +544,10 @@ func TestCartHandler_GetCart(t *testing.T) {
 		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
-		productService.GetProductMock.Expect(items[0].SKU).Return(products[0], nil)
+		productService.GetRPSMock.Expect().Return(10)
+		productService.GetProductMock.When(items[0].SKU).Then(products[0], nil).
+			GetProductMock.When(items[1].SKU).Then(products[1], nil)
+
 		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
 			SkuId: int64(items[0].SKU),
 		}).Return(&loms.StocksInfoResponse{
@@ -558,7 +562,6 @@ func TestCartHandler_GetCart(t *testing.T) {
 		})
 		require.Nil(t, err)
 
-		productService.GetProductMock.Expect(items[1].SKU).Return(products[1], nil)
 		stocksService.StocksInfoMock.Expect(context.Background(), &loms.StocksInfoRequest{
 			SkuId: int64(items[1].SKU),
 		}).Return(&loms.StocksInfoResponse{

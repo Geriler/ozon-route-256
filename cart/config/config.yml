@@ -5,6 +5,7 @@ http:
 product:
   base_url: "http://route256.pavl.uk:8080"
   token: "testtoken"
+  rps: 10
 grpc:
   host: "loms"
   port: 8081

@@ -18,6 +18,7 @@ type CartService interface {
 
 type ProductService interface {
 	GetProduct(skuId model.SkuID) (*productModel.Product, error)
+	GetRPS() int
 }
 
 type CartHandler struct {
