@@ -521,7 +521,7 @@ func TestCartHandler_GetCart(t *testing.T) {
 			Items: cartItems,
 		}
 
-		productService.GetRPSMock.Expect().Return(10)
+		productService.GetRPSLimitMock.Expect().Return(10)
 		cartService.GetCartByUserIDMock.Expect(context.Background(), userId).Return(cart, nil)
 		cartService.GetTotalPriceMock.Expect(context.Background(), cart).Return(10)
 
@@ -544,7 +544,7 @@ func TestCartHandler_GetCart(t *testing.T) {
 		grpcClient := client.NewGRPCClient(orderService, stocksService, nil)
 		cartHandler := NewCartHandler(cartService, productService, *grpcClient)
 
-		productService.GetRPSMock.Expect().Return(10)
+		productService.GetRPSLimitMock.Expect().Return(10)
 		productService.GetProductMock.When(items[0].SKU).Then(products[0], nil).
 			GetProductMock.When(items[1].SKU).Then(products[1], nil)
 

@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"time"
 
@@ -17,14 +18,15 @@ type Config struct {
 }
 
 type ProductConfig struct {
-	BaseUrl string `yaml:"base_url"`
-	Token   string `yaml:"token"`
-	RPS     int    `yaml:"rps"`
+	BaseUrl  string `yaml:"base_url"`
+	Token    string `yaml:"token"`
+	RPSLimit int    `yaml:"rps_limit"`
 }
 
 type AddressConfig struct {
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
+	Host    string        `yaml:"host"`
+	Port    int           `yaml:"port"`
+	Timeout time.Duration `yaml:"timeout" omitempty:"true"`
 }
 
 func MustLoad() Config {
@@ -44,7 +46,20 @@ func MustLoad() Config {
 		panic("failed to read config: " + err.Error())
 	}
 
+	err := validateConfig(&cfg)
+	if err != nil {
+		panic("invalid config: " + err.Error())
+	}
+
 	return cfg
+}
+
+func validateConfig(c *Config) error {
+	if c.Product.RPSLimit <= 0 {
+		return fmt.Errorf("RPSLimit must be greater than 0")
+	}
+
+	return nil
 }
 
 func fetchConfigPath() string {

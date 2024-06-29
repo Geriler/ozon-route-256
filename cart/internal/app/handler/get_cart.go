@@ -5,8 +5,8 @@ import (
 	"sort"
 	"time"
 
-	"golang.org/x/sync/errgroup"
 	"route256/cart/internal/cart/model"
+	"route256/cart/pkg/lib/errgroup"
 )
 
 func (h *CartHandler) GetCart(ctx context.Context, req *model.UserRequest) (model.CartResponse, error) {
@@ -16,14 +16,14 @@ func (h *CartHandler) GetCart(ctx context.Context, req *model.UserRequest) (mode
 	}
 
 	eg, egCtx := errgroup.WithContext(ctx)
-	ticker := time.NewTicker(time.Second / time.Duration(h.productService.GetRPS()))
+	ticker := time.NewTicker(time.Second / time.Duration(h.productService.GetRPSLimit()))
 	for _, item := range cart.Items {
+		item := item
 		eg.Go(func() error {
 			select {
 			case <-egCtx.Done():
 				return nil
 			case <-ticker.C:
-				item := item
 				_, err = h.productService.GetProduct(item.SKU)
 				if err != nil {
 					egCtx.Done()
