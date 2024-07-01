@@ -18,8 +18,9 @@ func (h *CartHandler) GetCart(ctx context.Context, req *model.UserRequest) (mode
 	eg, egCtx := errgroup.WithContext(ctx)
 	ticker := time.NewTicker(time.Second / time.Duration(h.productService.GetRPSLimit()))
 	for _, item := range cart.Items {
-		item := item
 		eg.Go(func() error {
+			var err error
+			item := item
 			select {
 			case <-egCtx.Done():
 				return nil
