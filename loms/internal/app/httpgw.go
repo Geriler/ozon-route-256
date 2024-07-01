@@ -64,3 +64,7 @@ func (a *HTTPGW) ListenAndServe() error {
 
 	return nil
 }
+
+func (a *HTTPGW) Shutdown(ctx context.Context) error {
+	return a.server.Shutdown(ctx)
+}

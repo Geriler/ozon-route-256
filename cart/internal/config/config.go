@@ -2,26 +2,31 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	"os"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	Env     string        `yaml:"env"`
-	HTTP    AddressConfig `yaml:"http"`
-	Product ProductConfig `yaml:"product"`
-	GRPC    AddressConfig `yaml:"grpc"`
+	Env         string        `yaml:"env"`
+	HTTP        AddressConfig `yaml:"http"`
+	Product     ProductConfig `yaml:"product"`
+	GRPC        AddressConfig `yaml:"grpc"`
+	TimeoutStop time.Duration `yaml:"timeout_stop"`
 }
 
 type ProductConfig struct {
-	BaseUrl string `yaml:"base_url"`
-	Token   string `yaml:"token"`
+	BaseUrl  string `yaml:"base_url"`
+	Token    string `yaml:"token"`
+	RPSLimit int    `yaml:"rps_limit"`
 }
 
 type AddressConfig struct {
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
+	Host    string        `yaml:"host"`
+	Port    int           `yaml:"port"`
+	Timeout time.Duration `yaml:"timeout" omitempty:"true"`
 }
 
 func MustLoad() Config {
@@ -41,7 +46,20 @@ func MustLoad() Config {
 		panic("failed to read config: " + err.Error())
 	}
 
+	err := validateConfig(&cfg)
+	if err != nil {
+		panic("invalid config: " + err.Error())
+	}
+
 	return cfg
+}
+
+func validateConfig(c *Config) error {
+	if c.Product.RPSLimit <= 0 {
+		return fmt.Errorf("RPSLimit must be greater than 0")
+	}
+
+	return nil
 }
 
 func fetchConfigPath() string {

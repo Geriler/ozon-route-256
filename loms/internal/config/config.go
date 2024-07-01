@@ -3,15 +3,17 @@ package config
 import (
 	"flag"
 	"os"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	Env      string         `yaml:"env"`
-	GRPC     AddressConfig  `yaml:"grpc"`
-	HTTP     AddressConfig  `yaml:"http"`
-	Database DatabaseConfig `yaml:"database"`
+	Env         string         `yaml:"env"`
+	GRPC        AddressConfig  `yaml:"grpc"`
+	HTTP        AddressConfig  `yaml:"http"`
+	Database    DatabaseConfig `yaml:"database"`
+	TimeoutStop time.Duration  `yaml:"timeout_stop"`
 }
 
 type AddressConfig struct {

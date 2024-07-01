@@ -7,3 +7,4 @@ http:
   port: 8080
 database:
   dsn: "postgres://postgres:postgres@postgres:5432/postgres"
+timeout_stop: 10s

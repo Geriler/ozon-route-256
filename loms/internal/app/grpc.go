@@ -65,6 +65,10 @@ func (a *GRPCApp) ListenAndServe() error {
 	return nil
 }
 
+func (a *GRPCApp) GracefulStop() {
+	a.server.GracefulStop()
+}
+
 func getServerOption() grpc.ServerOption {
 	return grpc.ChainUnaryInterceptor(
 		middleware.Logger,

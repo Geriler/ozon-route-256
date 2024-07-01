@@ -24,6 +24,12 @@ type ProductServiceMock struct {
 	afterGetProductCounter  uint64
 	beforeGetProductCounter uint64
 	GetProductMock          mProductServiceMockGetProduct
+
+	funcGetRPSLimit          func() (i1 int)
+	inspectFuncGetRPSLimit   func()
+	afterGetRPSLimitCounter  uint64
+	beforeGetRPSLimitCounter uint64
+	GetRPSLimitMock          mProductServiceMockGetRPSLimit
 }
 
 // NewProductServiceMock returns a mock for handler.ProductService
@@ -36,6 +42,8 @@ func NewProductServiceMock(t minimock.Tester) *ProductServiceMock {
 
 	m.GetProductMock = mProductServiceMockGetProduct{mock: m}
 	m.GetProductMock.callArgs = []*ProductServiceMockGetProductParams{}
+
+	m.GetRPSLimitMock = mProductServiceMockGetRPSLimit{mock: m}
 
 	t.Cleanup(m.MinimockFinish)
 
@@ -335,11 +343,192 @@ func (m *ProductServiceMock) MinimockGetProductInspect() {
 	}
 }
 
+type mProductServiceMockGetRPSLimit struct {
+	optional           bool
+	mock               *ProductServiceMock
+	defaultExpectation *ProductServiceMockGetRPSLimitExpectation
+	expectations       []*ProductServiceMockGetRPSLimitExpectation
+
+	expectedInvocations uint64
+}
+
+// ProductServiceMockGetRPSLimitExpectation specifies expectation struct of the ProductService.GetRPSLimit
+type ProductServiceMockGetRPSLimitExpectation struct {
+	mock *ProductServiceMock
+
+	results *ProductServiceMockGetRPSLimitResults
+	Counter uint64
+}
+
+// ProductServiceMockGetRPSLimitResults contains results of the ProductService.GetRPSLimit
+type ProductServiceMockGetRPSLimitResults struct {
+	i1 int
+}
+
+// Marks this method to be optional. The default behavior of any method with Return() is '1 or more', meaning
+// the test will fail minimock's automatic final call check if the mocked method was not called at least once.
+// Optional() makes method check to work in '0 or more' mode.
+// It is NOT RECOMMENDED to use this option by default unless you really need it, as it helps to
+// catch the problems when the expected method call is totally skipped during test run.
+func (mmGetRPSLimit *mProductServiceMockGetRPSLimit) Optional() *mProductServiceMockGetRPSLimit {
+	mmGetRPSLimit.optional = true
+	return mmGetRPSLimit
+}
+
+// Expect sets up expected params for ProductService.GetRPSLimit
+func (mmGetRPSLimit *mProductServiceMockGetRPSLimit) Expect() *mProductServiceMockGetRPSLimit {
+	if mmGetRPSLimit.mock.funcGetRPSLimit != nil {
+		mmGetRPSLimit.mock.t.Fatalf("ProductServiceMock.GetRPSLimit mock is already set by Set")
+	}
+
+	if mmGetRPSLimit.defaultExpectation == nil {
+		mmGetRPSLimit.defaultExpectation = &ProductServiceMockGetRPSLimitExpectation{}
+	}
+
+	return mmGetRPSLimit
+}
+
+// Inspect accepts an inspector function that has same arguments as the ProductService.GetRPSLimit
+func (mmGetRPSLimit *mProductServiceMockGetRPSLimit) Inspect(f func()) *mProductServiceMockGetRPSLimit {
+	if mmGetRPSLimit.mock.inspectFuncGetRPSLimit != nil {
+		mmGetRPSLimit.mock.t.Fatalf("Inspect function is already set for ProductServiceMock.GetRPSLimit")
+	}
+
+	mmGetRPSLimit.mock.inspectFuncGetRPSLimit = f
+
+	return mmGetRPSLimit
+}
+
+// Return sets up results that will be returned by ProductService.GetRPSLimit
+func (mmGetRPSLimit *mProductServiceMockGetRPSLimit) Return(i1 int) *ProductServiceMock {
+	if mmGetRPSLimit.mock.funcGetRPSLimit != nil {
+		mmGetRPSLimit.mock.t.Fatalf("ProductServiceMock.GetRPSLimit mock is already set by Set")
+	}
+
+	if mmGetRPSLimit.defaultExpectation == nil {
+		mmGetRPSLimit.defaultExpectation = &ProductServiceMockGetRPSLimitExpectation{mock: mmGetRPSLimit.mock}
+	}
+	mmGetRPSLimit.defaultExpectation.results = &ProductServiceMockGetRPSLimitResults{i1}
+	return mmGetRPSLimit.mock
+}
+
+// Set uses given function f to mock the ProductService.GetRPSLimit method
+func (mmGetRPSLimit *mProductServiceMockGetRPSLimit) Set(f func() (i1 int)) *ProductServiceMock {
+	if mmGetRPSLimit.defaultExpectation != nil {
+		mmGetRPSLimit.mock.t.Fatalf("Default expectation is already set for the ProductService.GetRPSLimit method")
+	}
+
+	if len(mmGetRPSLimit.expectations) > 0 {
+		mmGetRPSLimit.mock.t.Fatalf("Some expectations are already set for the ProductService.GetRPSLimit method")
+	}
+
+	mmGetRPSLimit.mock.funcGetRPSLimit = f
+	return mmGetRPSLimit.mock
+}
+
+// Times sets number of times ProductService.GetRPSLimit should be invoked
+func (mmGetRPSLimit *mProductServiceMockGetRPSLimit) Times(n uint64) *mProductServiceMockGetRPSLimit {
+	if n == 0 {
+		mmGetRPSLimit.mock.t.Fatalf("Times of ProductServiceMock.GetRPSLimit mock can not be zero")
+	}
+	mm_atomic.StoreUint64(&mmGetRPSLimit.expectedInvocations, n)
+	return mmGetRPSLimit
+}
+
+func (mmGetRPSLimit *mProductServiceMockGetRPSLimit) invocationsDone() bool {
+	if len(mmGetRPSLimit.expectations) == 0 && mmGetRPSLimit.defaultExpectation == nil && mmGetRPSLimit.mock.funcGetRPSLimit == nil {
+		return true
+	}
+
+	totalInvocations := mm_atomic.LoadUint64(&mmGetRPSLimit.mock.afterGetRPSLimitCounter)
+	expectedInvocations := mm_atomic.LoadUint64(&mmGetRPSLimit.expectedInvocations)
+
+	return totalInvocations > 0 && (expectedInvocations == 0 || expectedInvocations == totalInvocations)
+}
+
+// GetRPSLimit implements handler.ProductService
+func (mmGetRPSLimit *ProductServiceMock) GetRPSLimit() (i1 int) {
+	mm_atomic.AddUint64(&mmGetRPSLimit.beforeGetRPSLimitCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetRPSLimit.afterGetRPSLimitCounter, 1)
+
+	if mmGetRPSLimit.inspectFuncGetRPSLimit != nil {
+		mmGetRPSLimit.inspectFuncGetRPSLimit()
+	}
+
+	if mmGetRPSLimit.GetRPSLimitMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetRPSLimit.GetRPSLimitMock.defaultExpectation.Counter, 1)
+
+		mm_results := mmGetRPSLimit.GetRPSLimitMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetRPSLimit.t.Fatal("No results are set for the ProductServiceMock.GetRPSLimit")
+		}
+		return (*mm_results).i1
+	}
+	if mmGetRPSLimit.funcGetRPSLimit != nil {
+		return mmGetRPSLimit.funcGetRPSLimit()
+	}
+	mmGetRPSLimit.t.Fatalf("Unexpected call to ProductServiceMock.GetRPSLimit.")
+	return
+}
+
+// GetRPSLimitAfterCounter returns a count of finished ProductServiceMock.GetRPSLimit invocations
+func (mmGetRPSLimit *ProductServiceMock) GetRPSLimitAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetRPSLimit.afterGetRPSLimitCounter)
+}
+
+// GetRPSLimitBeforeCounter returns a count of ProductServiceMock.GetRPSLimit invocations
+func (mmGetRPSLimit *ProductServiceMock) GetRPSLimitBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetRPSLimit.beforeGetRPSLimitCounter)
+}
+
+// MinimockGetRPSLimitDone returns true if the count of the GetRPSLimit invocations corresponds
+// the number of defined expectations
+func (m *ProductServiceMock) MinimockGetRPSLimitDone() bool {
+	if m.GetRPSLimitMock.optional {
+		// Optional methods provide '0 or more' call count restriction.
+		return true
+	}
+
+	for _, e := range m.GetRPSLimitMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	return m.GetRPSLimitMock.invocationsDone()
+}
+
+// MinimockGetRPSLimitInspect logs each unmet expectation
+func (m *ProductServiceMock) MinimockGetRPSLimitInspect() {
+	for _, e := range m.GetRPSLimitMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Error("Expected call to ProductServiceMock.GetRPSLimit")
+		}
+	}
+
+	afterGetRPSLimitCounter := mm_atomic.LoadUint64(&m.afterGetRPSLimitCounter)
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetRPSLimitMock.defaultExpectation != nil && afterGetRPSLimitCounter < 1 {
+		m.t.Error("Expected call to ProductServiceMock.GetRPSLimit")
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetRPSLimit != nil && afterGetRPSLimitCounter < 1 {
+		m.t.Error("Expected call to ProductServiceMock.GetRPSLimit")
+	}
+
+	if !m.GetRPSLimitMock.invocationsDone() && afterGetRPSLimitCounter > 0 {
+		m.t.Errorf("Expected %d calls to ProductServiceMock.GetRPSLimit but found %d calls",
+			mm_atomic.LoadUint64(&m.GetRPSLimitMock.expectedInvocations), afterGetRPSLimitCounter)
+	}
+}
+
 // MinimockFinish checks that all mocked methods have been called the expected number of times
 func (m *ProductServiceMock) MinimockFinish() {
 	m.finishOnce.Do(func() {
 		if !m.minimockDone() {
 			m.MinimockGetProductInspect()
+
+			m.MinimockGetRPSLimitInspect()
 			m.t.FailNow()
 		}
 	})
@@ -364,5 +553,6 @@ func (m *ProductServiceMock) MinimockWait(timeout mm_time.Duration) {
 func (m *ProductServiceMock) minimockDone() bool {
 	done := true
 	return done &&
-		m.MinimockGetProductDone()
+		m.MinimockGetProductDone() &&
+		m.MinimockGetRPSLimitDone()
 }

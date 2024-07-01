@@ -3,6 +3,6 @@
 run-all:
 	docker-compose up --force-recreate --build -d
 
-cover:
-	go test -cover ./cart/... && \
-	go test -cover ./loms/...
+test:
+	go test -cover -race ./cart/... && \
+	go test -cover -race ./loms/...

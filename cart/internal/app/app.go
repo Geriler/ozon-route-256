@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -38,7 +39,7 @@ func NewApp(cfg config.Config, log *slog.Logger, loms *lomsService.GRPCClient) *
 }
 
 func (a *App) ListenAndServe() error {
-	productService := product.NewProductService(a.config.Product.BaseUrl, a.config.Product.Token)
+	productService := product.NewProductService(a.config.Product)
 	cartService := service.NewCartService(a.storage)
 	cartHandler := handler.NewCartHandler(cartService, productService, *a.loms)
 	cartHttpHandlers := cartHttp.NewCartHttpHandlers(cartHandler, a.log)
@@ -54,4 +55,8 @@ func (a *App) ListenAndServe() error {
 	}
 
 	return nil
+}
+
+func (a *App) Shutdown(ctx context.Context) error {
+	return a.server.Shutdown(ctx)
 }

@@ -8,18 +8,21 @@ import (
 	"net/http"
 
 	cartModel "route256/cart/internal/cart/model"
+	"route256/cart/internal/config"
 	"route256/cart/internal/product/model"
 )
 
 type ProductService struct {
-	baseUrl string
-	token   string
+	baseUrl  string
+	token    string
+	rpsLimit int
 }
 
-func NewProductService(baseUrl, token string) *ProductService {
+func NewProductService(cfg config.ProductConfig) *ProductService {
 	return &ProductService{
-		baseUrl: baseUrl,
-		token:   token,
+		baseUrl:  cfg.BaseUrl,
+		token:    cfg.Token,
+		rpsLimit: cfg.RPSLimit,
 	}
 }
 
@@ -63,4 +66,8 @@ func (s *ProductService) GetProduct(skuId cartModel.SkuID) (*model.Product, erro
 	}
 
 	return &product, nil
+}
+
+func (s *ProductService) GetRPSLimit() int {
+	return s.rpsLimit
 }
