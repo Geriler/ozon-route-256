@@ -79,6 +79,13 @@ services:
     ports:
       - "3000:3000"
 
+#  jaeger:
+#    container_name: jaeger
+#    image: bitnami/jaeger:latest
+#    ports:
+#      - "16686:16686"
+#      - "4318:4318"
+
 volumes:
   prometheus_data: {}
   grafana_data: {}
