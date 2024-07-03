@@ -16,7 +16,6 @@ func (h *CartHttpHandlers) Checkout(w http.ResponseWriter, r *http.Request) {
 
 	statusCode := http.StatusOK
 
-	requestCounter.WithLabelValues("checkout").Inc()
 	defer func(createdAt time.Time) {
 		requestHistogram.WithLabelValues("checkout", strconv.Itoa(statusCode)).Observe(time.Since(createdAt).Seconds())
 	}(time.Now())

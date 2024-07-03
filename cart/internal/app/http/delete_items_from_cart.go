@@ -15,7 +15,6 @@ func (h *CartHttpHandlers) DeleteItemsFromCart(w http.ResponseWriter, r *http.Re
 
 	statusCode := http.StatusNoContent
 
-	requestCounter.WithLabelValues("delete_items").Inc()
 	defer func(createdAt time.Time) {
 		requestHistogram.WithLabelValues("delete_items", strconv.Itoa(statusCode)).Observe(time.Since(createdAt).Seconds())
 	}(time.Now())

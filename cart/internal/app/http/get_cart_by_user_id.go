@@ -16,7 +16,6 @@ func (h *CartHttpHandlers) GetCartByUserID(w http.ResponseWriter, r *http.Reques
 
 	statusCode := http.StatusNoContent
 
-	requestCounter.WithLabelValues("get_cart").Inc()
 	defer func(createdAt time.Time) {
 		requestHistogram.WithLabelValues("get_cart", strconv.Itoa(statusCode)).Observe(time.Since(createdAt).Seconds())
 	}(time.Now())

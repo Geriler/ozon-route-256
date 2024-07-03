@@ -17,7 +17,6 @@ func (h *CartHttpHandlers) AddItemsToCart(w http.ResponseWriter, r *http.Request
 
 	statusCode := http.StatusNoContent
 
-	requestCounter.WithLabelValues("add_item_to_cart").Inc()
 	defer func(createdAt time.Time) {
 		requestHistogram.WithLabelValues("add_item_to_cart", strconv.Itoa(statusCode)).Observe(time.Since(createdAt).Seconds())
 	}(time.Now())
