@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"route256/cart/internal/app/handler"
 	cartHttp "route256/cart/internal/app/http"
 	"route256/cart/internal/cart/repository"
@@ -44,6 +46,7 @@ func (a *App) ListenAndServe() error {
 	cartHandler := handler.NewCartHandler(cartService, productService, *a.loms)
 	cartHttpHandlers := cartHttp.NewCartHttpHandlers(cartHandler, a.log)
 
+	a.mux.Handle("GET /metrics", promhttp.Handler())
 	a.mux.HandleFunc("POST /user/{user_id}/cart/checkout", cartHttpHandlers.Checkout)
 	a.mux.HandleFunc("POST /user/{user_id}/cart/{sku_id}", cartHttpHandlers.AddItemsToCart)
 	a.mux.HandleFunc("DELETE /user/{user_id}/cart/{sku_id}", cartHttpHandlers.DeleteItemsFromCart)

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"route256/loms/internal/config"
@@ -47,6 +48,10 @@ func (a *HTTPGW) ListenAndServe() error {
 	if err != nil {
 		return err
 	}
+
+	a.mux.HandlePath("GET", "/metrics", func(w http.ResponseWriter, r *http.Request, _ map[string]string) {
+		promhttp.Handler().ServeHTTP(w, r)
+	})
 
 	err = loms.RegisterOrderHandler(context.Background(), a.mux, conn)
 	if err != nil {
