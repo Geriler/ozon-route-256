@@ -366,7 +366,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum by(url) (cart_request_count)",
+          "expr": "sum by(url) (cart_request_duration_seconds_count)",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -719,6 +719,6 @@
   "timezone": "browser",
   "title": "Dashboard",
   "uid": "ddqigi53ddn9cd",
-  "version": 14,
+  "version": 15,
   "weekStart": ""
 }

@@ -6,15 +6,6 @@ import (
 )
 
 var (
-	requestCounter = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Namespace: "cart",
-			Name:      "request_count",
-			Help:      "Total number of requests processed.",
-		},
-		[]string{"url"},
-	)
-
 	requestHistogram = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Namespace: "cart",
