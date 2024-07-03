@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"route256/cart/internal"
 	"route256/cart/internal/cart/model"
 )
 
@@ -16,7 +17,7 @@ func (h *CartHttpHandlers) DeleteItemsFromCart(w http.ResponseWriter, r *http.Re
 	statusCode := http.StatusNoContent
 
 	defer func(createdAt time.Time) {
-		requestHistogram.WithLabelValues("delete_items", strconv.Itoa(statusCode)).Observe(time.Since(createdAt).Seconds())
+		internal.SaveMetrics(time.Since(createdAt).Seconds(), "DELETE /user/{user_id}/cart/{sku_id}", strconv.Itoa(statusCode))
 	}(time.Now())
 
 	w.Header().Set("Content-Type", "application/json")

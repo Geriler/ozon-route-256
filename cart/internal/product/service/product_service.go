@@ -6,7 +6,10 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strconv"
+	"time"
 
+	"route256/cart/internal"
 	cartModel "route256/cart/internal/cart/model"
 	"route256/cart/internal/config"
 	"route256/cart/internal/product/model"
@@ -27,6 +30,12 @@ func NewProductService(cfg config.ProductConfig) *ProductService {
 }
 
 func (s *ProductService) GetProduct(skuId cartModel.SkuID) (*model.Product, error) {
+	statusCode := http.StatusOK
+
+	defer func(createdAt time.Time) {
+		internal.SaveMetrics(time.Since(createdAt).Seconds(), "POST /get_product", strconv.Itoa(statusCode))
+	}(time.Now())
+
 	url := s.baseUrl + "/get_product"
 
 	request := model.GetProductRequest{
@@ -49,6 +58,8 @@ func (s *ProductService) GetProduct(skuId cartModel.SkuID) (*model.Product, erro
 		return nil, err
 	}
 	defer response.Body.Close()
+
+	statusCode = response.StatusCode
 
 	if response.StatusCode != http.StatusOK {
 		var errorResponse model.GetProductErrorResponse

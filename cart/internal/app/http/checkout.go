@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"route256/cart/internal"
 	"route256/cart/internal/cart/model"
 )
 
@@ -17,7 +18,7 @@ func (h *CartHttpHandlers) Checkout(w http.ResponseWriter, r *http.Request) {
 	statusCode := http.StatusOK
 
 	defer func(createdAt time.Time) {
-		requestHistogram.WithLabelValues("checkout", strconv.Itoa(statusCode)).Observe(time.Since(createdAt).Seconds())
+		internal.SaveMetrics(time.Since(createdAt).Seconds(), "POST /user/{user_id}/cart/checkout", strconv.Itoa(statusCode))
 	}(time.Now())
 
 	w.Header().Set("Content-Type", "application/json")
