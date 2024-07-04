@@ -9,7 +9,6 @@ var requestHistogram = promauto.NewHistogramVec(
 	prometheus.HistogramOpts{
 		Namespace: "cart",
 		Name:      "request_duration_seconds",
-		Help:      "Duration of requests in seconds.",
 		Buckets:   prometheus.DefBuckets,
 	},
 	[]string{"url", "status"},

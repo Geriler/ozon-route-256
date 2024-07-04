@@ -5,18 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"google.golang.org/grpc"
-)
-
-var requestCounter = promauto.NewCounterVec(
-	prometheus.CounterOpts{
-		Namespace: "loms",
-		Name:      "request_count",
-		Help:      "Total number of requests processed.",
-	},
-	[]string{"method"},
 )
 
 func Logger(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
@@ -26,8 +15,6 @@ func Logger(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, ha
 		slog.String("op", op),
 		slog.String("method", info.FullMethod),
 	)
-
-	requestCounter.WithLabelValues(info.FullMethod).Inc()
 
 	logger.Info("request received")
 

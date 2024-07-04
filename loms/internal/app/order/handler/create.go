@@ -2,12 +2,19 @@ package handler
 
 import (
 	"context"
+	"time"
 
+	"route256/loms/internal"
 	"route256/loms/internal/order/model"
 	loms "route256/loms/pb/api"
 )
 
 func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateRequest) (*loms.OrderCreateResponse, error) {
+	status := "ok"
+	defer func(createdAt time.Time) {
+		internal.SaveLomsMetrics(time.Since(createdAt).Seconds(), "/loms.api.OrderCreate", status)
+	}(time.Now())
+
 	var err error
 	items := model.LomsItemsToItems(req.Items)
 
@@ -17,6 +24,7 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 		Items:  items,
 	})
 	if err != nil {
+		status = "error"
 		return nil, err
 	}
 
@@ -26,6 +34,7 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 
 	err = h.stocksService.Reserve(ctx, items)
 	if err != nil {
+		status = "error"
 		errSetStatus := h.orderService.SetStatus(ctx, orderID, model.StatusFailed)
 		if errSetStatus != nil {
 			return nil, errSetStatus
@@ -36,6 +45,7 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 
 	err = h.orderService.SetStatus(ctx, orderID, model.StatusAwaitingPayment)
 	if err != nil {
+		status = "error"
 		return nil, err
 	}
 
