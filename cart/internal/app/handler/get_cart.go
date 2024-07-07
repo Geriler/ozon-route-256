@@ -5,12 +5,16 @@ import (
 	"sort"
 	"time"
 
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"route256/cart/internal/cart/model"
 	"route256/cart/pkg/lib/errgroup"
 )
 
 func (h *CartHandler) GetCart(ctx context.Context, req *model.UserRequest) (model.CartResponse, error) {
-	ctx, span := h.tracer.Start(ctx, "GetCart")
+	ctx, span := h.tracer.Start(ctx, "GetCart", trace.WithAttributes(
+		attribute.Int("user_id", int(req.UserID)),
+	))
 	defer span.End()
 
 	span.AddEvent("Get cart by user id")

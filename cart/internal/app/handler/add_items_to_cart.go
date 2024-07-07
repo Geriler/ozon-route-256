@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"route256/cart/internal/cart/model"
 	loms "route256/cart/pb/api"
 )
@@ -11,7 +13,11 @@ import (
 var ErrNotEnoughStock = errors.New("not enough stock")
 
 func (h *CartHandler) AddItemsToCart(ctx context.Context, req *model.UserSKUCountRequest) error {
-	ctx, span := h.tracer.Start(ctx, "AddItemsToCart")
+	ctx, span := h.tracer.Start(ctx, "AddItemsToCart", trace.WithAttributes(
+		attribute.Int("user_id", int(req.UserID)),
+		attribute.Int("sku_id", int(req.SKU)),
+		attribute.Int("count", int(req.Count)),
+	))
 	defer span.End()
 
 	span.AddEvent("Get product from ProductService")

@@ -7,11 +7,10 @@ import (
 	"syscall"
 
 	"go.opentelemetry.io/otel"
-	"route256/cart/internal/tracing"
-
 	"route256/cart/internal/app"
 	"route256/cart/internal/config"
 	"route256/cart/pkg/lib/logger"
+	"route256/cart/pkg/lib/tracing"
 )
 
 func main() {

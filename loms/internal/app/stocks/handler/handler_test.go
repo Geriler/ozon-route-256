@@ -31,7 +31,7 @@ func TestStocksHandler_StocksInfo(t *testing.T) {
 
 		ctrl := minimock.NewController(t)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		stocksHandler := NewStocksHandler(stocksService)
+		stocksHandler := NewStocksHandler(stocksService, nil)
 
 		stocksService.GetBySKUMock.Expect(context.Background(), items[0].SKU).Return(&stocksModel.Stocks{
 			SKU:           items[0].SKU,
@@ -50,7 +50,7 @@ func TestStocksHandler_StocksInfo(t *testing.T) {
 
 		ctrl := minimock.NewController(t)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		stocksHandler := NewStocksHandler(stocksService)
+		stocksHandler := NewStocksHandler(stocksService, nil)
 
 		stocksService.GetBySKUMock.Expect(context.Background(), items[0].SKU).Return(nil, stocksModel.ErrSkuNotFound)
 

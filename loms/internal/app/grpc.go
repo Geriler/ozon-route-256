@@ -7,6 +7,7 @@ import (
 	"net"
 
 	"github.com/jackc/pgx/v5"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	handlerOrder "route256/loms/internal/app/order/handler"
 	handlerStocks "route256/loms/internal/app/stocks/handler"
@@ -25,7 +26,7 @@ type GRPCApp struct {
 	server *grpc.Server
 }
 
-func NewGRPCApp(config config.Config, logger *slog.Logger) (*GRPCApp, error) {
+func NewGRPCApp(config config.Config, logger *slog.Logger, tracer trace.Tracer) (*GRPCApp, error) {
 	conn, err := dbConnect(context.Background(), config.Database.DSN)
 	if err != nil {
 		return nil, err
@@ -37,8 +38,8 @@ func NewGRPCApp(config config.Config, logger *slog.Logger) (*GRPCApp, error) {
 	stocksRepo := repositoryStocks.NewPostgresStocksRepository(conn, logger)
 	stocksService := srviceStocks.NewStocksService(stocksRepo)
 
-	orderHandler := handlerOrder.NewOrderHandler(orderService, stocksService)
-	stocksHandler := handlerStocks.NewStocksHandler(stocksService)
+	orderHandler := handlerOrder.NewOrderHandler(orderService, stocksService, tracer)
+	stocksHandler := handlerStocks.NewStocksHandler(stocksService, tracer)
 
 	server := grpc.NewServer(getServerOption())
 

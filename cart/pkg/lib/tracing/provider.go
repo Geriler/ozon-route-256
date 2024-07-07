@@ -12,9 +12,7 @@ import (
 )
 
 func MustLoadTraceProvider(cfg config.Config) *trace.TracerProvider {
-	rootCtx := context.Background()
-
-	explorer, err := otlptracehttp.New(rootCtx, otlptracehttp.WithEndpointURL(fmt.Sprintf("%s:%d", cfg.Tracer.Host, cfg.Tracer.Port)))
+	explorer, err := otlptracehttp.New(context.Background(), otlptracehttp.WithEndpointURL(fmt.Sprintf("%s:%d", cfg.Tracer.Host, cfg.Tracer.Port)))
 	if err != nil {
 		panic(err.Error())
 	}

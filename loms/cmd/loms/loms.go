@@ -6,9 +6,11 @@ import (
 	"os/signal"
 	"syscall"
 
+	"go.opentelemetry.io/otel"
 	"route256/loms/internal/app"
 	"route256/loms/internal/config"
 	"route256/loms/pkg/lib/logger"
+	"route256/loms/pkg/lib/tracing"
 )
 
 func main() {
@@ -16,7 +18,12 @@ func main() {
 
 	log := logger.SetupLogger(cfg.Env)
 
-	grpcApp, err := app.NewGRPCApp(cfg, log)
+	traceProvider := tracing.MustLoadTraceProvider(cfg)
+	otel.SetTracerProvider(traceProvider)
+
+	tracer := otel.GetTracerProvider().Tracer(cfg.ApplicationName)
+
+	grpcApp, err := app.NewGRPCApp(cfg, log, tracer)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
