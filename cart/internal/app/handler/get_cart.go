@@ -10,11 +10,16 @@ import (
 )
 
 func (h *CartHandler) GetCart(ctx context.Context, req *model.UserRequest) (model.CartResponse, error) {
+	ctx, span := h.tracer.Start(ctx, "GetCart")
+	defer span.End()
+
+	span.AddEvent("Get cart by user id")
 	cart, err := h.cartService.GetCartByUserID(ctx, req.UserID)
 	if err != nil {
 		return model.CartResponse{}, err
 	}
 
+	span.AddEvent("Get product information from ProductService")
 	eg, egCtx := errgroup.WithContext(ctx)
 	ticker := time.NewTicker(time.Second / time.Duration(h.productService.GetRPSLimit()))
 	for _, item := range cart.Items {
@@ -38,6 +43,7 @@ func (h *CartHandler) GetCart(ctx context.Context, req *model.UserRequest) (mode
 		return model.CartResponse{}, err
 	}
 
+	span.AddEvent("Calculate total price")
 	totalPrice := h.cartService.GetTotalPrice(ctx, cart)
 	items := make([]model.Item, 0, len(cart.Items))
 	for _, item := range cart.Items {
@@ -46,6 +52,8 @@ func (h *CartHandler) GetCart(ctx context.Context, req *model.UserRequest) (mode
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].SKU < items[j].SKU
 	})
+
+	span.AddEvent("Return cart information")
 	return model.CartResponse{
 		Items:      items,
 		TotalPrice: totalPrice,

@@ -6,6 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"go.opentelemetry.io/otel"
+	"route256/cart/internal/tracing"
+
 	"route256/cart/internal/app"
 	"route256/cart/internal/config"
 	"route256/cart/pkg/lib/logger"
@@ -16,13 +19,18 @@ func main() {
 
 	log := logger.SetupLogger(cfg.Env)
 
+	traceProvider := tracing.MustLoadTraceProvider(cfg)
+	otel.SetTracerProvider(traceProvider)
+
+	tracer := otel.GetTracerProvider().Tracer(cfg.ApplicationName)
+
 	grpcClient, err := app.NewGRPCClient(cfg)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
 	}
 
-	application := app.NewApp(cfg, log, grpcClient)
+	application := app.NewApp(cfg, log, grpcClient, tracer)
 
 	go func() {
 		log.Info("Starting HTTP application", "port", cfg.HTTP.Port)
@@ -48,6 +56,11 @@ func main() {
 	}
 
 	err = application.Shutdown(ctx)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	err = traceProvider.Shutdown(ctx)
 	if err != nil {
 		log.Error(err.Error())
 	}

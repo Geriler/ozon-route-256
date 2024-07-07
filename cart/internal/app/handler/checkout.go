@@ -8,11 +8,16 @@ import (
 )
 
 func (h *CartHandler) Checkout(ctx context.Context, req *model.UserRequest) (model.CartCheckoutResponse, error) {
+	ctx, span := h.tracer.Start(ctx, "Checkout")
+	defer span.End()
+
+	span.AddEvent("Get cart by user id")
 	cart, err := h.cartService.GetCartByUserID(ctx, req.UserID)
 	if err != nil {
 		return model.CartCheckoutResponse{}, err
 	}
 
+	span.AddEvent("Convert cart items to Loms items")
 	items := make([]*loms.Item, 0, len(cart.Items))
 	for _, item := range cart.Items {
 		items = append(items, &loms.Item{
@@ -21,6 +26,7 @@ func (h *CartHandler) Checkout(ctx context.Context, req *model.UserRequest) (mod
 		})
 	}
 
+	span.AddEvent("Create order in Loms")
 	orderCreateResponse, err := h.grpcClient.Order.OrderCreate(ctx, &loms.OrderCreateRequest{
 		UserId: int64(req.UserID),
 		Items:  items,
@@ -29,8 +35,10 @@ func (h *CartHandler) Checkout(ctx context.Context, req *model.UserRequest) (mod
 		return model.CartCheckoutResponse{}, err
 	}
 
+	span.AddEvent("Delete cart by user id")
 	h.cartService.DeleteCartByUserID(ctx, req.UserID)
 
+	span.AddEvent("Return order id")
 	return model.CartCheckoutResponse{
 		OrderID: orderCreateResponse.OrderId,
 	}, nil

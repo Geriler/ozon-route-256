@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.opentelemetry.io/otel/trace"
 
 	"route256/cart/internal/app/handler"
 	cartHttp "route256/cart/internal/app/http"
@@ -25,9 +26,10 @@ type App struct {
 	config  config.Config
 	storage service.CartRepository
 	loms    *lomsService.GRPCClient
+	tracer  trace.Tracer
 }
 
-func NewApp(cfg config.Config, log *slog.Logger, loms *lomsService.GRPCClient) *App {
+func NewApp(cfg config.Config, log *slog.Logger, loms *lomsService.GRPCClient, tracer trace.Tracer) *App {
 	mux := http.NewServeMux()
 
 	return &App{
@@ -37,13 +39,14 @@ func NewApp(cfg config.Config, log *slog.Logger, loms *lomsService.GRPCClient) *
 		config:  cfg,
 		storage: repository.NewInMemoryCartRepository(),
 		loms:    loms,
+		tracer:  tracer,
 	}
 }
 
 func (a *App) ListenAndServe() error {
 	productService := product.NewProductService(a.config.Product)
 	cartService := service.NewCartService(a.storage)
-	cartHandler := handler.NewCartHandler(cartService, productService, *a.loms)
+	cartHandler := handler.NewCartHandler(cartService, productService, *a.loms, a.tracer)
 	cartHttpHandlers := cartHttp.NewCartHttpHandlers(cartHandler, a.log)
 
 	a.mux.Handle("GET /metrics", promhttp.Handler())

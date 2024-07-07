@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 
+	"go.opentelemetry.io/otel/trace"
 	"route256/cart/internal/cart/model"
 	"route256/cart/internal/loms/client"
 	productModel "route256/cart/internal/product/model"
@@ -25,12 +26,14 @@ type CartHandler struct {
 	cartService    CartService
 	productService ProductService
 	grpcClient     client.GRPCClient
+	tracer         trace.Tracer
 }
 
-func NewCartHandler(cartService CartService, productService ProductService, grpcClient client.GRPCClient) *CartHandler {
+func NewCartHandler(cartService CartService, productService ProductService, grpcClient client.GRPCClient, tracer trace.Tracer) *CartHandler {
 	return &CartHandler{
 		cartService:    cartService,
 		productService: productService,
 		grpcClient:     grpcClient,
+		tracer:         tracer,
 	}
 }
