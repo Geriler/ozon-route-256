@@ -72,6 +72,7 @@ func (a *GRPCApp) GracefulStop() {
 
 func getServerOption() grpc.ServerOption {
 	return grpc.ChainUnaryInterceptor(
+		middleware.GRPCSreWrapper,
 		middleware.Logger,
 	)
 }

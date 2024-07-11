@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"route256/loms/internal"
+	"route256/loms/internal/middleware"
 	orderModel "route256/loms/internal/order/model"
 	"route256/loms/internal/stocks/model"
 	repository "route256/loms/internal/stocks/repository/sqlc"
@@ -33,7 +33,7 @@ func NewPostgresStocksRepository(conn *pgx.Conn, logger *slog.Logger) *PostgresS
 func (r *PostgresStocksRepository) Reserve(ctx context.Context, items []*orderModel.Item) error {
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
-		internal.SaveDatabaseMetrics(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
 	}(time.Now())
 
 	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
@@ -76,7 +76,7 @@ func (r *PostgresStocksRepository) Reserve(ctx context.Context, items []*orderMo
 func (r *PostgresStocksRepository) ReserveRemove(ctx context.Context, items []*orderModel.Item) error {
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
-		internal.SaveDatabaseMetrics(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
 	}(time.Now())
 
 	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
@@ -119,7 +119,7 @@ func (r *PostgresStocksRepository) ReserveRemove(ctx context.Context, items []*o
 func (r *PostgresStocksRepository) ReserveCancel(ctx context.Context, items []*orderModel.Item) error {
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
-		internal.SaveDatabaseMetrics(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
 	}(time.Now())
 
 	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
@@ -162,7 +162,7 @@ func (r *PostgresStocksRepository) ReserveCancel(ctx context.Context, items []*o
 func (r *PostgresStocksRepository) GetBySKU(ctx context.Context, sku model.SKU) (*model.Stocks, error) {
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
-		internal.SaveDatabaseMetrics(time.Since(createdAt).Seconds(), "SELECT", requestStatus)
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "SELECT", requestStatus)
 	}(time.Now())
 
 	row, err := r.cmd.GetBySKU(ctx, int32(sku))

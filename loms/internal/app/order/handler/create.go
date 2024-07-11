@@ -2,11 +2,9 @@ package handler
 
 import (
 	"context"
-	"time"
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"route256/loms/internal"
 	"route256/loms/internal/order/model"
 	loms "route256/loms/pb/api"
 )
@@ -15,11 +13,6 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 	ctx, span := h.tracer.Start(ctx, "OrderCreate", trace.WithAttributes(
 		attribute.Int("user_id", int(req.UserId)),
 	))
-
-	status := "ok"
-	defer func(createdAt time.Time) {
-		internal.SaveLomsMetrics(time.Since(createdAt).Seconds(), "/loms.api.OrderCreate", status)
-	}(time.Now())
 
 	span.AddEvent("Convert LomsItems to Items")
 	var err error
@@ -32,7 +25,6 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 		Items:  items,
 	})
 	if err != nil {
-		status = "error"
 		return nil, err
 	}
 
@@ -43,7 +35,6 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 	span.AddEvent("Reserve stocks")
 	err = h.stocksService.Reserve(ctx, items)
 	if err != nil {
-		status = "error"
 		errSetStatus := h.orderService.SetStatus(ctx, orderID, model.StatusFailed)
 		if errSetStatus != nil {
 			return nil, errSetStatus
@@ -55,7 +46,6 @@ func (h *OrderHandler) OrderCreate(ctx context.Context, req *loms.OrderCreateReq
 	span.AddEvent("Set order status to awaiting payment")
 	err = h.orderService.SetStatus(ctx, orderID, model.StatusAwaitingPayment)
 	if err != nil {
-		status = "error"
 		return nil, err
 	}
 

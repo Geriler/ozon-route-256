@@ -38,7 +38,7 @@ func NewHTTPGW(cfg config.Config, log *slog.Logger) *HTTPGW {
 	return &HTTPGW{
 		cfg:    cfg,
 		log:    log,
-		server: &http.Server{Addr: fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port), Handler: middleware.WithHTTPLoggingMiddleware(mux, log)},
+		server: &http.Server{Addr: fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port), Handler: getMiddlewares(mux, log)},
 		mux:    mux,
 	}
 }
@@ -72,4 +72,8 @@ func (a *HTTPGW) ListenAndServe() error {
 
 func (a *HTTPGW) Shutdown(ctx context.Context) error {
 	return a.server.Shutdown(ctx)
+}
+
+func getMiddlewares(mux http.Handler, log *slog.Logger) http.Handler {
+	return middleware.NewSreWrapperHandler(middleware.WithHTTPLoggingMiddleware(mux, log))
 }

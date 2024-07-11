@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"route256/loms/internal"
+	"route256/loms/internal/middleware"
 	"route256/loms/internal/order/model"
 	repository "route256/loms/internal/order/repository/sqlc"
 	modelStocks "route256/loms/internal/stocks/model"
@@ -33,7 +33,7 @@ func NewPostgresOrderRepository(conn *pgx.Conn, logger *slog.Logger) *PostgresOr
 func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.OrderID, status model.Status) error {
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
-		internal.SaveDatabaseMetrics(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
 	}(time.Now())
 
 	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
@@ -73,7 +73,7 @@ func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.O
 func (r *PostgresOrderRepository) GetOrder(ctx context.Context, orderID model.OrderID) (*model.Order, error) {
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
-		internal.SaveDatabaseMetrics(time.Since(createdAt).Seconds(), "SELECT", requestStatus)
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "SELECT", requestStatus)
 	}(time.Now())
 
 	row, err := r.cmd.GetOrder(ctx, int32(orderID))
@@ -110,7 +110,7 @@ func (r *PostgresOrderRepository) GetOrder(ctx context.Context, orderID model.Or
 func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order) (model.OrderID, error) {
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
-		internal.SaveDatabaseMetrics(time.Since(createdAt).Seconds(), "INSERT", requestStatus)
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "INSERT", requestStatus)
 	}(time.Now())
 
 	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
