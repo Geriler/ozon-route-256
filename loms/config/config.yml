@@ -10,5 +10,5 @@ database:
   dsn: "postgres://postgres:postgres@postgres:5432/postgres"
 timeout_stop: 10s
 tracer:
-  host: "http://jaeger"
+  host: "jaeger"
   port: 4318

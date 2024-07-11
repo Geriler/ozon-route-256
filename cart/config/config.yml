@@ -13,5 +13,5 @@ grpc:
   timeout: 1s
 timeout_stop: 10s
 tracer:
-  host: "http://jaeger"
+  host: "jaeger"
   port: 4318
