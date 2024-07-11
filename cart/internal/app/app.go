@@ -8,7 +8,6 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/otel/trace"
-
 	"route256/cart/internal/app/handler"
 	cartHttp "route256/cart/internal/app/http"
 	"route256/cart/internal/cart/repository"
@@ -35,7 +34,7 @@ func NewApp(cfg config.Config, log *slog.Logger, loms *lomsService.GRPCClient, t
 	return &App{
 		mux:     mux,
 		log:     log,
-		server:  &http.Server{Addr: fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port), Handler: middleware.NewLogWrapperHandler(mux, log)},
+		server:  &http.Server{Addr: fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port), Handler: getMiddlewares(mux, log)},
 		config:  cfg,
 		storage: repository.NewInMemoryCartRepository(),
 		loms:    loms,
@@ -65,4 +64,8 @@ func (a *App) ListenAndServe() error {
 
 func (a *App) Shutdown(ctx context.Context) error {
 	return a.server.Shutdown(ctx)
+}
+
+func getMiddlewares(mux http.Handler, log *slog.Logger) http.Handler {
+	return middleware.NewSreWrapperHandler(middleware.NewLogWrapperHandler(mux, log))
 }

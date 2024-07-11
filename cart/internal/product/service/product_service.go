@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"time"
 
-	"route256/cart/internal"
 	cartModel "route256/cart/internal/cart/model"
 	"route256/cart/internal/config"
+	"route256/cart/internal/middleware"
 	"route256/cart/internal/product/model"
 )
 
@@ -33,7 +33,7 @@ func (s *ProductService) GetProduct(skuId cartModel.SkuID) (*model.Product, erro
 	statusCode := http.StatusOK
 
 	defer func(createdAt time.Time) {
-		internal.SaveMetrics(time.Since(createdAt).Seconds(), "POST /get_product", strconv.Itoa(statusCode))
+		middleware.ObserveRequestDurationSeconds(time.Since(createdAt).Seconds(), "POST /get_product", strconv.Itoa(statusCode))
 	}(time.Now())
 
 	url := s.baseUrl + "/get_product"
