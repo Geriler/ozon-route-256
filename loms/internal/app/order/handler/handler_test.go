@@ -36,7 +36,7 @@ func TestOrderHandler_OrderCancel(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		orderHandler := NewOrderHandler(orderService, stocksService, nil)
+		orderHandler := NewOrderHandler(orderService, stocksService)
 
 		orderItems := make([]*model.Item, 1)
 		orderItems[0] = items[0]
@@ -61,7 +61,7 @@ func TestOrderHandler_OrderCancel(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		orderHandler := NewOrderHandler(orderService, stocksService, nil)
+		orderHandler := NewOrderHandler(orderService, stocksService)
 
 		orderItems := make([]*model.Item, 1)
 		orderItems[0] = items[0]
@@ -80,7 +80,7 @@ func TestOrderHandler_OrderCancel(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		orderHandler := NewOrderHandler(orderService, stocksService, nil)
+		orderHandler := NewOrderHandler(orderService, stocksService)
 
 		orderItems := make([]*model.Item, 1)
 		orderItems[0] = items[0]
@@ -132,7 +132,7 @@ func TestOrderHandler_OrderCreate(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		orderHandler := NewOrderHandler(orderService, stocksService, nil)
+		orderHandler := NewOrderHandler(orderService, stocksService)
 
 		orderService.CreateMock.Expect(context.Background(), &model.Order{
 			UserID: userID,
@@ -155,7 +155,7 @@ func TestOrderHandler_OrderCreate(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		orderHandler := NewOrderHandler(orderService, stocksService, nil)
+		orderHandler := NewOrderHandler(orderService, stocksService)
 
 		orderService.CreateMock.Expect(context.Background(), &model.Order{
 			UserID: userID,
@@ -192,7 +192,7 @@ func TestOrderHandler_OrderInfo(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		orderHandler := NewOrderHandler(orderService, stocksService, nil)
+		orderHandler := NewOrderHandler(orderService, stocksService)
 
 		orderService.GetOrderMock.Expect(context.Background(), model.OrderID(orderID)).Return(&model.Order{
 			UserID: 1,
@@ -212,7 +212,7 @@ func TestOrderHandler_OrderInfo(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		orderHandler := NewOrderHandler(orderService, stocksService, nil)
+		orderHandler := NewOrderHandler(orderService, stocksService)
 
 		orderService.GetOrderMock.Expect(context.Background(), model.OrderID(orderID)).Return(nil, model.ErrOrderNotFound)
 
@@ -243,7 +243,7 @@ func TestOrderHandler_OrderPay(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		orderHandler := NewOrderHandler(orderService, stocksService, nil)
+		orderHandler := NewOrderHandler(orderService, stocksService)
 
 		orderService.GetOrderMock.Expect(context.Background(), model.OrderID(orderID)).Return(&model.Order{
 			UserID: userID,
@@ -265,7 +265,7 @@ func TestOrderHandler_OrderPay(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		orderHandler := NewOrderHandler(orderService, stocksService, nil)
+		orderHandler := NewOrderHandler(orderService, stocksService)
 
 		orderService.GetOrderMock.Expect(context.Background(), model.OrderID(orderID)).Return(nil, model.ErrOrderNotFound)
 
@@ -281,7 +281,7 @@ func TestOrderHandler_OrderPay(t *testing.T) {
 		ctrl := minimock.NewController(t)
 		orderService := mock.NewOrderServiceMock(ctrl)
 		stocksService := mock.NewStocksServiceMock(ctrl)
-		orderHandler := NewOrderHandler(orderService, stocksService, nil)
+		orderHandler := NewOrderHandler(orderService, stocksService)
 
 		orderService.GetOrderMock.Expect(context.Background(), model.OrderID(orderID)).Return(&model.Order{
 			UserID: userID,

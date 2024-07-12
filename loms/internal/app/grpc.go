@@ -7,7 +7,8 @@ import (
 	"net"
 
 	"github.com/jackc/pgx/v5"
-	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 	handlerOrder "route256/loms/internal/app/order/handler"
 	handlerStocks "route256/loms/internal/app/stocks/handler"
@@ -26,7 +27,7 @@ type GRPCApp struct {
 	server *grpc.Server
 }
 
-func NewGRPCApp(config config.Config, logger *slog.Logger, tracer trace.Tracer) (*GRPCApp, error) {
+func NewGRPCApp(config config.Config, logger *slog.Logger) (*GRPCApp, error) {
 	conn, err := dbConnect(context.Background(), config.Database.DSN)
 	if err != nil {
 		return nil, err
@@ -38,10 +39,15 @@ func NewGRPCApp(config config.Config, logger *slog.Logger, tracer trace.Tracer) 
 	stocksRepo := repositoryStocks.NewPostgresStocksRepository(conn, logger)
 	stocksService := srviceStocks.NewStocksService(stocksRepo)
 
-	orderHandler := handlerOrder.NewOrderHandler(orderService, stocksService, tracer)
-	stocksHandler := handlerStocks.NewStocksHandler(stocksService, tracer)
+	orderHandler := handlerOrder.NewOrderHandler(orderService, stocksService)
+	stocksHandler := handlerStocks.NewStocksHandler(stocksService)
 
-	server := grpc.NewServer(getServerOption())
+	server := grpc.NewServer(getServerOption(),
+		grpc.StatsHandler(otelgrpc.NewServerHandler(
+			otelgrpc.WithTracerProvider(otel.GetTracerProvider()),
+			otelgrpc.WithPropagators(otel.GetTextMapPropagator()),
+		)),
+	)
 
 	loms.RegisterOrderServer(server, orderHandler)
 	loms.RegisterStocksServer(server, stocksHandler)
@@ -72,6 +78,7 @@ func (a *GRPCApp) GracefulStop() {
 
 func getServerOption() grpc.ServerOption {
 	return grpc.ChainUnaryInterceptor(
+		middleware.Tracing,
 		middleware.GRPCSreWrapper,
 		middleware.Logger,
 	)

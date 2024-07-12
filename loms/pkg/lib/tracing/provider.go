@@ -10,6 +10,7 @@ import (
 	sdkResource "go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.25.0"
+	otelTrace "go.opentelemetry.io/otel/trace"
 	"route256/loms/internal/config"
 )
 
@@ -31,7 +32,7 @@ func MustLoadTraceProvider(cfg config.Config) *trace.TracerProvider {
 		trace.WithBatcher(explorer),
 		trace.WithResource(sdkResource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceName(cfg.ApplicationName),
+			semconv.ServiceName("loms"),
 			semconv.DeploymentEnvironment(cfg.Env),
 		)),
 	)
@@ -39,4 +40,8 @@ func MustLoadTraceProvider(cfg config.Config) *trace.TracerProvider {
 	otel.SetTracerProvider(traceProvider)
 
 	return traceProvider
+}
+
+func StartSpanFromContext(ctx context.Context, name string, opts ...otelTrace.SpanStartOption) (context.Context, otelTrace.Span) {
+	return otel.Tracer("loms").Start(ctx, name, opts...)
 }

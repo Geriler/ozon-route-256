@@ -84,7 +84,6 @@ services:
     image: bitnami/jaeger:latest
     ports:
       - "16686:16686"
-      - "4318:4318"
 
 volumes:
   prometheus_data: {}

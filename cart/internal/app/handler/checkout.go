@@ -7,13 +7,15 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"route256/cart/internal/cart/model"
 	loms "route256/cart/pb/api"
+	"route256/cart/pkg/lib/tracing"
 )
 
 func (h *CartHandler) Checkout(ctx context.Context, req *model.UserRequest) (model.CartCheckoutResponse, error) {
-	ctx, span := h.tracer.Start(ctx, "Checkout", trace.WithAttributes(
+	ctx, span := tracing.StartSpanFromContext(ctx, "Checkout", trace.WithAttributes(
 		attribute.Int("user_id", int(req.UserID)),
 	))
 	defer span.End()
+	ctx = tracing.InjectSpanContext(ctx, span.SpanContext())
 
 	span.AddEvent("Get cart by user id")
 	cart, err := h.cartService.GetCartByUserID(ctx, req.UserID)

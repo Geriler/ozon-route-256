@@ -18,9 +18,8 @@ func main() {
 	log := logger.SetupLogger(cfg.Env)
 
 	traceProvider := tracing.MustLoadTraceProvider(cfg)
-	tracer := traceProvider.Tracer(cfg.ApplicationName)
 
-	grpcApp, err := app.NewGRPCApp(cfg, log, tracer)
+	grpcApp, err := app.NewGRPCApp(cfg, log)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
@@ -57,6 +56,11 @@ func main() {
 
 	grpcApp.GracefulStop()
 	err = httpgw.Shutdown(ctx)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	err = traceProvider.Shutdown(ctx)
 	if err != nil {
 		log.Error(err.Error())
 	}

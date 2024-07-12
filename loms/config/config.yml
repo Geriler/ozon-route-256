@@ -11,4 +11,4 @@ database:
 timeout_stop: 10s
 tracer:
   host: "jaeger"
-  port: 4318
+  port: 4317

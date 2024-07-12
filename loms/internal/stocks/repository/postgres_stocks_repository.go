@@ -12,6 +12,7 @@ import (
 	orderModel "route256/loms/internal/order/model"
 	"route256/loms/internal/stocks/model"
 	repository "route256/loms/internal/stocks/repository/sqlc"
+	"route256/loms/pkg/lib/tracing"
 )
 
 type PostgresStocksRepository struct {
@@ -31,6 +32,9 @@ func NewPostgresStocksRepository(conn *pgx.Conn, logger *slog.Logger) *PostgresS
 }
 
 func (r *PostgresStocksRepository) Reserve(ctx context.Context, items []*orderModel.Item) error {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresStocksRepository.Reserve")
+	defer span.End()
+
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
 		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
@@ -74,6 +78,9 @@ func (r *PostgresStocksRepository) Reserve(ctx context.Context, items []*orderMo
 }
 
 func (r *PostgresStocksRepository) ReserveRemove(ctx context.Context, items []*orderModel.Item) error {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresStocksRepository.ReserveRemove")
+	defer span.End()
+
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
 		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
@@ -117,6 +124,9 @@ func (r *PostgresStocksRepository) ReserveRemove(ctx context.Context, items []*o
 }
 
 func (r *PostgresStocksRepository) ReserveCancel(ctx context.Context, items []*orderModel.Item) error {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresStocksRepository.ReserveCancel")
+	defer span.End()
+
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
 		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
@@ -160,6 +170,9 @@ func (r *PostgresStocksRepository) ReserveCancel(ctx context.Context, items []*o
 }
 
 func (r *PostgresStocksRepository) GetBySKU(ctx context.Context, sku model.SKU) (*model.Stocks, error) {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresStocksRepository.GetBySKU")
+	defer span.End()
+
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
 		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "SELECT", requestStatus)

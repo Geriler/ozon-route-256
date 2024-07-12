@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 
-	"go.opentelemetry.io/otel/trace"
 	"route256/loms/internal/app/stocks/handler"
 	"route256/loms/internal/order/model"
 	loms "route256/loms/pb/api"
@@ -19,13 +18,11 @@ type OrderHandler struct {
 	loms.UnimplementedOrderServer
 	orderService  OrderService
 	stocksService handler.StocksService
-	tracer        trace.Tracer
 }
 
-func NewOrderHandler(orderService OrderService, stocksService handler.StocksService, tracer trace.Tracer) *OrderHandler {
+func NewOrderHandler(orderService OrderService, stocksService handler.StocksService) *OrderHandler {
 	return &OrderHandler{
 		orderService:  orderService,
 		stocksService: stocksService,
-		tracer:        tracer,
 	}
 }

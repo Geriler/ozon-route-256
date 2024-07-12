@@ -6,10 +6,11 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"route256/cart/internal/cart/model"
+	"route256/cart/pkg/lib/tracing"
 )
 
 func (h *CartHandler) DeleteItemsFromCart(ctx context.Context, req *model.UserSKURequest) error {
-	ctx, span := h.tracer.Start(ctx, "DeleteItemsFromCart", trace.WithAttributes(
+	ctx, span := tracing.StartSpanFromContext(ctx, "DeleteItemsFromCart", trace.WithAttributes(
 		attribute.Int("user_id", int(req.UserID)),
 		attribute.Int("sku_id", int(req.SKU)),
 	))

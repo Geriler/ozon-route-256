@@ -18,7 +18,6 @@ func main() {
 	log := logger.SetupLogger(cfg.Env)
 
 	traceProvider := tracing.MustLoadTraceProvider(cfg)
-	tracer := traceProvider.Tracer(cfg.ApplicationName)
 
 	grpcClient, err := app.NewGRPCClient(cfg)
 	if err != nil {
@@ -26,7 +25,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	application := app.NewApp(cfg, log, grpcClient, tracer)
+	application := app.NewApp(cfg, log, grpcClient)
 
 	go func() {
 		log.Info("Starting HTTP application", "port", cfg.HTTP.Port)

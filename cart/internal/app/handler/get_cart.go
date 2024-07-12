@@ -9,10 +9,11 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"route256/cart/internal/cart/model"
 	"route256/cart/pkg/lib/errgroup"
+	"route256/cart/pkg/lib/tracing"
 )
 
 func (h *CartHandler) GetCart(ctx context.Context, req *model.UserRequest) (model.CartResponse, error) {
-	ctx, span := h.tracer.Start(ctx, "GetCart", trace.WithAttributes(
+	ctx, span := tracing.StartSpanFromContext(ctx, "GetCart", trace.WithAttributes(
 		attribute.Int("user_id", int(req.UserID)),
 	))
 	defer span.End()
@@ -34,7 +35,7 @@ func (h *CartHandler) GetCart(ctx context.Context, req *model.UserRequest) (mode
 			case <-egCtx.Done():
 				return nil
 			case <-ticker.C:
-				_, err = h.productService.GetProduct(item.SKU)
+				_, err = h.productService.GetProduct(ctx, item.SKU)
 				if err != nil {
 					egCtx.Done()
 					return err

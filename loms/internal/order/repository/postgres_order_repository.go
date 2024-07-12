@@ -12,6 +12,7 @@ import (
 	"route256/loms/internal/order/model"
 	repository "route256/loms/internal/order/repository/sqlc"
 	modelStocks "route256/loms/internal/stocks/model"
+	"route256/loms/pkg/lib/tracing"
 )
 
 type PostgresOrderRepository struct {
@@ -31,6 +32,9 @@ func NewPostgresOrderRepository(conn *pgx.Conn, logger *slog.Logger) *PostgresOr
 }
 
 func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.OrderID, status model.Status) error {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresOrderRepository.SetStatus")
+	defer span.End()
+
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
 		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
@@ -71,6 +75,9 @@ func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.O
 }
 
 func (r *PostgresOrderRepository) GetOrder(ctx context.Context, orderID model.OrderID) (*model.Order, error) {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresOrderRepository.GetOrder")
+	defer span.End()
+
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
 		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "SELECT", requestStatus)
@@ -108,6 +115,9 @@ func (r *PostgresOrderRepository) GetOrder(ctx context.Context, orderID model.Or
 }
 
 func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order) (model.OrderID, error) {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresOrderRepository.Create")
+	defer span.End()
+
 	requestStatus := "ok"
 	defer func(createdAt time.Time) {
 		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "INSERT", requestStatus)
