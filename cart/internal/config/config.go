@@ -10,11 +10,13 @@ import (
 )
 
 type Config struct {
-	Env         string        `yaml:"env"`
-	HTTP        AddressConfig `yaml:"http"`
-	Product     ProductConfig `yaml:"product"`
-	GRPC        AddressConfig `yaml:"grpc"`
-	TimeoutStop time.Duration `yaml:"timeout_stop"`
+	ApplicationName string        `yaml:"application_name"`
+	Env             string        `yaml:"env"`
+	HTTP            AddressConfig `yaml:"http"`
+	Product         ProductConfig `yaml:"product"`
+	GRPC            AddressConfig `yaml:"grpc"`
+	TimeoutStop     time.Duration `yaml:"timeout_stop"`
+	Tracer          AddressConfig `yaml:"tracer"`
 }
 
 type ProductConfig struct {

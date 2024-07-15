@@ -1,3 +1,4 @@
+application_name: "cart"
 env: "local"
 http:
   host: "cart"
@@ -11,3 +12,6 @@ grpc:
   port: 8081
   timeout: 1s
 timeout_stop: 10s
+tracer:
+  host: "jaeger"
+  port: 4318

@@ -1,3 +1,4 @@
+application_name: "loms"
 env: "local"
 grpc:
   host: "loms"
@@ -8,3 +9,6 @@ http:
 database:
   dsn: "postgres://postgres:postgres@postgres:5432/postgres"
 timeout_stop: 10s
+tracer:
+  host: "jaeger"
+  port: 4317

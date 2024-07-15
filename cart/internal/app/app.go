@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"route256/cart/internal/app/handler"
 	cartHttp "route256/cart/internal/app/http"
 	"route256/cart/internal/cart/repository"
@@ -31,7 +32,7 @@ func NewApp(cfg config.Config, log *slog.Logger, loms *lomsService.GRPCClient) *
 	return &App{
 		mux:     mux,
 		log:     log,
-		server:  &http.Server{Addr: fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port), Handler: middleware.NewLogWrapperHandler(mux, log)},
+		server:  &http.Server{Addr: fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port), Handler: getMiddlewares(mux, log)},
 		config:  cfg,
 		storage: repository.NewInMemoryCartRepository(),
 		loms:    loms,
@@ -44,6 +45,7 @@ func (a *App) ListenAndServe() error {
 	cartHandler := handler.NewCartHandler(cartService, productService, *a.loms)
 	cartHttpHandlers := cartHttp.NewCartHttpHandlers(cartHandler, a.log)
 
+	a.mux.Handle("GET /metrics", promhttp.Handler())
 	a.mux.HandleFunc("POST /user/{user_id}/cart/checkout", cartHttpHandlers.Checkout)
 	a.mux.HandleFunc("POST /user/{user_id}/cart/{sku_id}", cartHttpHandlers.AddItemsToCart)
 	a.mux.HandleFunc("DELETE /user/{user_id}/cart/{sku_id}", cartHttpHandlers.DeleteItemsFromCart)
@@ -59,4 +61,8 @@ func (a *App) ListenAndServe() error {
 
 func (a *App) Shutdown(ctx context.Context) error {
 	return a.server.Shutdown(ctx)
+}
+
+func getMiddlewares(mux http.Handler, log *slog.Logger) http.Handler {
+	return middleware.NewSreWrapperHandler(middleware.NewLogWrapperHandler(mux, log))
 }

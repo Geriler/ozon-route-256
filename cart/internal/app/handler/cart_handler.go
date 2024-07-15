@@ -17,7 +17,7 @@ type CartService interface {
 }
 
 type ProductService interface {
-	GetProduct(skuId model.SkuID) (*productModel.Product, error)
+	GetProduct(ctx context.Context, skuId model.SkuID) (*productModel.Product, error)
 	GetRPSLimit() int
 }
 

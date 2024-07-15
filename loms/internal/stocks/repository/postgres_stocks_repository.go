@@ -5,11 +5,14 @@ import (
 	_ "embed"
 	"errors"
 	"log/slog"
+	"time"
 
 	"github.com/jackc/pgx/v5"
+	"route256/loms/internal/middleware"
 	orderModel "route256/loms/internal/order/model"
 	"route256/loms/internal/stocks/model"
 	repository "route256/loms/internal/stocks/repository/sqlc"
+	"route256/loms/pkg/lib/tracing"
 )
 
 type PostgresStocksRepository struct {
@@ -29,13 +32,23 @@ func NewPostgresStocksRepository(conn *pgx.Conn, logger *slog.Logger) *PostgresS
 }
 
 func (r *PostgresStocksRepository) Reserve(ctx context.Context, items []*orderModel.Item) error {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresStocksRepository.Reserve")
+	defer span.End()
+
+	requestStatus := "ok"
+	defer func(createdAt time.Time) {
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
+	}(time.Now())
+
 	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
+		requestStatus = "error"
 		return err
 	}
 	defer func(tx pgx.Tx, ctx context.Context) {
 		rollbackErr := tx.Rollback(ctx)
 		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
+			requestStatus = "error"
 			r.logger.Error("Error in PostgresStocksRepository.Reserve.Rollback",
 				slog.String("error", rollbackErr.Error()),
 			)
@@ -48,12 +61,14 @@ func (r *PostgresStocksRepository) Reserve(ctx context.Context, items []*orderMo
 			ItemID:  int32(item.SKU),
 		})
 		if err != nil {
+			requestStatus = "error"
 			return err
 		}
 	}
 
 	commitErr := tx.Commit(ctx)
 	if commitErr != nil {
+		requestStatus = "error"
 		r.logger.Error("Error in PostgresStocksRepository.Reserve.Commit",
 			slog.String("error", commitErr.Error()),
 		)
@@ -63,13 +78,23 @@ func (r *PostgresStocksRepository) Reserve(ctx context.Context, items []*orderMo
 }
 
 func (r *PostgresStocksRepository) ReserveRemove(ctx context.Context, items []*orderModel.Item) error {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresStocksRepository.ReserveRemove")
+	defer span.End()
+
+	requestStatus := "ok"
+	defer func(createdAt time.Time) {
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
+	}(time.Now())
+
 	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
+		requestStatus = "error"
 		return err
 	}
 	defer func(tx pgx.Tx, ctx context.Context) {
 		rollbackErr := tx.Rollback(ctx)
 		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
+			requestStatus = "error"
 			r.logger.Error("Error in PostgresStocksRepository.ReserveRemove.Rollback",
 				slog.String("error", rollbackErr.Error()),
 			)
@@ -82,12 +107,14 @@ func (r *PostgresStocksRepository) ReserveRemove(ctx context.Context, items []*o
 			ItemID:  int32(item.SKU),
 		})
 		if err != nil {
+			requestStatus = "error"
 			return err
 		}
 	}
 
 	commitErr := tx.Commit(ctx)
 	if commitErr != nil {
+		requestStatus = "error"
 		r.logger.Error("Error in PostgresStocksRepository.ReserveRemove.Commit",
 			slog.String("error", commitErr.Error()),
 		)
@@ -97,13 +124,23 @@ func (r *PostgresStocksRepository) ReserveRemove(ctx context.Context, items []*o
 }
 
 func (r *PostgresStocksRepository) ReserveCancel(ctx context.Context, items []*orderModel.Item) error {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresStocksRepository.ReserveCancel")
+	defer span.End()
+
+	requestStatus := "ok"
+	defer func(createdAt time.Time) {
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
+	}(time.Now())
+
 	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
+		requestStatus = "error"
 		return err
 	}
 	defer func(tx pgx.Tx, ctx context.Context) {
 		rollbackErr := tx.Rollback(ctx)
 		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
+			requestStatus = "error"
 			r.logger.Error("Error in PostgresStocksRepository.ReserveCancel.Rollback",
 				slog.String("error", rollbackErr.Error()),
 			)
@@ -116,12 +153,14 @@ func (r *PostgresStocksRepository) ReserveCancel(ctx context.Context, items []*o
 			ItemID:  int32(item.SKU),
 		})
 		if err != nil {
+			requestStatus = "error"
 			return err
 		}
 	}
 
 	commitErr := tx.Commit(ctx)
 	if commitErr != nil {
+		requestStatus = "error"
 		r.logger.Error("Error in PostgresStocksRepository.ReserveCancel.Commit",
 			slog.String("error", commitErr.Error()),
 		)
@@ -131,8 +170,17 @@ func (r *PostgresStocksRepository) ReserveCancel(ctx context.Context, items []*o
 }
 
 func (r *PostgresStocksRepository) GetBySKU(ctx context.Context, sku model.SKU) (*model.Stocks, error) {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresStocksRepository.GetBySKU")
+	defer span.End()
+
+	requestStatus := "ok"
+	defer func(createdAt time.Time) {
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "SELECT", requestStatus)
+	}(time.Now())
+
 	row, err := r.cmd.GetBySKU(ctx, int32(sku))
 	if err != nil {
+		requestStatus = "error"
 		return nil, err
 	}
 

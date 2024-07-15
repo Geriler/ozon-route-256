@@ -2,14 +2,19 @@ package service
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
+	"strconv"
+	"time"
 
 	cartModel "route256/cart/internal/cart/model"
 	"route256/cart/internal/config"
+	"route256/cart/internal/middleware"
 	"route256/cart/internal/product/model"
+	"route256/cart/pkg/lib/tracing"
 )
 
 type ProductService struct {
@@ -26,7 +31,16 @@ func NewProductService(cfg config.ProductConfig) *ProductService {
 	}
 }
 
-func (s *ProductService) GetProduct(skuId cartModel.SkuID) (*model.Product, error) {
+func (s *ProductService) GetProduct(ctx context.Context, skuId cartModel.SkuID) (*model.Product, error) {
+	ctx, span := tracing.StartSpanFromContext(ctx, "GetProduct")
+	defer span.End()
+
+	statusCode := http.StatusOK
+
+	defer func(createdAt time.Time) {
+		middleware.ObserveRequestDurationSeconds(time.Since(createdAt).Seconds(), "POST /get_product", strconv.Itoa(statusCode))
+	}(time.Now())
+
 	url := s.baseUrl + "/get_product"
 
 	request := model.GetProductRequest{
@@ -49,6 +63,8 @@ func (s *ProductService) GetProduct(skuId cartModel.SkuID) (*model.Product, erro
 		return nil, err
 	}
 	defer response.Body.Close()
+
+	statusCode = response.StatusCode
 
 	if response.StatusCode != http.StatusOK {
 		var errorResponse model.GetProductErrorResponse

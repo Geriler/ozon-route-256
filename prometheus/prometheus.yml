@@ -1,0 +1,15 @@
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:9090']
+  
+  - job_name: 'cart'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['cart:8082']
+
+  - job_name: 'loms'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['loms:8080']

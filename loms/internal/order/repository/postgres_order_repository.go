@@ -5,11 +5,14 @@ import (
 	"database/sql"
 	"errors"
 	"log/slog"
+	"time"
 
 	"github.com/jackc/pgx/v5"
+	"route256/loms/internal/middleware"
 	"route256/loms/internal/order/model"
 	repository "route256/loms/internal/order/repository/sqlc"
 	modelStocks "route256/loms/internal/stocks/model"
+	"route256/loms/pkg/lib/tracing"
 )
 
 type PostgresOrderRepository struct {
@@ -29,6 +32,14 @@ func NewPostgresOrderRepository(conn *pgx.Conn, logger *slog.Logger) *PostgresOr
 }
 
 func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.OrderID, status model.Status) error {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresOrderRepository.SetStatus")
+	defer span.End()
+
+	requestStatus := "ok"
+	defer func(createdAt time.Time) {
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
+	}(time.Now())
+
 	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return err
@@ -36,6 +47,7 @@ func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.O
 	defer func(tx pgx.Tx, ctx context.Context) {
 		rollbackErr := tx.Rollback(ctx)
 		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
+			requestStatus = "error"
 			r.logger.Error("Error in PostgresOrderRepository.SetStatus.Rollback",
 				slog.String("error", rollbackErr.Error()),
 			)
@@ -47,11 +59,13 @@ func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.O
 		ID:     int32(orderID),
 	})
 	if err != nil {
+		requestStatus = "error"
 		return err
 	}
 
 	commitErr := tx.Commit(ctx)
 	if commitErr != nil {
+		requestStatus = "error"
 		r.logger.Error("Error in PostgresOrderRepository.SetStatus.Commit",
 			slog.String("error", commitErr.Error()),
 		)
@@ -61,16 +75,26 @@ func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.O
 }
 
 func (r *PostgresOrderRepository) GetOrder(ctx context.Context, orderID model.OrderID) (*model.Order, error) {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresOrderRepository.GetOrder")
+	defer span.End()
+
+	requestStatus := "ok"
+	defer func(createdAt time.Time) {
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "SELECT", requestStatus)
+	}(time.Now())
+
 	row, err := r.cmd.GetOrder(ctx, int32(orderID))
-	if err != nil {
-		return nil, err
-	}
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, model.ErrOrderNotFound
+	}
+	if err != nil {
+		requestStatus = "error"
+		return nil, err
 	}
 
 	orderItems, err := r.cmd.GetOrderItems(ctx, int32(orderID))
 	if err != nil {
+		requestStatus = "error"
 		return nil, err
 	}
 
@@ -91,13 +115,23 @@ func (r *PostgresOrderRepository) GetOrder(ctx context.Context, orderID model.Or
 }
 
 func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order) (model.OrderID, error) {
+	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresOrderRepository.Create")
+	defer span.End()
+
+	requestStatus := "ok"
+	defer func(createdAt time.Time) {
+		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "INSERT", requestStatus)
+	}(time.Now())
+
 	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
+		requestStatus = "error"
 		return 0, err
 	}
 	defer func(tx pgx.Tx, ctx context.Context) {
 		rollbackErr := tx.Rollback(ctx)
 		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
+			requestStatus = "error"
 			r.logger.Error("Error in PostgresOrderRepository.Create.Rollback",
 				slog.String("error", rollbackErr.Error()),
 			)
@@ -106,6 +140,7 @@ func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order
 
 	create, err := r.cmd.WithTx(tx).Create(ctx, int32(order.UserID))
 	if err != nil {
+		requestStatus = "error"
 		return 0, err
 	}
 
@@ -116,12 +151,14 @@ func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order
 			Count:   int32(item.Count),
 		})
 		if err != nil {
+			requestStatus = "error"
 			return 0, err
 		}
 	}
 
 	commitErr := tx.Commit(ctx)
 	if commitErr != nil {
+		requestStatus = "error"
 		r.logger.Error("Error in PostgresOrderRepository.Create.Commit",
 			slog.String("error", commitErr.Error()),
 		)

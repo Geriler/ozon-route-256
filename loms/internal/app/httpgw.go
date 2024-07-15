@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"route256/loms/internal/config"
@@ -37,7 +38,7 @@ func NewHTTPGW(cfg config.Config, log *slog.Logger) *HTTPGW {
 	return &HTTPGW{
 		cfg:    cfg,
 		log:    log,
-		server: &http.Server{Addr: fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port), Handler: middleware.WithHTTPLoggingMiddleware(mux, log)},
+		server: &http.Server{Addr: fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port), Handler: getMiddlewares(mux, log)},
 		mux:    mux,
 	}
 }
@@ -47,6 +48,10 @@ func (a *HTTPGW) ListenAndServe() error {
 	if err != nil {
 		return err
 	}
+
+	a.mux.HandlePath("GET", "/metrics", func(w http.ResponseWriter, r *http.Request, _ map[string]string) {
+		promhttp.Handler().ServeHTTP(w, r)
+	})
 
 	err = loms.RegisterOrderHandler(context.Background(), a.mux, conn)
 	if err != nil {
@@ -67,4 +72,8 @@ func (a *HTTPGW) ListenAndServe() error {
 
 func (a *HTTPGW) Shutdown(ctx context.Context) error {
 	return a.server.Shutdown(ctx)
+}
+
+func getMiddlewares(mux http.Handler, log *slog.Logger) http.Handler {
+	return middleware.NewSreWrapperHandler(middleware.WithHTTPLoggingMiddleware(mux, log))
 }

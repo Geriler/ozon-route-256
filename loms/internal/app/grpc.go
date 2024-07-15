@@ -7,6 +7,8 @@ import (
 	"net"
 
 	"github.com/jackc/pgx/v5"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 	handlerOrder "route256/loms/internal/app/order/handler"
 	handlerStocks "route256/loms/internal/app/stocks/handler"
@@ -40,7 +42,12 @@ func NewGRPCApp(config config.Config, logger *slog.Logger) (*GRPCApp, error) {
 	orderHandler := handlerOrder.NewOrderHandler(orderService, stocksService)
 	stocksHandler := handlerStocks.NewStocksHandler(stocksService)
 
-	server := grpc.NewServer(getServerOption())
+	server := grpc.NewServer(getServerOption(),
+		grpc.StatsHandler(otelgrpc.NewServerHandler(
+			otelgrpc.WithTracerProvider(otel.GetTracerProvider()),
+			otelgrpc.WithPropagators(otel.GetTextMapPropagator()),
+		)),
+	)
 
 	loms.RegisterOrderServer(server, orderHandler)
 	loms.RegisterStocksServer(server, stocksHandler)
@@ -71,6 +78,7 @@ func (a *GRPCApp) GracefulStop() {
 
 func getServerOption() grpc.ServerOption {
 	return grpc.ChainUnaryInterceptor(
+		middleware.GRPCSreWrapper,
 		middleware.Logger,
 	)
 }

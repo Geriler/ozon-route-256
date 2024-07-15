@@ -9,12 +9,15 @@ import (
 	"route256/loms/internal/app"
 	"route256/loms/internal/config"
 	"route256/loms/pkg/lib/logger"
+	"route256/loms/pkg/lib/tracing"
 )
 
 func main() {
 	cfg := config.MustLoad()
 
 	log := logger.SetupLogger(cfg.Env)
+
+	traceProvider := tracing.MustLoadTraceProvider(cfg)
 
 	grpcApp, err := app.NewGRPCApp(cfg, log)
 	if err != nil {
@@ -53,6 +56,11 @@ func main() {
 
 	grpcApp.GracefulStop()
 	err = httpgw.Shutdown(ctx)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	err = traceProvider.Shutdown(ctx)
 	if err != nil {
 		log.Error(err.Error())
 	}

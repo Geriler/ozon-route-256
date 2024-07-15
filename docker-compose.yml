@@ -54,3 +54,37 @@ services:
     volumes:
       - ./loms/migrations:/migrations
     command: "sh -c 'go install github.com/pressly/goose/v3/cmd/goose@latest && goose -dir /migrations up'"
+
+  prometheus:
+    container_name: prometheus
+    image: bitnami/prometheus:latest
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning/
+      - ./grafana/dashboard:/etc/grafana/dashboard/
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+
+  jaeger:
+    container_name: jaeger
+    image: bitnami/jaeger:latest
+    ports:
+      - "16686:16686"
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
