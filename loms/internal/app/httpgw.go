@@ -11,6 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"route256/loms/internal/config"
 	"route256/loms/internal/middleware"
 	loms "route256/loms/pb/api"
@@ -33,7 +34,19 @@ func headerMatcher(key string) (string, bool) {
 }
 
 func NewHTTPGW(cfg config.Config, log *slog.Logger) *HTTPGW {
-	mux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(headerMatcher))
+	mux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(headerMatcher),
+		runtime.WithMetadata(func(ctx context.Context, r *http.Request) metadata.MD {
+			md := make(map[string]string)
+			if method, ok := runtime.RPCMethod(ctx); ok {
+				md["method"] = method
+			}
+			if pattern, ok := runtime.HTTPPathPattern(ctx); ok {
+				r.Pattern = pattern
+				md["pattern"] = pattern
+			}
+			return metadata.New(md)
+		}),
+	)
 
 	return &HTTPGW{
 		cfg:    cfg,
