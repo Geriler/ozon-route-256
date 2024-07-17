@@ -11,6 +11,7 @@ import (
 	"route256/loms/internal/middleware"
 	"route256/loms/internal/order/model"
 	repository "route256/loms/internal/order/repository/sqlc"
+	ourboxRepo "route256/loms/internal/outbox/repository/sqlc"
 	modelStocks "route256/loms/internal/stocks/model"
 	"route256/loms/pkg/lib/tracing"
 )
@@ -19,6 +20,7 @@ type PostgresOrderRepository struct {
 	conn   *pgx.Conn
 	cmd    *repository.Queries
 	logger *slog.Logger
+	outbox *ourboxRepo.Queries
 }
 
 func NewPostgresOrderRepository(conn *pgx.Conn, logger *slog.Logger) *PostgresOrderRepository {
@@ -57,6 +59,15 @@ func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.O
 	err = r.cmd.WithTx(tx).SetStatus(ctx, repository.SetStatusParams{
 		Status: string(status),
 		ID:     int32(orderID),
+	})
+	if err != nil {
+		requestStatus = "error"
+		return err
+	}
+
+	err = r.outbox.WithTx(tx).CreateEvent(ctx, ourboxRepo.CreateEventParams{
+		OrderID:   int32(orderID),
+		EventType: string(status),
 	})
 	if err != nil {
 		requestStatus = "error"
@@ -138,7 +149,7 @@ func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order
 		}
 	}(tx, ctx)
 
-	create, err := r.cmd.WithTx(tx).Create(ctx, int32(order.UserID))
+	orderID, err := r.cmd.WithTx(tx).Create(ctx, int32(order.UserID))
 	if err != nil {
 		requestStatus = "error"
 		return 0, err
@@ -146,7 +157,7 @@ func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order
 
 	for _, item := range order.Items {
 		err = r.cmd.WithTx(tx).AddItemToOrder(ctx, repository.AddItemToOrderParams{
-			OrderID: create,
+			OrderID: orderID,
 			ItemID:  int32(item.SKU),
 			Count:   int32(item.Count),
 		})
@@ -154,6 +165,15 @@ func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order
 			requestStatus = "error"
 			return 0, err
 		}
+	}
+
+	err = r.outbox.WithTx(tx).CreateEvent(ctx, ourboxRepo.CreateEventParams{
+		OrderID:   orderID,
+		EventType: string(model.StatusNew),
+	})
+	if err != nil {
+		requestStatus = "error"
+		return 0, err
 	}
 
 	commitErr := tx.Commit(ctx)
@@ -164,5 +184,5 @@ func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order
 		)
 		return 0, commitErr
 	}
-	return model.OrderID(create), nil
+	return model.OrderID(orderID), nil
 }

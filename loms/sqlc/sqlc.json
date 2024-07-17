@@ -24,6 +24,18 @@
         }
       },
       "queries": "../internal/order/repository/sqlc"
+    },
+    {
+      "engine": "postgresql",
+      "schema": "../migrations",
+      "gen": {
+        "go": {
+          "package": "repository",
+          "out": "../internal/outbox/repository/sqlc",
+          "sql_package": "pgx/v5"
+        }
+      },
+      "queries": "../internal/outbox/repository/sqlc"
     }
   ]
 }
