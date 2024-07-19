@@ -24,24 +24,36 @@ func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) error 
 	return err
 }
 
-const fetchNextMsg = `-- name: FetchNextMsg :one
+const fetchNextMsgs = `-- name: FetchNextMsgs :many
 SELECT order_id, event_type
 FROM outbox
 WHERE status = 'pending'
 ORDER BY created_at
-LIMIT 1
 `
 
-type FetchNextMsgRow struct {
+type FetchNextMsgsRow struct {
 	OrderID   int32
 	EventType string
 }
 
-func (q *Queries) FetchNextMsg(ctx context.Context) (FetchNextMsgRow, error) {
-	row := q.db.QueryRow(ctx, fetchNextMsg)
-	var i FetchNextMsgRow
-	err := row.Scan(&i.OrderID, &i.EventType)
-	return i, err
+func (q *Queries) FetchNextMsgs(ctx context.Context) ([]FetchNextMsgsRow, error) {
+	rows, err := q.db.Query(ctx, fetchNextMsgs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []FetchNextMsgsRow
+	for rows.Next() {
+		var i FetchNextMsgsRow
+		if err := rows.Scan(&i.OrderID, &i.EventType); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const markAsError = `-- name: MarkAsError :exec
@@ -62,7 +74,7 @@ func (q *Queries) MarkAsError(ctx context.Context, arg MarkAsErrorParams) error 
 	return err
 }
 
-const markAsSent = `-- name: MarkAsSent :exec
+const markAsSuccess = `-- name: MarkAsSuccess :exec
 UPDATE outbox
 SET status = 'success',
     updated_at = NOW()
@@ -70,12 +82,12 @@ WHERE order_id = $1
   AND event_type = $2
 `
 
-type MarkAsSentParams struct {
+type MarkAsSuccessParams struct {
 	OrderID   int32
 	EventType string
 }
 
-func (q *Queries) MarkAsSent(ctx context.Context, arg MarkAsSentParams) error {
-	_, err := q.db.Exec(ctx, markAsSent, arg.OrderID, arg.EventType)
+func (q *Queries) MarkAsSuccess(ctx context.Context, arg MarkAsSuccessParams) error {
+	_, err := q.db.Exec(ctx, markAsSuccess, arg.OrderID, arg.EventType)
 	return err
 }

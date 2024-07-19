@@ -2,14 +2,13 @@
 INSERT INTO outbox (order_id, event_type)
 VALUES ($1, $2);
 
--- name: FetchNextMsg :one
+-- name: FetchNextMsgs :many
 SELECT order_id, event_type
 FROM outbox
 WHERE status = 'pending'
-ORDER BY created_at
-LIMIT 1;
+ORDER BY created_at;
 
--- name: MarkAsSent :exec
+-- name: MarkAsSuccess :exec
 UPDATE outbox
 SET status = 'success',
     updated_at = NOW()

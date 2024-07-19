@@ -12,3 +12,8 @@ timeout_stop: 10s
 tracer:
   host: "jaeger"
   port: 4317
+kafka:
+  addresses:
+    - "kafka:29092"
+  topic: "loms.order-events"
+  producer_message_interval: 100ms

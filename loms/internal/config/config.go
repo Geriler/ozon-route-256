@@ -16,6 +16,7 @@ type Config struct {
 	Database        DatabaseConfig `yaml:"database"`
 	TimeoutStop     time.Duration  `yaml:"timeout_stop"`
 	Tracer          AddressConfig  `yaml:"tracer"`
+	Kafka           KafkaConfig    `yaml:"kafka"`
 }
 
 type AddressConfig struct {
@@ -25,6 +26,12 @@ type AddressConfig struct {
 
 type DatabaseConfig struct {
 	DSN string `yaml:"dsn"`
+}
+
+type KafkaConfig struct {
+	Addresses               []string      `yaml:"addresses"`
+	Topic                   string        `yaml:"topic"`
+	ProducerMessageInterval time.Duration `yaml:"producer_message_interval"`
 }
 
 func MustLoad() Config {

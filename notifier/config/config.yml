@@ -1,0 +1,6 @@
+application_name: "notifier"
+env: "local"
+kafka:
+  addresses:
+    - "kafka:29092"
+  topic: "loms.order-events"

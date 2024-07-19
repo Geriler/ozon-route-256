@@ -27,6 +27,8 @@ services:
         condition: service_completed_successfully
       kafka:
         condition: service_started
+      notifier:
+        condition: service_started
 
   postgres:
     container_name: postgres
@@ -124,6 +126,15 @@ services:
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
         cub kafka-ready -b kafka:29092 1 30 && \
         kafka-topics --create --topic loms.order-events --partitions 2 --replication-factor 1 --if-not-exists --bootstrap-server kafka:29092'"
+
+  notifier:
+    container_name: notifier
+    build:
+      context: ./notifier
+      dockerfile: ./Dockerfile
+    depends_on:
+      kafka-init-topics:
+        condition: service_completed_successfully
 
 volumes:
   prometheus_data: {}
