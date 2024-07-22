@@ -30,8 +30,6 @@ func (c *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession,
 
 			msg := convertMessage(message)
 
-			log.Printf("%+v\n\n", msg)
-
 			log.Printf(
 				"Consumed message\nTopic: %s\nPartition: %d\nOffset: %d\nKey: %s\nPayload: %s\n\n",
 				msg.Topic,
