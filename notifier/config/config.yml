@@ -4,3 +4,4 @@ kafka:
   addresses:
     - "kafka:29092"
   topic: "loms.order-events"
+  consumer_group_id: "notifier-consumer-group"

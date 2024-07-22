@@ -17,14 +17,12 @@ func main() {
 
 	log := logger.SetupLogger(cfg.Env)
 
-	//application := app.NewApp(cfg, log)
-
 	var wg = &sync.WaitGroup{}
 
 	handler := consumer_group.NewConsumerGroupHandler()
 	cg, err := consumer_group.NewConsumerGroup(
 		cfg.Kafka.Addresses,
-		"notifier-consumer-group",
+		cfg.Kafka.ConsumerGroupID,
 		[]string{cfg.Kafka.Topic},
 		handler,
 	)
@@ -38,11 +36,4 @@ func main() {
 	cg.Run(rootCtx, wg)
 
 	wg.Wait()
-
-	//log.Info("Starting notifier service...")
-	//err := application.Run(rootCtx)
-	//if err != nil {
-	//	log.Error(err.Error())
-	//	os.Exit(1)
-	//}
 }

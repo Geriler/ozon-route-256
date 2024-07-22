@@ -86,7 +86,14 @@ func (p *Producer) Start(ctx context.Context) error {
 					return err
 				}
 
-				p.logger.Info(fmt.Sprintf("Sent message with key %s to partition %d at offset %d", key, partition, offset))
+				p.logger.Info("Sent message",
+					slog.String("key", key),
+					slog.Int("partition", int(partition)),
+					slog.Int64("offset", offset),
+					slog.String("message", string(bytes)),
+					slog.Int("order_id", int(message.OrderID)),
+					slog.String("event_type", message.EventType),
+				)
 
 				return nil
 			})

@@ -14,8 +14,9 @@ type Config struct {
 }
 
 type KafkaConfig struct {
-	Addresses []string `yaml:"addresses"`
-	Topic     string   `yaml:"topic"`
+	Addresses       []string `yaml:"addresses"`
+	Topic           string   `yaml:"topic"`
+	ConsumerGroupID string   `yaml:"consumer_group_id"`
 }
 
 func MustLoad() Config {

@@ -1,7 +1,6 @@
 package consumer_group
 
 import (
-	"encoding/json"
 	"log"
 
 	"github.com/IBM/sarama"
@@ -30,8 +29,15 @@ func (c *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession,
 			}
 
 			msg := convertMessage(message)
-			data, _ := json.Marshal(msg)
-			log.Printf("Consumed message: %s\n", data)
+
+			log.Printf(
+				"Consumed message\nTopic: %s\nPartition: %d\nOffset: %d\nKey: %s\nPayload: %s\n\n",
+				msg.Topic,
+				msg.Partition,
+				msg.Offset,
+				msg.Key,
+				msg.Payload,
+			)
 
 			session.MarkMessage(message, "")
 		case <-session.Context().Done():

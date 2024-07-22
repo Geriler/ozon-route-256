@@ -6,15 +6,15 @@ import (
 	repository "route256/loms/internal/outbox/repository/sqlc"
 )
 
-type OrderRepository interface {
+type OutboxRepository interface {
 	SendMessage(ctx context.Context, callback func(ctx context.Context, message *repository.FetchNextMsgsRow) error) error
 }
 
 type OutboxService struct {
-	repository OrderRepository
+	repository OutboxRepository
 }
 
-func NewOutboxService(repository OrderRepository) *OutboxService {
+func NewOutboxService(repository OutboxRepository) *OutboxService {
 	return &OutboxService{
 		repository: repository,
 	}
