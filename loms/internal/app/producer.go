@@ -2,8 +2,6 @@ package app
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -11,6 +9,7 @@ import (
 
 	"github.com/IBM/sarama"
 	"route256/loms/internal/config"
+	orderModel "route256/loms/internal/order/model"
 	"route256/loms/internal/outbox/model"
 	outboxRepository "route256/loms/internal/outbox/repository"
 	repository "route256/loms/internal/outbox/repository/sqlc"
@@ -63,16 +62,14 @@ func (p *Producer) Start(ctx context.Context) error {
 			err := p.outbox.SendMessage(ctx, func(ctx context.Context, message *repository.FetchNextMsgsRow) error {
 				event := &model.Message{
 					OrderID:   message.OrderID,
-					EventType: message.EventType,
+					EventType: orderModel.Status(message.EventType),
 				}
 				bytes, err := json.Marshal(event)
 				if err != nil {
 					return err
 				}
 
-				hasher := md5.New()
-				hasher.Write([]byte(fmt.Sprintf("%s-%d", event.EventType, event.OrderID)))
-				key := hex.EncodeToString(hasher.Sum(nil))
+				key := fmt.Sprintf("%d", event.OrderID)
 
 				msg := &sarama.ProducerMessage{
 					Topic:     p.config.Kafka.Topic,
@@ -87,7 +84,6 @@ func (p *Producer) Start(ctx context.Context) error {
 				}
 
 				p.logger.Info("Sent message",
-					slog.String("key", key),
 					slog.Int("partition", int(partition)),
 					slog.Int64("offset", offset),
 					slog.String("message", string(bytes)),

@@ -7,11 +7,13 @@ package repository
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createEvent = `-- name: CreateEvent :exec
-INSERT INTO outbox (order_id, event_type)
-VALUES ($1, $2)
+INSERT INTO outbox (order_id, event_type, status)
+VALUES ($1, $2, 'pending')
 `
 
 type CreateEventParams struct {
@@ -56,38 +58,21 @@ func (q *Queries) FetchNextMsgs(ctx context.Context) ([]FetchNextMsgsRow, error)
 	return items, nil
 }
 
-const markAsError = `-- name: MarkAsError :exec
+const updateStatus = `-- name: UpdateStatus :exec
 UPDATE outbox
-SET status = 'error',
+SET status = $1,
     updated_at = NOW()
-WHERE order_id = $1
-  AND event_type = $2
+WHERE order_id = $2
+  AND event_type = $3
 `
 
-type MarkAsErrorParams struct {
+type UpdateStatusParams struct {
+	Status    pgtype.Text
 	OrderID   int32
 	EventType string
 }
 
-func (q *Queries) MarkAsError(ctx context.Context, arg MarkAsErrorParams) error {
-	_, err := q.db.Exec(ctx, markAsError, arg.OrderID, arg.EventType)
-	return err
-}
-
-const markAsSuccess = `-- name: MarkAsSuccess :exec
-UPDATE outbox
-SET status = 'success',
-    updated_at = NOW()
-WHERE order_id = $1
-  AND event_type = $2
-`
-
-type MarkAsSuccessParams struct {
-	OrderID   int32
-	EventType string
-}
-
-func (q *Queries) MarkAsSuccess(ctx context.Context, arg MarkAsSuccessParams) error {
-	_, err := q.db.Exec(ctx, markAsSuccess, arg.OrderID, arg.EventType)
+func (q *Queries) UpdateStatus(ctx context.Context, arg UpdateStatusParams) error {
+	_, err := q.db.Exec(ctx, updateStatus, arg.Status, arg.OrderID, arg.EventType)
 	return err
 }

@@ -1,6 +1,6 @@
 -- name: CreateEvent :exec
-INSERT INTO outbox (order_id, event_type)
-VALUES ($1, $2);
+INSERT INTO outbox (order_id, event_type, status)
+VALUES ($1, $2, 'pending');
 
 -- name: FetchNextMsgs :many
 SELECT order_id, event_type
@@ -8,16 +8,9 @@ FROM outbox
 WHERE status = 'pending'
 ORDER BY created_at;
 
--- name: MarkAsSuccess :exec
+-- name: UpdateStatus :exec
 UPDATE outbox
-SET status = 'success',
+SET status = $1,
     updated_at = NOW()
-WHERE order_id = $1
-  AND event_type = $2;
-
--- name: MarkAsError :exec
-UPDATE outbox
-SET status = 'error',
-    updated_at = NOW()
-WHERE order_id = $1
-  AND event_type = $2;
+WHERE order_id = $2
+  AND event_type = $3;

@@ -6,6 +6,8 @@ import (
 	"log/slog"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+	"route256/loms/internal/outbox/model"
 	repository "route256/loms/internal/outbox/repository/sqlc"
 )
 
@@ -40,28 +42,33 @@ func (r *PostgresOutboxRepository) SendMessage(ctx context.Context, callback fun
 	}(tx, ctx)
 
 	messages, err := r.cmd.WithTx(tx).FetchNextMsgs(ctx)
-	if err != nil && err.Error() == "no rows in result set" {
-		return nil
-	}
 	if err != nil {
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
+
 		return err
 	}
 
 	for _, message := range messages {
 		err = callback(ctx, &message)
 
-		var markErr error
+		var status model.Status
+
 		if err != nil {
-			markErr = r.cmd.WithTx(tx).MarkAsError(ctx, repository.MarkAsErrorParams{
-				OrderID:   message.OrderID,
-				EventType: message.EventType,
-			})
+			status = model.StatusError
 		} else {
-			markErr = r.cmd.WithTx(tx).MarkAsSuccess(ctx, repository.MarkAsSuccessParams{
-				OrderID:   message.OrderID,
-				EventType: message.EventType,
-			})
+			status = model.StatusSuccess
 		}
+
+		markErr := r.cmd.WithTx(tx).UpdateStatus(ctx, repository.UpdateStatusParams{
+			Status: pgtype.Text{
+				String: string(status),
+				Valid:  true,
+			},
+			OrderID:   message.OrderID,
+			EventType: message.EventType,
+		})
 		if markErr != nil {
 			return err
 		}

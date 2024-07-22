@@ -101,7 +101,7 @@ func (r *PostgresOrderRepository) GetOrder(ctx context.Context, orderID model.Or
 	}(time.Now())
 
 	defer func() {
-		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 			requestStatus = "error"
 		}
 	}()
