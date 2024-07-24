@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -77,6 +78,38 @@ func (r *PostgresOutboxRepository) SendMessage(ctx context.Context, callback fun
 	commitErr := tx.Commit(ctx)
 	if commitErr != nil {
 		r.logger.Error("Error in PostgresOutboxRepository.SendMessages.Commit",
+			slog.String("error", commitErr.Error()),
+		)
+		return commitErr
+	}
+	return nil
+}
+
+func (r *PostgresOutboxRepository) ClearOutbox(ctx context.Context, oldDataDuration time.Duration) error {
+	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func(tx pgx.Tx, ctx context.Context) {
+		rollbackErr := tx.Rollback(ctx)
+		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
+			r.logger.Error("Error in PostgresOutboxRepository.ClearOutbox.Rollback",
+				slog.String("error", rollbackErr.Error()),
+			)
+		}
+	}(tx, ctx)
+
+	err = r.cmd.WithTx(tx).ClearOutbox(ctx, pgtype.Timestamp{
+		Time:  time.Now().Add(-oldDataDuration),
+		Valid: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	commitErr := tx.Commit(ctx)
+	if commitErr != nil {
+		r.logger.Error("Error in PostgresOutboxRepository.ClearOutbox.Commit",
 			slog.String("error", commitErr.Error()),
 		)
 		return commitErr

@@ -14,3 +14,8 @@ SET status = $1,
     updated_at = NOW()
 WHERE order_id = $2
   AND event_type = $3;
+
+-- name: ClearOutbox :exec
+DELETE FROM outbox
+WHERE status != 'pending'
+  AND updated_at < $1;

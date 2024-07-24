@@ -11,6 +11,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const clearOutbox = `-- name: ClearOutbox :exec
+DELETE FROM outbox
+WHERE status != 'pending'
+  AND updated_at < $1
+`
+
+func (q *Queries) ClearOutbox(ctx context.Context, updatedAt pgtype.Timestamp) error {
+	_, err := q.db.Exec(ctx, clearOutbox, updatedAt)
+	return err
+}
+
 const createEvent = `-- name: CreateEvent :exec
 INSERT INTO outbox (order_id, event_type, status)
 VALUES ($1, $2, 'pending')

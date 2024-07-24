@@ -35,6 +35,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	outbox, err := app.NewOutbox(cfg, log)
+	if err != nil {
+		log.Error(err.Error())
+		os.Exit(1)
+	}
+
 	go func() {
 		log.Info("Starting gRPC application", "port", cfg.GRPC.Port)
 		err := grpcApp.ListenAndServe()
@@ -56,6 +62,14 @@ func main() {
 	go func() {
 		log.Info("Starting producer")
 		err := producer.Start(rootCtx)
+		if err != nil {
+			log.Error(err.Error())
+			os.Exit(1)
+		}
+	}()
+
+	go func() {
+		err := outbox.ClearOutbox(rootCtx)
 		if err != nil {
 			log.Error(err.Error())
 			os.Exit(1)

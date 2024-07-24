@@ -17,6 +17,7 @@ type Config struct {
 	TimeoutStop     time.Duration  `yaml:"timeout_stop"`
 	Tracer          AddressConfig  `yaml:"tracer"`
 	Kafka           KafkaConfig    `yaml:"kafka"`
+	Outbox          OutboxConfig   `yaml:"outbox"`
 }
 
 type AddressConfig struct {
@@ -32,6 +33,11 @@ type KafkaConfig struct {
 	Addresses               []string      `yaml:"addresses"`
 	Topic                   string        `yaml:"topic"`
 	ProducerMessageInterval time.Duration `yaml:"producer_message_interval"`
+}
+
+type OutboxConfig struct {
+	ClearTableInterval time.Duration `yaml:"clear_table_interval"`
+	OldDataDuration    time.Duration `yaml:"old_data_duration"`
 }
 
 func MustLoad() Config {

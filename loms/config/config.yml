@@ -17,3 +17,6 @@ kafka:
     - "kafka:29092"
   topic: "loms.order-events"
   producer_message_interval: 100ms
+outbox:
+  clear_table_interval: 1h
+  old_data_duration: 48h
