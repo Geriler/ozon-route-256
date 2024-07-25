@@ -5,15 +5,19 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	cartModel "route256/cart/internal/cart/model"
 	"route256/cart/internal/config"
 	"route256/cart/internal/middleware"
 	"route256/cart/internal/product/model"
+	redisClient "route256/cart/pkg/infra/redis"
 	"route256/cart/pkg/lib/tracing"
 )
 
@@ -21,13 +25,19 @@ type ProductService struct {
 	baseUrl  string
 	token    string
 	rpsLimit int
+	redis    *redisClient.Client
+	locks    map[string]*sync.Mutex
 }
 
-func NewProductService(cfg config.ProductConfig) *ProductService {
+func NewProductService(cfg config.Config) *ProductService {
+	client := redisClient.NewClient(cfg)
+
 	return &ProductService{
-		baseUrl:  cfg.BaseUrl,
-		token:    cfg.Token,
-		rpsLimit: cfg.RPSLimit,
+		baseUrl:  cfg.Product.BaseUrl,
+		token:    cfg.Product.Token,
+		rpsLimit: cfg.Product.RPSLimit,
+		redis:    client,
+		locks:    make(map[string]*sync.Mutex),
 	}
 }
 
@@ -40,6 +50,28 @@ func (s *ProductService) GetProduct(ctx context.Context, skuId cartModel.SkuID) 
 	defer func(createdAt time.Time) {
 		middleware.ObserveRequestDurationSeconds(time.Since(createdAt).Seconds(), "POST /get_product", strconv.Itoa(statusCode))
 	}(time.Now())
+
+	cacheID := fmt.Sprintf("ProductService.GetProduct:%d", int64(skuId))
+
+	_, exist := s.locks[cacheID]
+	if !exist {
+		s.locks[cacheID] = &sync.Mutex{}
+	}
+	s.locks[cacheID].Lock()
+	defer s.locks[cacheID].Unlock()
+
+	data, err := s.redis.Get(ctx, cacheID)
+	if err != nil && !errors.Is(err, redis.Nil) {
+		return nil, err
+	}
+	if err == nil {
+		var product model.Product
+		err = json.Unmarshal([]byte(data), &product)
+		if err != nil {
+			return nil, err
+		}
+		return &product, nil
+	}
 
 	url := s.baseUrl + "/get_product"
 
@@ -80,6 +112,8 @@ func (s *ProductService) GetProduct(ctx context.Context, skuId cartModel.SkuID) 
 	if err != nil {
 		return nil, err
 	}
+
+	err = s.redis.Set(ctx, cacheID, buf, s.redis.TTL)
 
 	return &product, nil
 }

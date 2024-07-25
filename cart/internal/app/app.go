@@ -40,7 +40,7 @@ func NewApp(cfg config.Config, log *slog.Logger, loms *lomsService.GRPCClient) *
 }
 
 func (a *App) ListenAndServe() error {
-	productService := product.NewProductService(a.config.Product)
+	productService := product.NewProductService(a.config)
 	cartService := service.NewCartService(a.storage)
 	cartHandler := handler.NewCartHandler(cartService, productService, *a.loms)
 	cartHttpHandlers := cartHttp.NewCartHttpHandlers(cartHandler, a.log)

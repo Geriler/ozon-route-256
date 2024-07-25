@@ -17,6 +17,7 @@ type Config struct {
 	GRPC            AddressConfig `yaml:"grpc"`
 	TimeoutStop     time.Duration `yaml:"timeout_stop"`
 	Tracer          AddressConfig `yaml:"tracer"`
+	Redis           RedisConfig   `yaml:"redis"`
 }
 
 type ProductConfig struct {
@@ -29,6 +30,13 @@ type AddressConfig struct {
 	Host    string        `yaml:"host"`
 	Port    int           `yaml:"port"`
 	Timeout time.Duration `yaml:"timeout" omitempty:"true"`
+}
+
+type RedisConfig struct {
+	Address  AddressConfig `yaml:"address"`
+	Password string        `yaml:"password" omitempty:"true"`
+	DB       int           `yaml:"db" omitempty:"true"`
+	TTL      time.Duration `yaml:"ttl" omitempty:"true"`
 }
 
 func MustLoad() Config {
