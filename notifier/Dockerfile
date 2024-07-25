@@ -10,10 +10,10 @@ COPY . .
 
 COPY ./config/config.yml /config.yml
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /cart ./cmd/cart
+RUN CGO_ENABLED=0 GOOS=linux go build -o /notifier ./cmd/notifier
 
 FROM scratch
-COPY --from=builder cart /bin/cart
+COPY --from=builder notifier /bin/notifier
 COPY --from=builder config.yml /bin/config.yml
 
-ENTRYPOINT ["/bin/cart", "--config=/bin/config.yml"]
+ENTRYPOINT ["/bin/notifier", "--config=/bin/config.yml"]

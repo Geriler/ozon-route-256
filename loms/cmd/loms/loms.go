@@ -13,6 +13,8 @@ import (
 )
 
 func main() {
+	rootCtx := context.Background()
+
 	cfg := config.MustLoad()
 
 	log := logger.SetupLogger(cfg.Env)
@@ -26,6 +28,18 @@ func main() {
 	}
 
 	httpgw := app.NewHTTPGW(cfg, log)
+
+	producer, err := app.NewProducer(cfg, log)
+	if err != nil {
+		log.Error(err.Error())
+		os.Exit(1)
+	}
+
+	outbox, err := app.NewOutbox(cfg, log)
+	if err != nil {
+		log.Error(err.Error())
+		os.Exit(1)
+	}
 
 	go func() {
 		log.Info("Starting gRPC application", "port", cfg.GRPC.Port)
@@ -45,13 +59,30 @@ func main() {
 		}
 	}()
 
+	go func() {
+		log.Info("Starting producer")
+		err := producer.Start(rootCtx)
+		if err != nil {
+			log.Error(err.Error())
+			os.Exit(1)
+		}
+	}()
+
+	go func() {
+		err := outbox.ClearOutbox(rootCtx)
+		if err != nil {
+			log.Error(err.Error())
+			os.Exit(1)
+		}
+	}()
+
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
 
 	log.Info("Stopping loms service...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.TimeoutStop)
+	ctx, cancel := context.WithTimeout(rootCtx, cfg.TimeoutStop)
 	defer cancel()
 
 	grpcApp.GracefulStop()
@@ -61,6 +92,11 @@ func main() {
 	}
 
 	err = traceProvider.Shutdown(ctx)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	err = producer.GracefulShutdown()
 	if err != nil {
 		log.Error(err.Error())
 	}

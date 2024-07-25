@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -50,7 +49,7 @@ func (h *SreWrapperHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	lrw := NewLoggingResponseWriter(w)
 
 	defer func(createdAt time.Time) {
-		ObserveRequestDurationSeconds(time.Since(createdAt).Seconds(), fmt.Sprintf("%s %s", r.Method, r.URL.String()), strconv.Itoa(lrw.statusCode))
+		ObserveRequestDurationSeconds(time.Since(createdAt).Seconds(), r.Pattern, strconv.Itoa(lrw.statusCode))
 	}(time.Now())
 
 	h.wrap.ServeHTTP(lrw, r)

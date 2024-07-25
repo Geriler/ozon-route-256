@@ -83,7 +83,7 @@ func (h *SreWrapperHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	lrw := NewLoggingResponseWriter(w)
 
 	defer func(createdAt time.Time) {
-		ObserveRequestHTTPDurationSeconds(time.Since(createdAt).Seconds(), fmt.Sprintf("%s %s", r.Method, r.URL.String()), strconv.Itoa(lrw.statusCode))
+		ObserveRequestHTTPDurationSeconds(time.Since(createdAt).Seconds(), fmt.Sprintf("%s %s", r.Method, r.Pattern), strconv.Itoa(lrw.statusCode))
 	}(time.Now())
 
 	h.wrap.ServeHTTP(lrw, r)

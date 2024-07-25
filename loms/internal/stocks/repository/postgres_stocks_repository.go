@@ -32,6 +32,8 @@ func NewPostgresStocksRepository(conn *pgx.Conn, logger *slog.Logger) *PostgresS
 }
 
 func (r *PostgresStocksRepository) Reserve(ctx context.Context, items []*orderModel.Item) error {
+	var err, commitErr, rollbackErr error
+
 	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresStocksRepository.Reserve")
 	defer span.End()
 
@@ -40,15 +42,19 @@ func (r *PostgresStocksRepository) Reserve(ctx context.Context, items []*orderMo
 		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
 	}(time.Now())
 
+	defer func() {
+		if err != nil || commitErr != nil || (rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed)) {
+			requestStatus = "error"
+		}
+	}()
+
 	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		requestStatus = "error"
 		return err
 	}
 	defer func(tx pgx.Tx, ctx context.Context) {
-		rollbackErr := tx.Rollback(ctx)
+		rollbackErr = tx.Rollback(ctx)
 		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
-			requestStatus = "error"
 			r.logger.Error("Error in PostgresStocksRepository.Reserve.Rollback",
 				slog.String("error", rollbackErr.Error()),
 			)
@@ -61,14 +67,12 @@ func (r *PostgresStocksRepository) Reserve(ctx context.Context, items []*orderMo
 			ItemID:  int32(item.SKU),
 		})
 		if err != nil {
-			requestStatus = "error"
 			return err
 		}
 	}
 
-	commitErr := tx.Commit(ctx)
+	commitErr = tx.Commit(ctx)
 	if commitErr != nil {
-		requestStatus = "error"
 		r.logger.Error("Error in PostgresStocksRepository.Reserve.Commit",
 			slog.String("error", commitErr.Error()),
 		)
@@ -78,6 +82,8 @@ func (r *PostgresStocksRepository) Reserve(ctx context.Context, items []*orderMo
 }
 
 func (r *PostgresStocksRepository) ReserveRemove(ctx context.Context, items []*orderModel.Item) error {
+	var err, commitErr, rollbackErr error
+
 	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresStocksRepository.ReserveRemove")
 	defer span.End()
 
@@ -86,15 +92,19 @@ func (r *PostgresStocksRepository) ReserveRemove(ctx context.Context, items []*o
 		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
 	}(time.Now())
 
+	defer func() {
+		if err != nil || commitErr != nil || (rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed)) {
+			requestStatus = "error"
+		}
+	}()
+
 	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		requestStatus = "error"
 		return err
 	}
 	defer func(tx pgx.Tx, ctx context.Context) {
-		rollbackErr := tx.Rollback(ctx)
+		rollbackErr = tx.Rollback(ctx)
 		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
-			requestStatus = "error"
 			r.logger.Error("Error in PostgresStocksRepository.ReserveRemove.Rollback",
 				slog.String("error", rollbackErr.Error()),
 			)
@@ -107,14 +117,12 @@ func (r *PostgresStocksRepository) ReserveRemove(ctx context.Context, items []*o
 			ItemID:  int32(item.SKU),
 		})
 		if err != nil {
-			requestStatus = "error"
 			return err
 		}
 	}
 
-	commitErr := tx.Commit(ctx)
+	commitErr = tx.Commit(ctx)
 	if commitErr != nil {
-		requestStatus = "error"
 		r.logger.Error("Error in PostgresStocksRepository.ReserveRemove.Commit",
 			slog.String("error", commitErr.Error()),
 		)
@@ -124,6 +132,8 @@ func (r *PostgresStocksRepository) ReserveRemove(ctx context.Context, items []*o
 }
 
 func (r *PostgresStocksRepository) ReserveCancel(ctx context.Context, items []*orderModel.Item) error {
+	var err, commitErr, rollbackErr error
+
 	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresStocksRepository.ReserveCancel")
 	defer span.End()
 
@@ -132,15 +142,19 @@ func (r *PostgresStocksRepository) ReserveCancel(ctx context.Context, items []*o
 		middleware.ObserveRequestDatabaseDurationSeconds(time.Since(createdAt).Seconds(), "UPDATE", requestStatus)
 	}(time.Now())
 
+	defer func() {
+		if err != nil || commitErr != nil || (rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed)) {
+			requestStatus = "error"
+		}
+	}()
+
 	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		requestStatus = "error"
 		return err
 	}
 	defer func(tx pgx.Tx, ctx context.Context) {
-		rollbackErr := tx.Rollback(ctx)
+		rollbackErr = tx.Rollback(ctx)
 		if rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
-			requestStatus = "error"
 			r.logger.Error("Error in PostgresStocksRepository.ReserveCancel.Rollback",
 				slog.String("error", rollbackErr.Error()),
 			)
@@ -153,14 +167,12 @@ func (r *PostgresStocksRepository) ReserveCancel(ctx context.Context, items []*o
 			ItemID:  int32(item.SKU),
 		})
 		if err != nil {
-			requestStatus = "error"
 			return err
 		}
 	}
 
-	commitErr := tx.Commit(ctx)
+	commitErr = tx.Commit(ctx)
 	if commitErr != nil {
-		requestStatus = "error"
 		r.logger.Error("Error in PostgresStocksRepository.ReserveCancel.Commit",
 			slog.String("error", commitErr.Error()),
 		)
