@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
@@ -19,6 +19,7 @@ import (
 	repositoryStocks "route256/loms/internal/stocks/repository"
 	srviceStocks "route256/loms/internal/stocks/service"
 	loms "route256/loms/pb/api"
+	"route256/loms/pkg/infra/shards"
 )
 
 type GRPCApp struct {
@@ -28,12 +29,19 @@ type GRPCApp struct {
 }
 
 func NewGRPCApp(config config.Config, logger *slog.Logger) (*GRPCApp, error) {
-	conn, err := dbConnect(context.Background(), config.Database.DSN)
+	pools, err := dbConnect(context.Background(), config.Database.DSNs)
 	if err != nil {
 		return nil, err
 	}
 
-	orderRepo := orderRepository.NewPostgresOrderRepository(conn, logger)
+	sm := shards.NewManager(shards.GetMurmur3ShardFn(len(pools)), pools)
+
+	conn, err := sm.GetShardByIndex(0)
+	if err != nil {
+		return nil, err
+	}
+
+	orderRepo := orderRepository.NewPostgresOrderRepository(sm, logger)
 	orderService := serviceOrder.NewOrderService(orderRepo)
 
 	stocksRepo := repositoryStocks.NewPostgresStocksRepository(conn, logger)
@@ -83,16 +91,22 @@ func getServerOption() grpc.ServerOption {
 	)
 }
 
-func dbConnect(ctx context.Context, dsn string) (*pgx.Conn, error) {
-	conn, err := pgx.Connect(ctx, dsn)
-	if err != nil {
-		return nil, err
+func dbConnect(ctx context.Context, dsns []string) ([]*pgxpool.Pool, error) {
+	databases := make([]*pgxpool.Pool, 0, len(dsns))
+
+	for _, dsn := range dsns {
+		db, err := pgxpool.New(ctx, dsn)
+		if err != nil {
+			return nil, err
+		}
+
+		err = db.Ping(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		databases = append(databases, db)
 	}
 
-	err = conn.Ping(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return conn, nil
+	return databases, nil
 }

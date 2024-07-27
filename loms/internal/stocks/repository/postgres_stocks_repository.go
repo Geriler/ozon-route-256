@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"route256/loms/internal/middleware"
 	orderModel "route256/loms/internal/order/model"
 	"route256/loms/internal/stocks/model"
@@ -16,12 +17,12 @@ import (
 )
 
 type PostgresStocksRepository struct {
-	conn   *pgx.Conn
+	conn   *pgxpool.Pool
 	cmd    *repository.Queries
 	logger *slog.Logger
 }
 
-func NewPostgresStocksRepository(conn *pgx.Conn, logger *slog.Logger) *PostgresStocksRepository {
+func NewPostgresStocksRepository(conn *pgxpool.Pool, logger *slog.Logger) *PostgresStocksRepository {
 	cmd := repository.New(conn)
 
 	return &PostgresStocksRepository{

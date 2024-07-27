@@ -14,22 +14,27 @@ import (
 type Outbox struct {
 	cfg     config.Config
 	logger  *slog.Logger
-	service *service.OutboxService
+	service []*service.OutboxService
 }
 
 func NewOutbox(cfg config.Config, logger *slog.Logger) (*Outbox, error) {
-	conn, err := dbConnect(context.Background(), cfg.Database.DSN)
+	pools, err := dbConnect(context.Background(), cfg.Database.DSNs)
 	if err != nil {
 		return nil, err
 	}
 
-	outboxRepository := repository.NewPostgresOutboxRepository(conn, logger)
-	outboxService := service.NewOutboxService(outboxRepository)
+	services := make([]*service.OutboxService, 0, len(pools))
+
+	for _, pool := range pools {
+		outboxRepository := repository.NewPostgresOutboxRepository(pool, logger)
+		outboxService := service.NewOutboxService(outboxRepository)
+		services = append(services, outboxService)
+	}
 
 	return &Outbox{
 		cfg:     cfg,
 		logger:  logger,
-		service: outboxService,
+		service: services,
 	}, nil
 }
 
@@ -40,9 +45,11 @@ func (o *Outbox) ClearOutbox(ctx context.Context) error {
 		case <-ctx.Done():
 			return nil
 		case <-ticker.C:
-			err := o.service.ClearOutbox(ctx, o.cfg.Outbox.OldDataDuration)
-			if err != nil {
-				o.logger.Error(fmt.Sprintf("Error clearing outbox: %s", err.Error()))
+			for _, s := range o.service {
+				err := s.ClearOutbox(ctx, o.cfg.Outbox.OldDataDuration)
+				if err != nil {
+					o.logger.Error(fmt.Sprintf("Error clearing outbox: %s", err.Error()))
+				}
 			}
 		}
 	}

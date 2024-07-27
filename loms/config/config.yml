@@ -7,7 +7,9 @@ http:
   host: "loms"
   port: 8080
 database:
-  dsn: "postgres://postgres:postgres@postgres:5432/postgres"
+  dsn: 
+    - "postgres://postgres:postgres@postgres-1:5432/postgres"
+    - "postgres://postgres:postgres@postgres-2:5432/postgres"
 timeout_stop: 10s
 tracer:
   host: "jaeger"

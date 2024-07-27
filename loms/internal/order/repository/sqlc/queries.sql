@@ -15,8 +15,8 @@ FROM order_items
 WHERE order_id = $1;
 
 -- name: Create :one
-INSERT INTO orders (user_id)
-VALUES ($1)
+INSERT INTO orders (id, user_id)
+VALUES (nextval('order_id_manual_seq') + $1, $2)
 RETURNING id;
 
 -- name: AddItemToOrder :exec

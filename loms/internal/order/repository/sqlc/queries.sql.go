@@ -26,13 +26,18 @@ func (q *Queries) AddItemToOrder(ctx context.Context, arg AddItemToOrderParams) 
 }
 
 const create = `-- name: Create :one
-INSERT INTO orders (user_id)
-VALUES ($1)
+INSERT INTO orders (id, user_id)
+VALUES (nextval('order_id_manual_seq') + $1, $2)
 RETURNING id
 `
 
-func (q *Queries) Create(ctx context.Context, userID int32) (int32, error) {
-	row := q.db.QueryRow(ctx, create, userID)
+type CreateParams struct {
+	Column1 interface{}
+	UserID  int32
+}
+
+func (q *Queries) Create(ctx context.Context, arg CreateParams) (int32, error) {
+	row := q.db.QueryRow(ctx, create, arg.Column1, arg.UserID)
 	var id int32
 	err := row.Scan(&id)
 	return id, err

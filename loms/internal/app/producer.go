@@ -18,14 +18,14 @@ import (
 )
 
 type Producer struct {
-	outbox   *service.OutboxService
+	outbox   []*service.OutboxService
 	producer sarama.SyncProducer
 	config   config.Config
 	logger   *slog.Logger
 }
 
 func NewProducer(config config.Config, logger *slog.Logger) (*Producer, error) {
-	conn, err := dbConnect(context.Background(), config.Database.DSN)
+	pools, err := dbConnect(context.Background(), config.Database.DSNs)
 	if err != nil {
 		return nil, err
 	}
@@ -41,11 +41,16 @@ func NewProducer(config config.Config, logger *slog.Logger) (*Producer, error) {
 		return nil, err
 	}
 
-	outboxRepo := outboxRepository.NewPostgresOutboxRepository(conn, logger)
-	outbox := service.NewOutboxService(outboxRepo)
+	outboxes := make([]*service.OutboxService, 0, len(pools))
+
+	for _, pool := range pools {
+		outboxRepo := outboxRepository.NewPostgresOutboxRepository(pool, logger)
+		outbox := service.NewOutboxService(outboxRepo)
+		outboxes = append(outboxes, outbox)
+	}
 
 	return &Producer{
-		outbox:   outbox,
+		outbox:   outboxes,
 		producer: syncProducer,
 		config:   config,
 		logger:   logger,
@@ -59,42 +64,44 @@ func (p *Producer) Start(ctx context.Context) error {
 		case <-ctx.Done():
 			return nil
 		case <-ticker.C:
-			err := p.outbox.SendMessage(ctx, func(ctx context.Context, message *repository.FetchNextMsgsRow) error {
-				event := &model.Message{
-					OrderID:   message.OrderID,
-					EventType: orderModel.Status(message.EventType),
-				}
-				bytes, err := json.Marshal(event)
+			for _, s := range p.outbox {
+				err := s.SendMessage(ctx, func(ctx context.Context, message *repository.FetchNextMsgsRow) error {
+					event := &model.Message{
+						OrderID:   message.OrderID,
+						EventType: orderModel.Status(message.EventType),
+					}
+					bytes, err := json.Marshal(event)
+					if err != nil {
+						return err
+					}
+
+					key := fmt.Sprintf("%d", event.OrderID)
+
+					msg := &sarama.ProducerMessage{
+						Topic:     p.config.Kafka.Topic,
+						Key:       sarama.StringEncoder(key),
+						Value:     sarama.StringEncoder(bytes),
+						Timestamp: time.Now(),
+					}
+
+					partition, offset, err := p.producer.SendMessage(msg)
+					if err != nil {
+						return err
+					}
+
+					p.logger.Info("Sent message",
+						slog.Int("partition", int(partition)),
+						slog.Int64("offset", offset),
+						slog.String("message", string(bytes)),
+						slog.Int("order_id", int(message.OrderID)),
+						slog.String("event_type", message.EventType),
+					)
+
+					return nil
+				})
 				if err != nil {
 					return err
 				}
-
-				key := fmt.Sprintf("%d", event.OrderID)
-
-				msg := &sarama.ProducerMessage{
-					Topic:     p.config.Kafka.Topic,
-					Key:       sarama.StringEncoder(key),
-					Value:     sarama.StringEncoder(bytes),
-					Timestamp: time.Now(),
-				}
-
-				partition, offset, err := p.producer.SendMessage(msg)
-				if err != nil {
-					return err
-				}
-
-				p.logger.Info("Sent message",
-					slog.Int("partition", int(partition)),
-					slog.Int64("offset", offset),
-					slog.String("message", string(bytes)),
-					slog.Int("order_id", int(message.OrderID)),
-					slog.String("event_type", message.EventType),
-				)
-
-				return nil
-			})
-			if err != nil {
-				return err
 			}
 		}
 	}

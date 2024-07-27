@@ -8,28 +8,29 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"route256/loms/internal/outbox/model"
 	repository "route256/loms/internal/outbox/repository/sqlc"
 )
 
 type PostgresOutboxRepository struct {
-	conn   *pgx.Conn
+	pool   *pgxpool.Pool
 	cmd    *repository.Queries
 	logger *slog.Logger
 }
 
-func NewPostgresOutboxRepository(conn *pgx.Conn, logger *slog.Logger) *PostgresOutboxRepository {
-	cmd := repository.New(conn)
+func NewPostgresOutboxRepository(pool *pgxpool.Pool, logger *slog.Logger) *PostgresOutboxRepository {
+	cmd := repository.New(pool)
 
 	return &PostgresOutboxRepository{
-		conn:   conn,
+		pool:   pool,
 		cmd:    cmd,
 		logger: logger,
 	}
 }
 
 func (r *PostgresOutboxRepository) SendMessage(ctx context.Context, callback func(ctx context.Context, message *repository.FetchNextMsgsRow) error) error {
-	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return err
 	}
@@ -86,7 +87,7 @@ func (r *PostgresOutboxRepository) SendMessage(ctx context.Context, callback fun
 }
 
 func (r *PostgresOutboxRepository) ClearOutbox(ctx context.Context, oldDataDuration time.Duration) error {
-	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := r.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return err
 	}

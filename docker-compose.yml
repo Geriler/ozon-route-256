@@ -23,21 +23,25 @@ services:
       - "8081:8081" # GRPC
       - "8080:8080" # HTTP
     depends_on:
-      postgres:
+      postgres-1:
         condition: service_healthy
-      goose:
+      postgres-2:
+        condition: service_healthy
+      goose-1:
+        condition: service_completed_successfully
+      goose-2:
         condition: service_completed_successfully
       kafka:
         condition: service_started
       notifier:
         condition: service_started
 
-  postgres:
-    container_name: postgres
+  postgres-1:
+    container_name: postgres-1
     image: postgres:latest
     restart: always
     ports:
-      - "5432:5432"
+      - "54321:5432"
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
@@ -48,15 +52,44 @@ services:
       timeout: 5s
       retries: 10
 
-  goose:
-    container_name: goose
+  postgres-2:
+    container_name: postgres-2
+    image: postgres:latest
+    restart: always
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  goose-1:
+    container_name: goose-1
     image: golang:1.22
     depends_on:
-      postgres:
+      postgres-1:
         condition: service_healthy
     environment:
       - GOOSE_DRIVER=postgres
-      - GOOSE_DBSTRING=postgres://postgres:postgres@postgres:5432/postgres
+      - GOOSE_DBSTRING=postgres://postgres:postgres@postgres-1:5432/postgres
+    volumes:
+      - ./loms/migrations:/migrations
+    command: "sh -c 'go install github.com/pressly/goose/v3/cmd/goose@latest && goose -dir /migrations up'"
+
+  goose-2:
+    container_name: goose-2
+    image: golang:1.22
+    depends_on:
+      postgres-2:
+        condition: service_healthy
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=postgres://postgres:postgres@postgres-2:5432/postgres
     volumes:
       - ./loms/migrations:/migrations
     command: "sh -c 'go install github.com/pressly/goose/v3/cmd/goose@latest && goose -dir /migrations up'"

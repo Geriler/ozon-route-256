@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"log/slog"
+	"strconv"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -13,28 +14,30 @@ import (
 	repository "route256/loms/internal/order/repository/sqlc"
 	ourboxRepo "route256/loms/internal/outbox/repository/sqlc"
 	modelStocks "route256/loms/internal/stocks/model"
+	"route256/loms/pkg/infra/shards"
 	"route256/loms/pkg/lib/tracing"
 )
 
 type PostgresOrderRepository struct {
-	conn   *pgx.Conn
-	cmd    *repository.Queries
+	sm     *shards.Manager
 	logger *slog.Logger
 	outbox *ourboxRepo.Queries
 }
 
-func NewPostgresOrderRepository(conn *pgx.Conn, logger *slog.Logger) *PostgresOrderRepository {
-	cmd := repository.New(conn)
-
+func NewPostgresOrderRepository(sm *shards.Manager, logger *slog.Logger) *PostgresOrderRepository {
 	return &PostgresOrderRepository{
-		conn:   conn,
-		cmd:    cmd,
+		sm:     sm,
 		logger: logger,
 	}
 }
 
 func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.OrderID, status model.Status) error {
 	var err, commitErr, rollbackErr error
+
+	shardIndex := r.sm.GetShardIndexFromID(int(orderID))
+	shard, _ := r.sm.GetShardByIndex(shardIndex)
+
+	cmd := repository.New(shard)
 
 	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresOrderRepository.SetStatus")
 	defer span.End()
@@ -50,7 +53,7 @@ func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.O
 		}
 	}()
 
-	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := shard.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return err
 	}
@@ -63,7 +66,7 @@ func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.O
 		}
 	}(tx, ctx)
 
-	err = r.cmd.WithTx(tx).SetStatus(ctx, repository.SetStatusParams{
+	err = cmd.WithTx(tx).SetStatus(ctx, repository.SetStatusParams{
 		Status: string(status),
 		ID:     int32(orderID),
 	})
@@ -92,6 +95,13 @@ func (r *PostgresOrderRepository) SetStatus(ctx context.Context, orderID model.O
 func (r *PostgresOrderRepository) GetOrder(ctx context.Context, orderID model.OrderID) (*model.Order, error) {
 	var err error
 
+	shardIndex := r.sm.GetShardIndexFromID(int(orderID))
+	shard, _ := r.sm.GetShardByIndex(shardIndex)
+	cmd := repository.New(shard)
+
+	shardForStocks, _ := r.sm.GetShardByIndex(0)
+	cmdForStocks := repository.New(shardForStocks)
+
 	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresOrderRepository.GetOrder")
 	defer span.End()
 
@@ -106,7 +116,7 @@ func (r *PostgresOrderRepository) GetOrder(ctx context.Context, orderID model.Or
 		}
 	}()
 
-	row, err := r.cmd.GetOrder(ctx, int32(orderID))
+	row, err := cmd.GetOrder(ctx, int32(orderID))
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, model.ErrOrderNotFound
 	}
@@ -114,7 +124,7 @@ func (r *PostgresOrderRepository) GetOrder(ctx context.Context, orderID model.Or
 		return nil, err
 	}
 
-	orderItems, err := r.cmd.GetOrderItems(ctx, int32(orderID))
+	orderItems, err := cmdForStocks.GetOrderItems(ctx, int32(orderID))
 	if err != nil {
 		return nil, err
 	}
@@ -138,6 +148,13 @@ func (r *PostgresOrderRepository) GetOrder(ctx context.Context, orderID model.Or
 func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order) (model.OrderID, error) {
 	var err, commitErr, rollbackErr error
 
+	shardIndex := r.sm.GetShardIndex(shards.ShardKey(strconv.Itoa(int(order.UserID))))
+	shard, _ := r.sm.GetShardByIndex(shardIndex)
+	cmd := repository.New(shard)
+
+	shardForStocks, _ := r.sm.GetShardByIndex(0)
+	cmdForStocks := repository.New(shardForStocks)
+
 	ctx, span := tracing.StartSpanFromContext(ctx, "PostgresOrderRepository.Create")
 	defer span.End()
 
@@ -152,7 +169,7 @@ func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order
 		}
 	}()
 
-	tx, err := r.conn.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := shard.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return 0, err
 	}
@@ -165,13 +182,16 @@ func (r *PostgresOrderRepository) Create(ctx context.Context, order *model.Order
 		}
 	}(tx, ctx)
 
-	orderID, err := r.cmd.WithTx(tx).Create(ctx, int32(order.UserID))
+	orderID, err := cmd.WithTx(tx).Create(ctx, repository.CreateParams{
+		Column1: shardIndex,
+		UserID:  int32(order.UserID),
+	})
 	if err != nil {
 		return 0, err
 	}
 
 	for _, item := range order.Items {
-		err = r.cmd.WithTx(tx).AddItemToOrder(ctx, repository.AddItemToOrderParams{
+		err = cmdForStocks.AddItemToOrder(ctx, repository.AddItemToOrderParams{
 			OrderID: orderID,
 			ItemID:  int32(item.SKU),
 			Count:   int32(item.Count),

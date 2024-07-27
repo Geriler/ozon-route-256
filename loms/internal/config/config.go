@@ -26,7 +26,7 @@ type AddressConfig struct {
 }
 
 type DatabaseConfig struct {
-	DSN string `yaml:"dsn"`
+	DSNs []string `yaml:"dsn"`
 }
 
 type KafkaConfig struct {

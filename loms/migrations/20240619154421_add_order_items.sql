@@ -2,12 +2,8 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS order_items
 (
-  order_id INTEGER           NOT NULL
-    CONSTRAINT order_items_orders_id_fk
-      REFERENCES orders,
-  item_id  INTEGER           NOT NULL
-    CONSTRAINT order_items_stocks_items_sku_fk
-      REFERENCES stocks_items,
+  order_id INTEGER           NOT NULL,
+  item_id  INTEGER           NOT NULL,
   count    INTEGER DEFAULT 0 NOT NULL,
   status   TEXT              NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
